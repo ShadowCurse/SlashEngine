@@ -15,9 +15,11 @@ namespace Slash
         virtual ~Renderer() = default;
         static void Init();
         static void Destroy();
+        // static Instance that returns pouinter to actuial renderer
 
     private:
         static Unique<RendererAPI> _apiInstance;
+        // static Uniqie<Renderer> _instance;
     };
 
 } // namespace Slash

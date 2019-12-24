@@ -16,6 +16,7 @@ namespace Slash
         SL_CORE_ERROR("GLFW error ({0}): {1}", error, description);
     }
 
+    // body of static Create method in core/Window.hpp 
     Window* Window::Create(const WindowProps& props)
     {
         return new LinuxWindow(props);
