@@ -18,14 +18,11 @@ namespace Slash
         virtual ~Application();
 
         void run();
-
         void OnEvent(Event& e);
-
         void PushLayer(Layer* layer);
         void PushOverlay(Layer* layer);
 
         inline Window& GetWindow() { return *_window; }
-
         inline static Application& Get() { return *_instance; }
     private:
         bool OnWindowClose(WindowCloseEvent& e);

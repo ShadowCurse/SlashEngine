@@ -74,6 +74,7 @@ namespace Slash
     inline std::ostream& operator<<(std::ostream& os, const Event& e)
     {
         os << e.ToString();
+        return os;
     }
 } // namespace Slash
 

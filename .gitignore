@@ -2,3 +2,5 @@
 Makefile
 SlashPCH.hpp.gch
 .vscode
+/vendor/vulkan
+*.spv

@@ -12,6 +12,7 @@ namespace Slash
         virtual ~RendererAPI() = default;
         virtual void Init() = 0;
         virtual void Destroy() = 0;
+        virtual void DrawFrame() = 0;
     };
 
 } // namespace Slash

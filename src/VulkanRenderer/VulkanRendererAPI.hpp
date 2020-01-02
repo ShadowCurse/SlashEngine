@@ -4,8 +4,6 @@
 #include "SlashPCH.hpp"
 #include "Core/Core.hpp"
 #include "Renderer/RendererAPI.hpp"
-
-#define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 
 namespace Slash
@@ -35,8 +33,9 @@ namespace Slash
         VulkanRendererAPI() = default;
         ~VulkanRendererAPI();
 
-        void Init() override;
-        void Destroy() override;
+        void Init() final;
+        void Destroy() final;
+        void DrawFrame() final;
     private:
         void CreateInstance();
         void SetUpDebugMessanger();
@@ -45,6 +44,14 @@ namespace Slash
         void PickPhysicalDevice();
         void CreateLogicalDevice();
         void CreateSwapChain();
+        void CreateImageViews();
+        void CreateRenderPass();
+        void CreateGraphicsPipeline();
+        void CreateFramebuffers();
+        void CreateCommandPool();
+        void CreateCommandBuffers();
+        void CreateSemaphores();
+        void CreateFences();
 
         std::vector<const char*> GetRequaredExtentions();
         static VKAPI_ATTR VkBool32 VKAPI_CALL DebugCallBack(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
@@ -62,23 +69,38 @@ namespace Slash
         bool IsDeviceSutable(const VkPhysicalDevice& device);
         QueueFamilyIndices FindQueueFamilies(const VkPhysicalDevice& device);
         bool checkDeviceExtensionSupport(const VkPhysicalDevice& device);
+
         SwapChainSupportDetails querySwapChainSupport(const VkPhysicalDevice& device);
         VkSurfaceFormatKHR chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats);
         VkPresentModeKHR   chooseSwapPresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes);
         VkExtent2D         chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities);
 
+        static std::vector<char> readShader(const std::string& filename);
+        VkShaderModule CreateShaderModule(const std::vector<char>& code);
+
     private:
-        VkInstance               instance;
-        VkSurfaceKHR             surface;
-        VkDebugUtilsMessengerEXT debugMessanger;
-        VkPhysicalDevice         physicalDevice = VK_NULL_HANDLE;
-        VkDevice                 device;                          // logical device
-        VkQueue                  graphicsQueue;
-        VkQueue                  presentQueue;
-        VkSwapchainKHR           swapChain;
-        VkFormat                 swapChainFormat;
-        VkExtent2D               swapChainExtent;
-        std::vector<VkImage>     swapChainImages;
+        VkInstance                   instance;
+        VkSurfaceKHR                 surface;
+        VkDebugUtilsMessengerEXT     debugMessanger;
+        VkPhysicalDevice             physicalDevice = VK_NULL_HANDLE;
+        VkDevice                     device;                          // logical device
+        VkQueue                      graphicsQueue;
+        VkQueue                      presentQueue;
+        VkSwapchainKHR               swapChain;
+        VkFormat                     swapChainFormat;
+        VkExtent2D                   swapChainExtent;
+        std::vector<VkImage>         swapChainImages;
+        std::vector<VkImageView>     swapChainImageViews;
+        VkRenderPass                 renderPass;
+        VkPipelineLayout             pipelineLayout;
+        VkPipeline                   graphicsPipeline;
+        std::vector<VkFramebuffer>   swapChainFramebuffers;
+        VkCommandPool                commandPool;
+        std::vector<VkCommandBuffer> commandBuffers;
+        std::vector<VkSemaphore>     imageAvailableSemaphores;
+        std::vector<VkSemaphore>     renderFinishedSemaphores;
+        std::vector<VkFence>         inFlightFences;
+        std::vector<VkFence>         imagesInFlight;
 
         const std::vector<const char*> validationLayers = {
             "VK_LAYER_KHRONOS_validation",
@@ -87,6 +109,9 @@ namespace Slash
         const std::vector<const char*> deviceExtentions = {
             VK_KHR_SWAPCHAIN_EXTENSION_NAME,
         };
+
+        const int MAX_FRAMES_IN_FLIGHT = 2;
+        size_t current_frame = 0;
     };
 
 } // namespace Slash

@@ -47,7 +47,6 @@ namespace Slash
             if (e.Handled)
                 break;
         }
-
     }
 
     Application::~Application()
@@ -67,14 +66,14 @@ namespace Slash
                 for (Layer* layer: _layerStack)
                     layer->OnUpdate(timestep);
             }
-
             _window->OnUpdate();
+            Renderer::DrawFrame();
         }
+        Renderer::Destroy();
     }
 
     bool Application::OnWindowClose(WindowCloseEvent& e)
     {
-        Renderer::Destroy();
         _running = false;
         return true;
     }

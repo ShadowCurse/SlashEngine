@@ -31,6 +31,8 @@ namespace Slash
 #define SL_CORE_TRACE(...) ::Slash::Log::GetEngineLogger()->trace(__VA_ARGS__)
 #define SL_CORE_FATAL(...) ::Slash::Log::GetEngineLogger()->fatal(__VA_ARGS__)
 
+#define SL_CORE_LOG_FUNC(className) ::Slash::Log::GetEngineLogger()->trace(#className)
+
 #define SL_ERROR(...) ::Slash::Log::GetApplicationLogger()->error(__VA_ARGS__)
 #define SL_INFO(...)  ::Slash::Log::GetApplicationLogger()->info(__VA_ARGS__)
 #define SL_WARN(...)  ::Slash::Log::GetApplicationLogger()->warn(__VA_ARGS__)

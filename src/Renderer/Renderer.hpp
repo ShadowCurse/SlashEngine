@@ -15,6 +15,7 @@ namespace Slash
         virtual ~Renderer() = default;
         static void Init();
         static void Destroy();
+        static void DrawFrame();
         // static Instance that returns pouinter to actuial renderer
 
     private:

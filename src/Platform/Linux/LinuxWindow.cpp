@@ -146,7 +146,6 @@ namespace Slash
     void LinuxWindow::Shutdown()
     {
         glfwDestroyWindow(_window);
-
         glfwTerminate();
     }
 

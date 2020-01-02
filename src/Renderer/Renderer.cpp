@@ -16,4 +16,9 @@ namespace Slash
         _apiInstance->Destroy();
     }
 
+    void Renderer::DrawFrame()
+    {
+        _apiInstance->DrawFrame();
+    }
+
 } // namespace Slash
