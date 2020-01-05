@@ -1,24 +1,23 @@
 #include "Renderer/Renderer.hpp"
-#include "VulkanRenderer/VulkanRendererAPI.hpp"
 
 namespace Slash
 {
-    
-    Unique<RendererAPI> Renderer::_apiInstance = CreateUnique<VulkanRendererAPI>();
-
+    void Renderer::AddWindow(std::shared_ptr<Window> window)
+    {
+        m_apiInstance->AddWindow(window);
+    }
     void Renderer::Init()
     {
-        _apiInstance->Init();
+        m_apiInstance->Init();
     }
 
     void Renderer::Destroy()
     {
-        _apiInstance->Destroy();
+        m_apiInstance->Destroy();
     }
 
     void Renderer::DrawFrame()
     {
-        _apiInstance->DrawFrame();
+        m_apiInstance->DrawFrame();
     }
-
 } // namespace Slash

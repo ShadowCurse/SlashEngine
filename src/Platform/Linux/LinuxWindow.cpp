@@ -4,6 +4,8 @@
 #include "Events/MouseEvent.hpp"
 #include "Events/KeyEvent.hpp"
 
+#include "Renderer/RendererAPI.hpp"
+
 #include "Core/Log.hpp"
 
 namespace Slash
@@ -30,6 +32,44 @@ namespace Slash
     LinuxWindow::~LinuxWindow()
     {
         Shutdown();
+    }
+
+    void LinuxWindow::OnUpdate()
+    {
+        glfwPollEvents();
+    }
+
+    uint LinuxWindow::GetWidth() const 
+    {
+         return _data.Width;
+    }
+    uint LinuxWindow::GetHeight() const
+    {
+        return _data.Height;
+    }
+
+    bool LinuxWindow::IsVSync() const
+    {
+        return _data.VSync;
+    }
+
+    void LinuxWindow::SetVSync([[maybe_unused]] bool enabled)
+    {
+        // if(enabled)
+        //     glfwSwapInterval(1);
+        // else
+        //     glfwSwapInterval(0);
+        // _data.VSync = enabled;
+    }
+
+    void LinuxWindow::SetEventCallback(const EventCallBackFn& callback)
+    {
+        _data.EventCallback = callback;
+    }
+
+    void* LinuxWindow::GetNativeWindow() const
+    {
+         return _window;
     }
 
     void LinuxWindow::Init(const WindowProps& props)
@@ -63,6 +103,15 @@ namespace Slash
             data->EventCallback(event);
         });
 
+        glfwSetFramebufferSizeCallback(_window, [](GLFWwindow* window, int width, int heigh)
+        {
+            WindowData* data = static_cast<WindowData*>(glfwGetWindowUserPointer(window));
+            data->resized = true;
+
+            WindowResizeEvent event(width, heigh);
+            data->EventCallback(event);
+        });
+
         glfwSetWindowCloseCallback(_window, [](GLFWwindow* window)
         {
             WindowData* data = static_cast<WindowData*>(glfwGetWindowUserPointer(window));
@@ -70,7 +119,7 @@ namespace Slash
             data->EventCallback(event);
         });
 
-        glfwSetKeyCallback(_window, [](GLFWwindow* window, int key, int scancode, int action, int mods)
+        glfwSetKeyCallback(_window, [](GLFWwindow* window, int key, [[maybe_unused]] int scancode, int action, [[maybe_unused]] int mods)
         {
             WindowData* data = static_cast<WindowData*>(glfwGetWindowUserPointer(window));
             
@@ -105,7 +154,7 @@ namespace Slash
             data->EventCallback(event);
         });
 
-        glfwSetMouseButtonCallback(_window, [](GLFWwindow* window, int button, int action, int mods)
+        glfwSetMouseButtonCallback(_window, [](GLFWwindow* window, int button, int action, [[maybe_unused]] int mods)
         {
             WindowData* data = static_cast<WindowData*>(glfwGetWindowUserPointer(window));
             
@@ -147,25 +196,6 @@ namespace Slash
     {
         glfwDestroyWindow(_window);
         glfwTerminate();
-    }
-
-    void LinuxWindow::OnUpdate()
-    {
-        glfwPollEvents();
-    }
-
-    void LinuxWindow::SetVSync(bool enabled)
-    {
-        // if(enabled)
-        //     glfwSwapInterval(1);
-        // else
-        //     glfwSwapInterval(0);
-        // _data.VSync = enabled;
-    }
-
-    bool LinuxWindow::IsVSync() const
-    {
-        return _data.VSync;
     }
 
 } // namespace Slash

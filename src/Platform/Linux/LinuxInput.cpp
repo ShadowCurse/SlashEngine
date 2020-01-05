@@ -11,14 +11,14 @@ namespace Slash
     {
         auto window = static_cast<GLFWwindow*>(Application::Get().GetWindow().GetNativeWindow());
         auto state = glfwGetKey(window, keycode);
-        return state = GLFW_PRESS || state == GLFW_REPEAT;
+        return state == GLFW_PRESS || state == GLFW_REPEAT;
     }
     
     bool LinuxInput::IsMouseButtonPressedImpl(int button)
     {
         auto window = static_cast<GLFWwindow*>(Application::Get().GetWindow().GetNativeWindow());
         auto state = glfwGetMouseButton(window, button);
-        return state = GLFW_PRESS;
+        return state == GLFW_PRESS;
     }
 
     std::pair<float, float> LinuxInput::GetMoucePositionImpl()

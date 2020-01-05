@@ -1,16 +1,18 @@
 // main header file for Slash
 
-#include "src/Core/Core.hpp"
-#include "src/Core/Application.hpp"
-#include "src/Core/Log.hpp"
-#include "src/Core/Layer.hpp"
-#include "src/Core/Input.hpp"
-#include "src/Core/LayerStack.hpp"
-#include "src/Core/Timestep.hpp"
-#include "src/Core/Window.hpp"
+#include "Core/Core.hpp"
+#include "Core/Application.hpp"
+#include "Core/Log.hpp"
+#include "Core/Layer.hpp"
+#include "Core/Input.hpp"
+#include "Core/LayerStack.hpp"
+#include "Core/Timestep.hpp"
+#include "Core/Window.hpp"
 
 #include "Renderer/Renderer.hpp"
 #include "Renderer/RendererAPI.hpp"
+
+#include "VulkanRenderer/VulkanRendererAPI.hpp"
 
 // -------------------
 

@@ -3,6 +3,7 @@
 #include "SlashPCH.hpp"
 #include "Core/Log.hpp"
 #include "Renderer/Renderer.hpp"
+#include "VulkanRenderer/VulkanRendererAPI.hpp"
 #include "GLFW/glfw3.h"
 
 namespace Slash
@@ -10,27 +11,30 @@ namespace Slash
 
 #define BIND_EVENT_FN(x) std::bind(&Application::x, this, std::placeholders::_1)
 
-    Application* Application::_instance = nullptr;
+    Application* Application::m_instance = nullptr;
 
     Application::Application()
     {
-        SL_CORE_ASSERT(!_instance, "Application already exists");
-        _instance = this;
+        SL_CORE_ASSERT(!m_instance, "Application already exists");
+        m_instance = this;
 
-        _window = std::unique_ptr<Window>(Window::Create());
-        _window->SetEventCallback(BIND_EVENT_FN(OnEvent));
+        m_window = std::shared_ptr<Window>(Window::Create());
+        m_window->SetEventCallback(BIND_EVENT_FN(OnEvent));
 
+        Renderer::Create<VulkanRendererAPI>();
+        Renderer::AddWindow(m_window);
+        // auto conf = Renderer::GetAPI<VulkanRendererAPI>().GetConfig();
         Renderer::Init();
     }
 
     void Application::PushLayer(Layer* layer)
     {
-        _layerStack.PushLayer(layer);
+        m_layerStack.PushLayer(layer);
     }
 
     void Application::PushOverlay(Layer* overlay)
     {
-        _layerStack.PushOverlay(overlay);
+        m_layerStack.PushOverlay(overlay);
     }
 
     void Application::OnEvent(Event& e)
@@ -41,7 +45,7 @@ namespace Slash
         }
         dispatcher.Dispatch<WindowResizeEvent>(BIND_EVENT_FN(OnWindowResize));
 
-        for (auto it = _layerStack.end(); it != _layerStack.begin();)
+        for (auto it = m_layerStack.end(); it != m_layerStack.begin();)
         {
             (*--it)->OnEvent(e);
             if (e.Handled)
@@ -55,26 +59,28 @@ namespace Slash
 
     void Application::run()
     {
-        while (_running)
+        while (m_running)
         {
             float time = glfwGetTime();
-            Timestep timestep = time - _lastFrameTime;
-            _lastFrameTime = time;
+            Timestep timestep = time - m_lastFrameTime;
+            m_lastFrameTime = time;
 
-            if (!_minimized)
+            if (!m_minimized)
             {
-                for (Layer* layer: _layerStack)
+                for (Layer* layer: m_layerStack)
                     layer->OnUpdate(timestep);
             }
-            _window->OnUpdate();
-            Renderer::DrawFrame();
+            m_window->OnUpdate();
+            if (!m_minimized)
+                Renderer::DrawFrame();
         }
         Renderer::Destroy();
     }
 
     bool Application::OnWindowClose(WindowCloseEvent& e)
     {
-        _running = false;
+        e.Handled = true;
+        m_running = false;
         return true;
     }
 
@@ -82,11 +88,11 @@ namespace Slash
     {
         if (e.GetWidth() == 0 || e.GetHeigth() == 0)
         {
-            _minimized = true;
+            m_minimized = true;
             return false;
         }
 
-        _minimized = false;
+        m_minimized = false;
 
         return false;
     }

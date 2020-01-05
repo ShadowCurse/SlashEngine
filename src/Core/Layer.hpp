@@ -10,14 +10,14 @@ namespace Slash
 
     class Slash_API Layer
     {
+    protected:
+        Layer() = default;
     public:
-        Layer() {}
         virtual ~Layer() = default;
-
-        virtual void OnAttach() {}
-        virtual void OnDetach() {}
-        virtual void OnUpdate(Timestep ts) {}
-        virtual void OnEvent(Event& event) {}
+        virtual void OnAttach() = 0;
+        virtual void OnDetach() = 0;
+        virtual void OnUpdate(Timestep ts) = 0;
+        virtual void OnEvent(Event& event) = 0;
     };
 
 } // namespace Slash

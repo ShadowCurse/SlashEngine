@@ -22,19 +22,19 @@ namespace Slash
         void PushLayer(Layer* layer);
         void PushOverlay(Layer* layer);
 
-        inline Window& GetWindow() { return *_window; }
-        inline static Application& Get() { return *_instance; }
+        inline Window& GetWindow() { return *m_window; }
+        inline static Application& Get() { return *m_instance; }
     private:
         bool OnWindowClose(WindowCloseEvent& e);
         bool OnWindowResize(WindowResizeEvent& e);
 
-        Unique<Window> _window;
-        bool _running = true;
-        bool _minimized = false;
-        LayerStack _layerStack;
-        float _lastFrameTime = 0.0f;
+        Shared<Window> m_window;
+        bool           m_running = true;
+        bool           m_minimized = false;
+        LayerStack     m_layerStack;
+        float          m_lastFrameTime = 0.0f;
 
-        static Application* _instance;
+        static Application* m_instance;
     };
 
     Application* CreateApplication();

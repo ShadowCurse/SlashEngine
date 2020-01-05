@@ -28,7 +28,8 @@ add_library(SlashEngine SHARED
 
 add_definitions(-DGLFW_INCLUDE_VULKAN -DGLFW_INCLUDE_NONE -DSL_LINUX -DSL_BUILD_DLL -DSL_DEBUG -DSL_ENABLE_ASSERTS)
 
-set_target_properties(SlashEngine PROPERTIES CXX_STANDARD 17 PUBLIC_HEADER Slash.hpp)
+set_target_properties(SlashEngine PROPERTIES CXX_STANDARD 17  PUBLIC_HEADER Slash.hpp)
+target_compile_options(SlashEngine PRIVATE -Wall -Wextra -pedantic -Werror)
 TARGET_LINK_LIBRARIES(SlashEngine vulkan)
 TARGET_LINK_LIBRARIES(SlashEngine glfw3)
 TARGET_LINK_LIBRARIES(SlashEngine dl)
