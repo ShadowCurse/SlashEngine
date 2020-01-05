@@ -680,21 +680,21 @@ namespace Slash
             break;
         case VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT:
             SL_CORE_WARN(pCallBackData->pMessage);
-            SL_CORE_WARN("For objects: ");
-            for (uint32_t i(0); i < pCallBackData->objectCount; ++i)
-                SL_CORE_WARN(pCallBackData->pObjects[i].pObjectName);
+            // SL_CORE_WARN("For objects: ");
+            // for (uint32_t i(0); i < pCallBackData->objectCount; ++i)
+            //     SL_CORE_WARN(pCallBackData->pObjects[i].pObjectName);
             break;
         case VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT:
             SL_CORE_ERROR(pCallBackData->pMessage);
-            SL_CORE_ERROR("For objects: ");
-            for (uint32_t i(0); i < pCallBackData->objectCount; ++i)
-                SL_CORE_ERROR(pCallBackData->pObjects[i].pObjectName);
+            // SL_CORE_ERROR("For objects: ");
+            // for (uint32_t i(0); i < pCallBackData->objectCount; ++i)
+            //     SL_CORE_ERROR(pCallBackData->pObjects[i].pObjectName);
             break;
         default:
             SL_CORE_ERROR(pCallBackData->pMessage);
-            SL_CORE_ERROR("For objects: ");
-            for (uint32_t i(0); i < pCallBackData->objectCount; ++i)
-                SL_CORE_ERROR(pCallBackData->pObjects[i].pObjectName);
+            // SL_CORE_ERROR("For objects: ");
+            // for (uint32_t i(0); i < pCallBackData->objectCount; ++i)
+            //     SL_CORE_ERROR(pCallBackData->pObjects[i].pObjectName);
         }
         return VK_FALSE;
     }
