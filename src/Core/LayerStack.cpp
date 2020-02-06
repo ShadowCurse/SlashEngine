@@ -1,6 +1,5 @@
-#include "LayerStack.hpp"
-
 #include "SlashPCH.hpp"
+#include "LayerStack.hpp"
 
 namespace Slash
 {

@@ -4,6 +4,7 @@ project(SlashEngine)
 
 include_directories(${CMAKE_SOURCE_DIR}/vendor/spdlog/include)
 include_directories(${CMAKE_SOURCE_DIR}/vendor/glfw3/include)
+include_directories(${CMAKE_SOURCE_DIR}/vendor/glm)
 include_directories(${CMAKE_SOURCE_DIR}/vendor/vulkan/x86_64/include)
 include_directories(${CMAKE_SOURCE_DIR}/src)
 include_directories(${CMAKE_SOURCE_DIR})

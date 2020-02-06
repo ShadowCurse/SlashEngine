@@ -1,6 +1,5 @@
-#include "Application.hpp"
-
 #include "SlashPCH.hpp"
+#include "Application.hpp"
 #include "Core/Log.hpp"
 #include "Renderer/Renderer.hpp"
 #include "VulkanRenderer/VulkanRendererAPI.hpp"
@@ -72,7 +71,7 @@ namespace Slash
             }
             m_window->OnUpdate();
             if (!m_minimized)
-                Renderer::DrawFrame();
+                Renderer::DrawFrame(timestep.GetSecond());
         }
         Renderer::Destroy();
     }

@@ -20,7 +20,7 @@ namespace Slash
         static void AddWindow(std::shared_ptr<Window> window);
         static void Init();
         static void Destroy();
-        static void DrawFrame();
+        static void DrawFrame(float time);
 
     private:
         inline static Unique<RendererAPI> m_apiInstance = nullptr;

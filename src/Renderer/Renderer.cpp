@@ -16,8 +16,8 @@ namespace Slash
         m_apiInstance->Destroy();
     }
 
-    void Renderer::DrawFrame()
+    void Renderer::DrawFrame(float time)
     {
-        m_apiInstance->DrawFrame();
+        m_apiInstance->DrawFrame(time);
     }
 } // namespace Slash

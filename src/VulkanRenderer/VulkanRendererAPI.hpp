@@ -2,13 +2,27 @@
 #define SL_VULKANRENDERER
 
 #include "SlashPCH.hpp"
+#include <GLFW/glfw3.h> 
 #include "Core/Core.hpp"
 #include "Core/Window.hpp"
 #include "Renderer/RendererAPI.hpp"
-#include <GLFW/glfw3.h>
+#include "Renderer/Vertex.hpp"
+#include "VulkanVertex.hpp"
 
 namespace Slash
 {
+
+    const std::vector<Vertex> vertices = {
+        {{-0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}},
+        {{0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}},
+        {{0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}},
+        {{-0.5f, 0.5f}, {1.0f, 1.0f, 1.0f}}
+    };
+
+    const std::vector<uint16_t> indices = {
+        0, 1, 2, 2, 3, 0
+    };
+
     class VulkanRendererAPI : public RendererAPI
     {
     public:
@@ -24,8 +38,8 @@ namespace Slash
                 VkQueueFlags queueFlags    = VK_QUEUE_GRAPHICS_BIT;
             };
             struct SwapChainConfig {
-                VkFormat         format               = VK_FORMAT_B8G8R8A8_UNORM;
-                VkColorSpaceKHR  colorSpace           = VK_COLOR_SPACE_SRGB_NONLINEAR_KHR;
+                VkFormat         format      = VK_FORMAT_B8G8R8A8_UNORM;
+                VkColorSpaceKHR  colorSpace  = VK_COLOR_SPACE_SRGB_NONLINEAR_KHR;
                 VkPresentModeKHR presentMode = VK_PRESENT_MODE_MAILBOX_KHR;
             };
             InstanceConfig instanceConfig;
@@ -61,13 +75,13 @@ namespace Slash
         };
     public:
         VulkanRendererAPI() = default;
-        virtual ~VulkanRendererAPI() = default;
+        ~VulkanRendererAPI() final = default;
         void AddWindow(std::shared_ptr<Window> window) final;
         void Init() final;
         void Destroy() final;
-        void DrawFrame() final;
+        void DrawFrame(float time) final;
 
-        inline Config& GetConfig() { return m_config; }
+        Config& GetConfig() { return m_config; }
     private:
         void CreateInstance();
         void SetUpDebugMessanger();
@@ -81,9 +95,15 @@ namespace Slash
         void RecreateSwapChain();
         void CreateImageViews();
         void CreateRenderPass();
+        void CreateDescriptorSetLayout();
         void CreateGraphicsPipeline();
         void CreateFramebuffers();
         void CreateCommandPool();
+        void CreateVertexBuffer();
+        void CreateIndexBuffer();
+        void CreateUniformBuffers();
+        void CreateDescriptorPool();
+        void CreateDescriptorSets();
         void CreateCommandBuffers();
         void CreateSemaphores();
         void CreateFences();
@@ -113,12 +133,18 @@ namespace Slash
         static std::vector<char> readShader(const std::string& filename);
         VkShaderModule CreateShaderModule(const std::vector<char>& code);
 
+        uint32_t FindMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties);
+        void CreateBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer& buffer, VkDeviceMemory& bufferMemory);
+        void CopyByffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size);
+
+        void UpdateUniformBuffer(float time, uint32_t currentImage);
+
     private:
         VkInstance                   instance;
         VkSurfaceKHR                 surface;
         VkDebugUtilsMessengerEXT     debugMessanger;
         VkPhysicalDevice             physicalDevice = VK_NULL_HANDLE;
-        VkDevice                     device;                          // logical device
+        VkDevice                     device;
         VkQueue                      graphicsQueue;
         VkQueue                      presentQueue;
         VkSwapchainKHR               swapChain;
@@ -127,6 +153,7 @@ namespace Slash
         std::vector<VkImage>         swapChainImages;
         std::vector<VkImageView>     swapChainImageViews;
         VkRenderPass                 renderPass;
+        VkDescriptorSetLayout        descriptorSetLayout;
         VkPipelineLayout             pipelineLayout;
         VkPipeline                   graphicsPipeline;
         std::vector<VkFramebuffer>   swapChainFramebuffers;
@@ -139,6 +166,17 @@ namespace Slash
 
         std::shared_ptr<Window> m_window;
         Window::WindowData* m_windowData;
+
+        VkBuffer vertexBuffer;
+        VkDeviceMemory vertexBufferMemory;
+        VkBuffer indexBuffer;
+        VkDeviceMemory indexBufferMemory;
+
+        std::vector<VkBuffer> uniformBuffers;
+        std::vector<VkDeviceMemory> uniformBuffersMemory;
+
+        VkDescriptorPool descriptorPool;
+        std::vector<VkDescriptorSet> descriptorSets;
 
         Config m_config = {};
 

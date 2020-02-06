@@ -15,7 +15,7 @@ namespace Slash
         virtual void AddWindow(std::shared_ptr<Window> window) = 0;
         virtual void Init() = 0;
         virtual void Destroy() = 0;
-        virtual void DrawFrame() = 0;
+        virtual void DrawFrame(float time) = 0;
     };
 
 } // namespace Slash
