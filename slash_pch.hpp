@@ -1,3 +1,6 @@
+#ifndef  SL_PCH
+#define  SL_PCH
+
 #include <memory>
 #include <iostream>
 #include <fstream>
@@ -12,5 +15,4 @@
 #include <algorithm>
 #include <chrono>
 
-#include "glm/glm.hpp"
-#include "glm/gtc/matrix_transform.hpp"
+#endif

@@ -1,7 +1,7 @@
-#include "SlashPCH.hpp"
 #include "Platform/Linux/LinuxInput.hpp"
 #include "Core/Application.hpp"
 #include "GLFW/glfw3.h"
+#include "slash_pch.hpp"
 
 namespace Slash
 {

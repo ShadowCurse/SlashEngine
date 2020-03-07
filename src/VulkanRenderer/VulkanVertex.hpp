@@ -17,20 +17,25 @@ namespace Slash {
             return bindingDescription;
         }
 
-        static std::array<VkVertexInputAttributeDescription, 2> getAttributeDescriptionds() {
-            std::array<VkVertexInputAttributeDescription, 2> attributeDesctiption = {};
+        static std::array<VkVertexInputAttributeDescription, 3> getAttributeDescriptions() {
+            std::array<VkVertexInputAttributeDescription, 3> attributeDescriptions = {};
 
-            attributeDesctiption[0].binding = 0;
-            attributeDesctiption[0].location = 0;
-            attributeDesctiption[0].format = VK_FORMAT_R32G32_SFLOAT;
-            attributeDesctiption[0].offset = offsetof(Vertex, pos);
+            attributeDescriptions[0].binding = 0;
+            attributeDescriptions[0].location = 0;
+            attributeDescriptions[0].format = VK_FORMAT_R32G32B32_SFLOAT;
+            attributeDescriptions[0].offset = offsetof(Vertex, pos);
 
-            attributeDesctiption[1].binding = 0;
-            attributeDesctiption[1].location = 1;
-            attributeDesctiption[1].format = VK_FORMAT_R32G32B32_SFLOAT;
-            attributeDesctiption[1].offset = offsetof(Vertex, color);
+            attributeDescriptions[1].binding = 0;
+            attributeDescriptions[1].location = 1;
+            attributeDescriptions[1].format = VK_FORMAT_R32G32B32_SFLOAT;
+            attributeDescriptions[1].offset = offsetof(Vertex, color);
 
-            return attributeDesctiption;
+            attributeDescriptions[2].binding = 0;
+            attributeDescriptions[2].location = 2;
+            attributeDescriptions[2].format = VK_FORMAT_R32G32_SFLOAT;
+            attributeDescriptions[2].offset = offsetof(Vertex, texCoord);
+
+            return attributeDescriptions;
         }
     };
 } // namespace Slash

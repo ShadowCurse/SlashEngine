@@ -1,26 +1,32 @@
 #ifndef SL_VULKANRENDERER
 #define SL_VULKANRENDERER
 
-#include "SlashPCH.hpp"
-#include <GLFW/glfw3.h> 
 #include "Core/Core.hpp"
 #include "Core/Window.hpp"
+#include "GLFW/glfw3.h"
 #include "Renderer/RendererAPI.hpp"
 #include "Renderer/Vertex.hpp"
 #include "VulkanVertex.hpp"
+#include "slash_pch.hpp"
 
 namespace Slash
 {
 
     const std::vector<Vertex> vertices = {
-        {{-0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}},
-        {{0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}},
-        {{0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}},
-        {{-0.5f, 0.5f}, {1.0f, 1.0f, 1.0f}}
+        {{-0.5f, -0.5f, 0.0f}, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}},
+        {{ 0.5f, -0.5f, 0.0f}, {0.0f, 1.0f, 0.0f}, {1.0f, 0.0f}},
+        {{ 0.5f,  0.5f, 0.0f}, {0.0f, 0.0f, 1.0f}, {1.0f, 1.0f}},
+        {{-0.5f,  0.5f, 0.0f}, {1.0f, 1.0f, 1.0f}, {0.0f, 1.0f}},
+
+        {{-0.5f, -0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}},
+        {{0.5f, -0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}, {1.0f, 0.0f}},
+        {{0.5f, 0.5f, -0.5f}, {0.0f, 0.0f, 1.0f}, {1.0f, 1.0f}},
+        {{-0.5f, 0.5f, -0.5f}, {1.0f, 1.0f, 1.0f}, {0.0f, 1.0f}}
     };
 
     const std::vector<uint16_t> indices = {
-        0, 1, 2, 2, 3, 0
+        0, 1, 2, 2, 3, 0,
+        4, 5, 6, 6, 7, 4
     };
 
     class VulkanRendererAPI : public RendererAPI
@@ -46,7 +52,7 @@ namespace Slash
             QueueFamilyConfig queueFalimyConfig;
             SwapChainConfig   swapChainConfig;
 
-            VkPhysicalDeviceFeatures deviceFeatures = {};
+//            VkPhysicalDeviceFeatures deviceFeatures = {};
 
             bool enableValidationLayers = true;
             std::vector<const char*> validationLayers = {
@@ -99,6 +105,10 @@ namespace Slash
         void CreateGraphicsPipeline();
         void CreateFramebuffers();
         void CreateCommandPool();
+        void CreateDepthResources();
+        void CreateTextureImage();
+        void CreateTextureImageView();
+        void CreateTextureSampler();
         void CreateVertexBuffer();
         void CreateIndexBuffer();
         void CreateUniformBuffers();
@@ -135,9 +145,22 @@ namespace Slash
 
         uint32_t FindMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties);
         void CreateBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer& buffer, VkDeviceMemory& bufferMemory);
-        void CopyByffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size);
+        void CopyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size);
 
         void UpdateUniformBuffer(float time, uint32_t currentImage);
+
+        void CreateImage(uint32_t width, uint32_t height, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkMemoryPropertyFlags properties, VkImage& image, VkDeviceMemory& imageMemory);
+
+        VkCommandBuffer BeginSingleTimeCommand();
+        void EndSingleTimeCommand(VkCommandBuffer command_buffer);
+
+        void TransitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout);
+        void CopyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height);
+
+        VkImageView CreateImageView(VkImage image, VkFormat format, VkImageAspectFlags aspectFlags);
+
+        VkFormat FindSupportedFormat(const std::vector<VkFormat>& candidates, VkImageTiling tiling, VkFormatFeatureFlags features);
+        VkFormat FindDepthFormat();
 
     private:
         VkInstance                   instance;
@@ -177,6 +200,15 @@ namespace Slash
 
         VkDescriptorPool descriptorPool;
         std::vector<VkDescriptorSet> descriptorSets;
+
+        VkImage textureImage;
+        VkDeviceMemory textureImageMemory;
+        VkImageView textureImageView;
+        VkSampler textureSampler;
+
+        VkImage depthImage;
+        VkDeviceMemory depthImageMemory;
+        VkImageView  depthImageView;
 
         Config m_config = {};
 

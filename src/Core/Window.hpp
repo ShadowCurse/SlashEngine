@@ -1,7 +1,7 @@
 #ifndef SL_WINDOW
 #define SL_WINDOW
 
-#include "SlashPCH.hpp"
+#include "slash_pch.hpp"
 
 #include "Core/Core.hpp"
 #include "Events/Event.hpp"

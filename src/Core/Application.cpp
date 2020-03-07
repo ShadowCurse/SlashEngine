@@ -1,9 +1,9 @@
-#include "SlashPCH.hpp"
 #include "Application.hpp"
 #include "Core/Log.hpp"
+#include "GLFW/glfw3.h"
 #include "Renderer/Renderer.hpp"
 #include "VulkanRenderer/VulkanRendererAPI.hpp"
-#include "GLFW/glfw3.h"
+#include "slash_pch.hpp"
 
 namespace Slash
 {

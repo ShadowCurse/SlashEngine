@@ -9,8 +9,8 @@
         #define Slash_API __declspec(dllimport)
     #endif
 #elif defined SL_LINUX
-    #include "SlashPCH.hpp"
-    //  GCC
+    #include "slash_pch.hpp"
+//  GCC
     #ifdef SL_BUILD_DLL
         #define Slash_API __attribute__((visibility("default")))
     #else
