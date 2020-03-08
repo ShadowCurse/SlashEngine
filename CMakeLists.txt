@@ -13,15 +13,15 @@ include_directories(${CMAKE_SOURCE_DIR})
 link_directories(${CMAKE_SOURCE_DIR}/vendor/vulkan/x86_64/lib)
 link_directories(${CMAKE_SOURCE_DIR}/vendor/glfw3/build/src)
 
-add_library(SlashEngine SHARED 
-    src/Core/Application.cpp
-    src/Core/Log.cpp
-    src/Core/LayerStack.cpp
+add_library(SlashEngine SHARED
+        src/Core/application.cpp
+        src/Core/log.cpp
+        src/Core/layer_stack.cpp
 
-    src/Platform/Linux/LinuxInput.cpp
-    src/Platform/Linux/LinuxWindow.cpp
+        src/Platform/Linux/linux_input.cpp
+        src/Platform/Linux/linux_window.cpp
 
-    src/Renderer/Renderer.cpp
+        src/Renderer/renderer.cpp
 
     src/VulkanRenderer/VulkanRendererAPI.cpp
 

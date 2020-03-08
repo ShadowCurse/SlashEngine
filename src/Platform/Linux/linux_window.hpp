@@ -1,17 +1,17 @@
-#ifndef SL_LINUXWINDOW
-#define SL_LINUXWINDOW
+#ifndef SLASHENGINE_PLATFORM_LINUX_LINUX_WINDOW_H_
+#define SLASHENGINE_PLATFORM_LINUX_LINUX_WINDOW_H_
 
-#include "Core/Window.hpp"
+#include "Core/window.hpp"
 #include <GLFW/glfw3.h>
 
-namespace Slash
+namespace slash
 {
 
     class LinuxWindow: public Window
     {
     public:
-        LinuxWindow(const WindowProps& props);
-        virtual ~LinuxWindow();
+      explicit LinuxWindow(const WindowProps& props);
+        ~LinuxWindow() final ;
 
         void OnUpdate() final;
         uint GetWidth() const final;
@@ -24,10 +24,10 @@ namespace Slash
         void Init(const WindowProps& props);
         void Shutdown();
 
-        GLFWwindow* _window;
-        WindowData _data;
+        GLFWwindow* window_ = nullptr;
+        WindowData data_;
     };
 
 } // namespace Slash
 
-#endif
+#endif // SLASHENGINE_PLATFORM_LINUX_LINUX_WINDOW_H_

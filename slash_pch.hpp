@@ -1,5 +1,5 @@
-#ifndef  SL_PCH
-#define  SL_PCH
+#ifndef  SLASHENGINE_PCH_H_
+#define  SLASHENGINE_PCH_H_
 
 #include <memory>
 #include <iostream>
@@ -15,4 +15,4 @@
 #include <algorithm>
 #include <chrono>
 
-#endif
+#endif // SLASHENGINE_PCH_H_
