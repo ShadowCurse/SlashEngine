@@ -11,4 +11,24 @@ void Renderer::Destroy() { api_instance_->Destroy(); }
 
 void Renderer::DrawFrame(float time) { api_instance_->DrawFrame(time); }
 
+void Renderer::UpdateScene() { api_instance_->UpdateScene(); }
+
+void Renderer::BindVertexBuffer(size_t uid,
+                                const std::vector<Vertex> &vertices) {
+  api_instance_->BindVertexBuffer(uid, vertices);
+}
+
+void Renderer::BindIndexBuffer(size_t uid,
+                               const std::vector<uint16_t> &indices) {
+  api_instance_->BindIndexBuffer(uid, indices);
+}
+
+void Renderer::UnBindVertexBuffer(size_t uid) {
+  api_instance_->UnBindVertexBuffer(uid);
+}
+
+void Renderer::UnBindIndexBuffer(size_t uid) {
+  api_instance_->UnBindIndexBuffer(uid);
+}
+
 } // namespace slash

@@ -1,9 +1,9 @@
 #include "application.hpp"
+#include "GameResources/resource_manager.hpp"
+#include "Renderer/renderer.hpp"
+#include "VulkanRenderer/vulkan_rendererAPI.hpp"
 #include "log.hpp"
 #include "slash_pch.hpp"
-//#include "GLFW/glfw3.h"
-#include "Renderer/renderer.hpp"
-#include "VulkanRenderer/VulkanRendererAPI.hpp"
 
 namespace slash {
 
@@ -20,8 +20,9 @@ Application::Application() {
 
   Renderer::Create<VulkanRendererAPI>();
   Renderer::AddWindow(window_);
-  // auto conf = Renderer::GetAPI<VulkanRendererAPI>().GetConfig();
   Renderer::Init();
+
+  ResourceManager::Init();
 }
 
 void Application::PushLayer(Layer *layer) { layer_stack_.PushLayer(layer); }
@@ -44,8 +45,6 @@ void Application::OnEvent(Event &e) {
   }
 }
 
-Application::~Application() {}
-
 void Application::run() {
   while (running_) {
     float time = glfwGetTime();
@@ -60,6 +59,7 @@ void Application::run() {
     if (!minimized_)
       Renderer::DrawFrame(timestep.GetSecond());
   }
+  ResourceManager::Destroy();
   Renderer::Destroy();
 }
 

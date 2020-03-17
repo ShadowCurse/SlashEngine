@@ -13,7 +13,7 @@ namespace slash {
 class Slash_API Application {
 public:
   Application();
-  virtual ~Application();
+  virtual ~Application() = default;
 
   void run();
   void OnEvent(Event &e);
@@ -28,14 +28,16 @@ private:
   bool OnWindowResize(WindowResizeEvent &e);
 
   Shared<Window> window_;
+  LayerStack layer_stack_;
   bool running_ = true;
   bool minimized_ = false;
-  LayerStack layer_stack_;
   float last_frame_time_ = 0.0f;
 
   inline static Application *p_application_ = nullptr;
 };
 
 Application *CreateApplication();
+
 } // namespace slash
+
 #endif // SLASHENGINE_CORE_APPLICATION_H_

@@ -1,12 +1,14 @@
 #ifndef SLASHENGINE_RENDERER_RENDERER_H_
 #define SLASHENGINE_RENDERER_RENDERER_H_
 
+#include "Core/core.hpp"
 #include "Core/window.hpp"
+#include "Renderer/vertex.hpp"
 #include "renderer_api.hpp"
 
 namespace slash {
 
-class Renderer {
+class Slash_API Renderer {
 private:
   Renderer() = default;
 
@@ -22,6 +24,11 @@ public:
   static void Init();
   static void Destroy();
   static void DrawFrame(float time);
+  static void UpdateScene();
+  static void BindVertexBuffer(size_t uid, const std::vector<Vertex> &vertices);
+  static void BindIndexBuffer(size_t uid, const std::vector<uint16_t> &indices);
+  static void UnBindVertexBuffer(size_t uid);
+  static void UnBindIndexBuffer(size_t uid);
 
 private:
   inline static Unique<RendererAPI> api_instance_ = nullptr;
