@@ -9,8 +9,6 @@ namespace slash {
 
 #define BIND_EVENT_FN(x) std::bind(&Application::x, this, std::placeholders::_1)
 
-// Application *Application::p_application_ = nullptr;
-
 Application::Application() {
   SL_CORE_ASSERT(!p_application_, "Application already exists");
   p_application_ = this;
@@ -74,6 +72,8 @@ bool Application::OnWindowResize(WindowResizeEvent &e) {
     minimized_ = true;
     return false;
   }
+
+  //Renderer::OnWindowResize(e.GetWidth(), e.GetHeigth());
 
   minimized_ = false;
 

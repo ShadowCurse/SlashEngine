@@ -31,4 +31,16 @@ void Renderer::UnBindIndexBuffer(size_t uid) {
   api_instance_->UnBindIndexBuffer(uid);
 }
 
+void Renderer::BindTexture(size_t uid, const Texture &texture) {
+  api_instance_->BindTexture(uid, texture);
+}
+
+void Renderer::UnBindTexture(size_t uid) {
+  api_instance_->UnBindTexture(uid);
+}
+
+void Renderer::BindObject(const ObjectInfo &object_info) {
+  api_instance_->BindObject(object_info);
+}
+
 } // namespace slash

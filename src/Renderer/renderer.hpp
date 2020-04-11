@@ -9,15 +9,17 @@
 namespace slash {
 
 class Slash_API Renderer {
-private:
+ private:
   Renderer() = default;
 
-public:
+ public:
   virtual ~Renderer() = default;
-  template <typename API> static void Create() {
+  template<typename API>
+  static void Create() {
     api_instance_ = CreateUnique<API>();
   }
-  template <typename API> static API &GetAPI() {
+  template<typename API>
+  static API &GetAPI() {
     return *static_cast<API *>(api_instance_.get());
   }
   static void AddWindow(std::shared_ptr<Window> window);
@@ -30,7 +32,12 @@ public:
   static void UnBindVertexBuffer(size_t uid);
   static void UnBindIndexBuffer(size_t uid);
 
-private:
+  static void BindTexture(size_t uid, const Texture &texture);
+  static void UnBindTexture(size_t uid);
+
+  static void BindObject(const ObjectInfo &object_info);
+
+ private:
   inline static Unique<RendererAPI> api_instance_ = nullptr;
 };
 

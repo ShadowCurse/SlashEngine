@@ -4,13 +4,15 @@
 #include "Core/core.hpp"
 #include "Core/window.hpp"
 #include "Renderer/vertex.hpp"
+#include "GameResources/texture.hpp"
+#include "GameResources/object_info.hpp"
 
 namespace slash {
 class Slash_API RendererAPI {
-protected:
+ protected:
   RendererAPI() = default;
 
-public:
+ public:
   virtual ~RendererAPI() = default;
   virtual void AddWindow(std::shared_ptr<Window> window) = 0;
   virtual void Init() = 0;
@@ -23,6 +25,12 @@ public:
                                const std::vector<uint16_t> &indices) = 0;
   virtual void UnBindVertexBuffer(size_t uid) = 0;
   virtual void UnBindIndexBuffer(size_t uid) = 0;
+
+  virtual void BindTexture(size_t uid, const Texture &texture) = 0;
+  virtual void UnBindTexture(size_t uid) = 0;
+
+  virtual void BindObject(const ObjectInfo &object_info) = 0;
+
 };
 
 } // namespace slash

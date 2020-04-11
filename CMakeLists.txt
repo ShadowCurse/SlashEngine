@@ -20,15 +20,14 @@ add_library(SlashEngine SHARED
 
         src/GameResources/resource_manager.cpp
         src/GameResources/model_manager.cpp
+        src/GameResources/texture_manager.cpp
 
         src/Platform/Linux/linux_input.cpp
         src/Platform/Linux/linux_window.cpp
 
         src/Renderer/renderer.cpp
 
-        src/VulkanRenderer/vulkan_rendererAPI.cpp
-
-        )
+        src/VulkanRenderer/vulkan_rendererAPI.cpp)
 
 add_definitions(-DGLFW_INCLUDE_VULKAN -DGLFW_INCLUDE_NONE -DSL_LINUX -DSL_BUILD_DLL -DSL_DEBUG -DSL_ENABLE_ASSERTS)
 

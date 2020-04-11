@@ -6,16 +6,14 @@
 #include "GLFW/glfw3.h"
 #include "Renderer/renderer_api.hpp"
 #include "Renderer/vertex.hpp"
+#include "Renderer/camera.hpp"
+#include "GameResources/object_info.hpp"
 #include "vulkan_vertex.hpp"
 
 namespace slash {
 
-class VulkanBufferManager;
-
 class Slash_API VulkanRendererAPI : public RendererAPI {
-public:
-  friend class VulkanBufferManager;
-
+ public:
   VulkanRendererAPI() = default;
   ~VulkanRendererAPI() final = default;
   void AddWindow(std::shared_ptr<Window> window) final;
@@ -23,12 +21,18 @@ public:
   void Destroy() final;
   void DrawFrame(float time) final;
   void UpdateScene() final;
+
   void BindVertexBuffer(size_t uid, const std::vector<Vertex> &vertices) final;
   void BindIndexBuffer(size_t uid, const std::vector<uint16_t> &indices) final;
   void UnBindVertexBuffer(size_t uid) final;
   void UnBindIndexBuffer(size_t uid) final;
 
-private:
+  void BindTexture(size_t uid, const Texture &texture) final;
+  void UnBindTexture(size_t uid) final;
+
+  void BindObject(const ObjectInfo &object_info) final;
+
+ private:
   struct Config {
     struct InstanceConfig {
       std::string application_name = "Vulkan app";
@@ -74,9 +78,6 @@ private:
     std::vector<VkPresentModeKHR> presentModes;
   };
 
-  void CreateSubSystems();
-  void DestroySubSystems();
-
   void CreateInstance();
   void SetUpDebugMessenger();
   void GetWindowData();
@@ -89,16 +90,14 @@ private:
   void RecreateSwapChain();
   void CreateImageViews();
   void CreateRenderPass();
-  void CreateDescriptorSetLayout();
+  void CreateDescriptorSetLayout(); // TODO
   void CreateGraphicsPipeline();
   void CreateFramebuffers();
   void CreateCommandPool();
   void CreateDepthResources();
-  void CreateTextureImage(); // TODO
-  void CreateTextureImageView();
+//  void CreateTextureImage(); // TODO
+//  void CreateTextureImageView();
   void CreateTextureSampler();
-  void CreateVertexBuffer();
-  void CreateIndexBuffer();
   void CreateUniformBuffers(); // TODO
   void CreateDescriptorPool();
   void CreateDescriptorSets(); // TODO
@@ -182,7 +181,11 @@ private:
   std::vector<VkImage> swap_chain_images_;
   std::vector<VkImageView> swap_chain_image_views_;
   VkRenderPass render_pass_;
+
   VkDescriptorSetLayout descriptor_set_layout_;
+  VkDescriptorPool descriptor_pool_;
+  std::vector<VkDescriptorSet> descriptor_sets_;
+
   VkPipelineLayout pipeline_layout_;
   VkPipeline graphics_pipeline_;
   std::vector<VkFramebuffer> swap_chain_framebuffers_;
@@ -192,54 +195,14 @@ private:
   std::vector<VkSemaphore> render_finished_semaphores_;
   std::vector<VkFence> inflight_fences_;
   std::vector<VkFence> images_inflight_;
+
   std::shared_ptr<Window> window_;
   Window::WindowData *window_data_;
 
-  //  VkBuffer vertex_buffer_;
-  //  VkDeviceMemory vertex_buffer_memory_;
-  //  VkBuffer index_buffer_;
-  //  VkDeviceMemory index_buffer_memory_;
+  Camera camera_;
 
-  std::vector<VkBuffer> uniform_buffers_;
-  std::vector<VkDeviceMemory> uniform_buffers_memory_;
-  VkDescriptorPool descriptor_pool_;
-  std::vector<VkDescriptorSet> descriptor_sets_;
+  std::vector<ObjectInfo> objects_;
 
-  VkImage texture_image_;
-  VkDeviceMemory texture_image_memory_;
-  VkImageView texture_image_view_;
-  VkSampler texture_sampler_;
-
-  VkImage depth_image_;
-  VkDeviceMemory depth_image_memory_;
-  VkImageView depth_image_view_;
-
-  QueueFamilyIndices queue_family_indices_ = {};
-  size_t current_frame = 0;
-
-  Unique<VulkanBufferManager> buffer_manager_;
-};
-
-class Slash_API VulkanBufferManager {
-public:
-  friend class VulkanRendererAPI;
-  explicit VulkanBufferManager(VulkanRendererAPI *renderer_api);
-  ~VulkanBufferManager();
-
-private:
-  void AddVertexBuffer(size_t uid, const std::vector<Vertex> &vertices);
-  void AddIndexBuffer(size_t uid, const std::vector<uint16_t> &indices);
-  void RemoveVertexBuffer(size_t uid);
-  void RemoveIndexBuffer(size_t uid);
-
-  [[nodiscard]] bool HasData() const;
-  [[nodiscard]] size_t Size() const;
-  [[nodiscard]] const VkBuffer *GetVertexBuffer(size_t index) const;
-  [[nodiscard]] const VkDeviceSize *GetVertexBuffersOffsets(size_t index) const;
-  [[nodiscard]] VkBuffer GetIndexBuffer(size_t index) const;
-  [[nodiscard]] uint32_t GetIndexBufferSize(size_t index) const;
-
-  VulkanRendererAPI *renderer_api_;
   std::vector<size_t> buffer_uids_;
   std::map<size_t, VkBuffer> vertex_buffers_;
   std::map<size_t, VkDeviceMemory> vertex_buffers_memory_;
@@ -248,6 +211,29 @@ private:
   std::map<size_t, VkBuffer> index_buffers_;
   std::map<size_t, VkDeviceMemory> index_buffers_memory_;
   std::map<size_t, uint32_t> index_buffers_size_;
+
+  std::vector<VkBuffer> uniform_buffers_; // for camera
+  std::vector<VkDeviceMemory> uniform_buffers_memory_;
+  std::vector<VkBuffer> rotation_buffers_; // for model rotations
+  std::vector<VkDeviceMemory> rotation_buffers_memory_;
+
+  VkImage texture_image_;
+  VkDeviceMemory texture_image_memory_;
+  VkImageView texture_image_view_;
+  VkSampler texture_sampler_;
+
+//  std::vector<size_t> texture_uids_;
+//  VkImage texture_image_;
+//  VkDeviceMemory texture_image_memory_;
+//  VkImageView texture_image_view_;
+//  VkSampler texture_sampler_;
+
+  VkImage depth_image_;
+  VkDeviceMemory depth_image_memory_;
+  VkImageView depth_image_view_;
+
+  QueueFamilyIndices queue_family_indices_ = {};
+  size_t current_frame = 0;
 };
 
 } // namespace slash

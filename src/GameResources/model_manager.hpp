@@ -6,24 +6,35 @@
 
 namespace slash {
 
-struct Slash_API Model {
-  std::string name;
-  std::vector<Vertex> vertices;
-  std::vector<uint16_t> indices;
-  bool binded = false;
+class Slash_API Model {
+ public:
+  friend class ModelManager;
+  Model(const std::string &name, const std::vector<Vertex> &verticies, const std::vector<uint16_t> &indices);
+  ~Model() = default;
+
+  const std::string &Name() const;
+  const std::vector<Vertex> &Vertices() const;
+  const std::vector<uint16_t> &Indices() const;
+
+ private:
+  std::string name_;
+  std::vector<Vertex> vertices_;
+  std::vector<uint16_t> indices_;
 };
 
 class Slash_API ModelManager {
-public:
+ public:
   ModelManager() = default;
   ~ModelManager() = default;
 
   void AddModel(Model model);
+  bool LoadModel(const std::string &model_name, const std::string &model_path);
   void RemoveModel(const std::string &model_name);
-  void BindModel(const std::string &model_name);
-  void UnBindModel(const std::string &model_name);
 
-private:
+  [[nodiscard]] size_t GetUid(const std::string &model_name) const;
+  [[nodiscard]] const Model &GetModel(const std::string &model_name) const;
+
+ private:
   std::map<size_t, Model> models_;
 };
 

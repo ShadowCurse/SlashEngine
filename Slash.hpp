@@ -17,6 +17,7 @@
 
 #include "GameResources/model_manager.hpp"
 #include "GameResources/resource_manager.hpp"
+#include "GameResources/texture_manager.hpp"
 
 #include "Renderer/renderer.hpp"
 #include "Renderer/renderer_api.hpp"

@@ -12,11 +12,11 @@ struct Slash_API Vertex {
   glm::vec2 texCoord;
 };
 
-struct Slash_API UniformBufferObject {
-  glm::mat4 model;
-  glm::mat4 view;
-  glm::mat4 proj;
-};
+//struct Slash_API UniformBufferObject {
+//  glm::mat4 model;
+//  glm::mat4 view;
+//  glm::mat4 proj;
+//};
 
 } // namespace slash
 
