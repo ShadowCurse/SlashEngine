@@ -7,9 +7,6 @@
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
 
-//#define STB_IMAGE_IMPLEMENTATION
-//#include <stb_image.h>
-
 namespace slash {
 
 void VulkanRendererAPI::AddWindow(std::shared_ptr<Window> window) {
@@ -31,20 +28,10 @@ void VulkanRendererAPI::Init() {
   CreateCommandPool();
   CreateDepthResources();
   CreateFramebuffers();
-//  CreateTextureImage();
-//  CreateTextureImageView();
   CreateTextureSampler();
-  //  CreateVertexBuffer();
-  //  CreateIndexBuffer();
-
-  //  BindVertexBuffer(global_vertices);
-  //  BindIndexBuffer(global_indices);
-
-  CreateUniformBuffers();
-  CreateDescriptorPool();
-//  CreateDescriptorSets();
+  CreateCameraBuffer();
+  CreateDescriptorPool(10);
   CreateCommandBuffers();
-  //  UpdateCommandBuffers();
   CreateSemaphores();
   CreateFences();
 }
@@ -57,20 +44,17 @@ void VulkanRendererAPI::Destroy() {
     vkDestroyFence(device_, inflight_fences_[i], nullptr);
   }
   DestroySwapChain();
-  vkDestroySampler(device_, texture_sampler_, nullptr);
-//  vkDestroyImageView(device_, texture_image_view_, nullptr);
-//  vkDestroyImage(device_, texture_image_, nullptr);
-//  vkFreeMemory(device_, texture_image_memory_, nullptr);
-  UnBindTexture(1);
   vkDestroyDescriptorSetLayout(device_, descriptor_set_layout_, nullptr);
-  for (auto &uid: buffer_uids_) {
-    UnBindVertexBuffer(uid);
-    UnBindIndexBuffer(uid);
+
+  DestroyCameraBuffer();
+  vkDestroySampler(device_, texture_sampler_, nullptr);
+  for (auto &uid: texture_uids_) {
+    UnBindTexture(uid);
   }
-  //  vkDestroyBuffer(device_, vertex_buffer_, nullptr);
-  //  vkFreeMemory(device_, vertex_buffer_memory_, nullptr);
-  //  vkDestroyBuffer(device_, index_buffer_, nullptr);
-  //  vkFreeMemory(device_, index_buffer_memory_, nullptr);
+  for (auto &uid: models_uid_) {
+    UnBindModel(uid);
+  }
+
   vkDestroyCommandPool(device_, command_pool_, nullptr);
   vkDestroyDevice(device_, nullptr);
   if (config_.enable_validation_layers)
@@ -140,9 +124,9 @@ void VulkanRendererAPI::DrawFrame(float time) {
 
 void VulkanRendererAPI::UpdateScene() { UpdateCommandBuffers(); }
 
-void VulkanRendererAPI::BindVertexBuffer(size_t uid,
-                                         const std::vector<Vertex> &vertices) {
-  SL_CORE_INFO("Binding vertex buffer");
+void VulkanRendererAPI::BindModel(size_t uid,
+                                  const std::vector<Vertex> &vertices, const std::vector<uint16_t> &indices) {
+  SL_CORE_INFO("Binding model: {}", uid);
   VkBuffer vertex_buffer;
   VkDeviceMemory vertex_buffer_memory;
   VkDeviceSize buffer_size = sizeof(vertices[0]) * vertices.size();
@@ -167,22 +151,14 @@ void VulkanRendererAPI::BindVertexBuffer(size_t uid,
   vertex_buffers_.insert({uid, vertex_buffer});
   vertex_buffers_memory_.insert({uid, vertex_buffer_memory});
   vertex_offsets_.insert({uid, 0});
-  buffer_uids_.push_back(uid);
-}
 
-void VulkanRendererAPI::BindIndexBuffer(size_t uid,
-                                        const std::vector<uint16_t> &indices) {
-  SL_CORE_INFO("Binding index buffer");
   VkBuffer index_buffer;
   VkDeviceMemory index_buffer_memory;
-  VkDeviceSize buffer_size = sizeof(indices[0]) * indices.size();
-  VkBuffer staging_buffer;
-  VkDeviceMemory staging_buffer_memory;
+  buffer_size = sizeof(indices[0]) * indices.size();
   CreateBuffer(buffer_size, VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
                VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
                    VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
                staging_buffer, staging_buffer_memory);
-  void *data;
   vkMapMemory(device_, staging_buffer_memory, 0, buffer_size, 0,
               &data);
   memcpy(data, indices.data(), static_cast<size_t>(buffer_size));
@@ -197,19 +173,18 @@ void VulkanRendererAPI::BindIndexBuffer(size_t uid,
   index_buffers_.insert({uid, index_buffer});
   index_buffers_memory_.insert({uid, index_buffer_memory});
   index_buffers_size_.insert({uid, static_cast<uint32_t>(indices.size())});
+
+  models_uid_.push_back(uid);
 }
 
-void VulkanRendererAPI::UnBindVertexBuffer(size_t uid) {
+void VulkanRendererAPI::UnBindModel(size_t uid) {
+  SL_CORE_INFO("UnBindVertexBuffer: {}", uid);
   vkDestroyBuffer(device_, vertex_buffers_[uid], nullptr);
   vkFreeMemory(device_, vertex_buffers_memory_[uid], nullptr);
   vertex_buffers_.erase(uid);
   vertex_buffers_memory_.erase(uid);
   vertex_offsets_.erase(uid);
-  std::remove(buffer_uids_.begin(), buffer_uids_.end(), uid);
-  buffer_uids_.shrink_to_fit();
-}
 
-void VulkanRendererAPI::UnBindIndexBuffer(size_t uid) {
   vkDestroyBuffer(device_, index_buffers_[uid], nullptr);
   vkFreeMemory(device_, index_buffers_memory_[uid], nullptr);
   index_buffers_.erase(uid);
@@ -217,7 +192,8 @@ void VulkanRendererAPI::UnBindIndexBuffer(size_t uid) {
   index_buffers_size_.erase(uid);
 }
 
-void VulkanRendererAPI::BindTexture([[maybe_unused]] size_t uid, const Texture &texture) {
+void VulkanRendererAPI::BindTexture(size_t uid, const Texture &texture) {
+  SL_CORE_INFO("Binding texture");
   VkDeviceSize image_size = texture.width_ * texture.height_ * 4;
   VkBuffer staging_buffer;
   VkDeviceMemory staging_buffer_memory;
@@ -230,38 +206,49 @@ void VulkanRendererAPI::BindTexture([[maybe_unused]] size_t uid, const Texture &
   memcpy(data, texture.pixels_.data(), static_cast<size_t>(image_size));
   vkUnmapMemory(device_, staging_buffer_memory);
 
+  VkImage texture_image;
+  VkDeviceMemory texture_image_memory;
   CreateImage(texture.width_, texture.height_, VK_FORMAT_R8G8B8A8_SRGB,
               VK_IMAGE_TILING_OPTIMAL,
               VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
-              VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, texture_image_,
-              texture_image_memory_);
-  TransitionImageLayout(texture_image_, VK_FORMAT_R8G8B8A8_SRGB,
+              VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, texture_image,
+              texture_image_memory);
+  TransitionImageLayout(texture_image, VK_FORMAT_R8G8B8A8_SRGB,
                         VK_IMAGE_LAYOUT_UNDEFINED,
                         VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
-  CopyBufferToImage(staging_buffer, texture_image_,
+  CopyBufferToImage(staging_buffer, texture_image,
                     static_cast<uint32_t>(texture.width_),
                     static_cast<uint32_t>(texture.height_));
-  TransitionImageLayout(texture_image_, VK_FORMAT_R8G8B8A8_SRGB,
+  TransitionImageLayout(texture_image, VK_FORMAT_R8G8B8A8_SRGB,
                         VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
                         VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 
   vkDestroyBuffer(device_, staging_buffer, nullptr);
   vkFreeMemory(device_, staging_buffer_memory, nullptr);
-  texture_image_view_ = CreateImageView(texture_image_, VK_FORMAT_R8G8B8A8_SRGB,
-                                        VK_IMAGE_ASPECT_COLOR_BIT);
+  VkImageView texture_image_view = CreateImageView(texture_image, VK_FORMAT_R8G8B8A8_SRGB,
+                                                   VK_IMAGE_ASPECT_COLOR_BIT);
+  texture_uids_.push_back(uid);
+  texture_images_.insert({uid, texture_image});
+  texture_images_memory_.insert({uid, texture_image_memory});
+  texture_images_view_.insert({uid, texture_image_view});
 }
 
-void VulkanRendererAPI::UnBindTexture([[maybe_unused]] size_t uid) {
-  vkDestroyImageView(device_, texture_image_view_, nullptr);
-  vkDestroyImage(device_, texture_image_, nullptr);
-  vkFreeMemory(device_, texture_image_memory_, nullptr);
+void VulkanRendererAPI::UnBindTexture(size_t uid) {
+  SL_CORE_INFO("UnBindTexture");
+  vkDestroyImageView(device_, texture_images_view_[uid], nullptr);
+  vkDestroyImage(device_, texture_images_[uid], nullptr);
+  vkFreeMemory(device_, texture_images_memory_[uid], nullptr);
+  texture_images_view_.erase(uid);
+  texture_images_.erase(uid);
+  texture_images_memory_.erase(uid);
 }
 
 void VulkanRendererAPI::BindObject(const ObjectInfo &object_info) {
-  objects_.push_back(object_info);
-  CreateDescriptorSets();
+  SL_CORE_INFO("Binding object");
+  objects_.insert({object_info.uid, object_info});
+  AddRotationBuffer(object_info.uid);
+  CreateDescriptorSet(object_info.uid, object_info.texture_uid);
   UpdateCommandBuffers();
-  // TODO updates
 }
 
 //////////////////////////////////////////////////////
@@ -494,30 +481,30 @@ void VulkanRendererAPI::DestroySwapChain() {
   vkDestroyPipeline(device_, graphics_pipeline_, nullptr);
   vkDestroyPipelineLayout(device_, pipeline_layout_, nullptr);
   vkDestroyRenderPass(device_, render_pass_, nullptr);
-  for (size_t i(0); i < swap_chain_image_views_.size(); ++i)
-    vkDestroyImageView(device_, swap_chain_image_views_[i], nullptr);
+  for (auto &image_view: swap_chain_image_views_)
+    vkDestroyImageView(device_, image_view, nullptr);
   vkDestroySwapchainKHR(device_, swap_chain_, nullptr);
-  for (size_t i(0); i < swap_chain_images_.size(); ++i) {
-    vkDestroyBuffer(device_, uniform_buffers_[i], nullptr);
-    vkFreeMemory(device_, uniform_buffers_memory_[i], nullptr);
-    vkDestroyBuffer(device_, rotation_buffers_[i], nullptr);
-    vkFreeMemory(device_, rotation_buffers_memory_[i], nullptr);
+  for (auto&[uid, object]: objects_) {
+    DestroyRotationBuffer(uid);
   }
-  vkDestroyDescriptorPool(device_, descriptor_pool_, nullptr);
+  DestroyDescriptorPool();
 }
 
 void VulkanRendererAPI::RecreateSwapChain() {
   vkDeviceWaitIdle(device_);
   DestroySwapChain();
+
   CreateSwapChain();
   CreateImageViews();
   CreateRenderPass();
   CreateGraphicsPipeline();
   CreateDepthResources();
   CreateFramebuffers();
-  CreateUniformBuffers();
-  CreateDescriptorPool();
-  CreateDescriptorSets();
+  for (auto&[uid, object]: objects_)
+    AddRotationBuffer(uid);
+  CreateDescriptorPool(10);
+  for (auto&[uid, object]: objects_)
+    CreateDescriptorSet(uid, object.texture_uid);
   CreateCommandBuffers();
   UpdateCommandBuffers();
 }
@@ -858,50 +845,6 @@ void VulkanRendererAPI::CreateDepthResources() {
                         VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
 }
 
-//void VulkanRendererAPI::CreateTextureImage() {
-//  int texWidth, texHeight, texChannel;
-//  stbi_uc *pixels = stbi_load("textures/texture.jpg", &texWidth, &texHeight,
-//                              &texChannel, STBI_rgb_alpha);
-//  VkDeviceSize image_size = texWidth * texHeight * 4;
-//  if (!pixels) {
-//    throw std::runtime_error("failed to load texture image");
-//  }
-//  VkBuffer staging_buffer;
-//  VkDeviceMemory staging_buffer_memory;
-//  CreateBuffer(image_size, VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
-//               VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
-//                   VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
-//               staging_buffer, staging_buffer_memory);
-//  void *data;
-//  vkMapMemory(device_, staging_buffer_memory, 0, image_size, 0, &data);
-//  memcpy(data, pixels, static_cast<size_t>(image_size));
-//  vkUnmapMemory(device_, staging_buffer_memory);
-//  stbi_image_free(pixels);
-//
-//  CreateImage(texWidth, texHeight, VK_FORMAT_R8G8B8A8_SRGB,
-//              VK_IMAGE_TILING_OPTIMAL,
-//              VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
-//              VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, texture_image_,
-//              texture_image_memory_);
-//  TransitionImageLayout(texture_image_, VK_FORMAT_R8G8B8A8_SRGB,
-//                        VK_IMAGE_LAYOUT_UNDEFINED,
-//                        VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
-//  CopyBufferToImage(staging_buffer, texture_image_,
-//                    static_cast<uint32_t>(texWidth),
-//                    static_cast<uint32_t>(texHeight));
-//  TransitionImageLayout(texture_image_, VK_FORMAT_R8G8B8A8_SRGB,
-//                        VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-//                        VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
-//
-//  vkDestroyBuffer(device_, staging_buffer, nullptr);
-//  vkFreeMemory(device_, staging_buffer_memory, nullptr);
-//}
-//
-//void VulkanRendererAPI::CreateTextureImageView() {
-//  texture_image_view_ = CreateImageView(texture_image_, VK_FORMAT_R8G8B8A8_SRGB,
-//                                        VK_IMAGE_ASPECT_COLOR_BIT);
-//}
-
 void VulkanRendererAPI::CreateTextureSampler() {
   VkSamplerCreateInfo sampler_info = {};
   sampler_info.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
@@ -924,114 +867,6 @@ void VulkanRendererAPI::CreateTextureSampler() {
   if (vkCreateSampler(device_, &sampler_info, nullptr, &texture_sampler_) !=
       VK_SUCCESS) {
     throw std::runtime_error("failed to create texture sampler");
-  }
-}
-
-void VulkanRendererAPI::CreateUniformBuffers() {
-  VkDeviceSize buffer_size = sizeof(Camera);
-  uniform_buffers_.resize(swap_chain_images_.size());
-  uniform_buffers_memory_.resize(swap_chain_image_views_.size());
-  for (size_t i(0); i < swap_chain_images_.size(); ++i) {
-    CreateBuffer(buffer_size, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
-                 VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
-                     VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
-                 uniform_buffers_[i], uniform_buffers_memory_[i]);
-  }
-  buffer_size = sizeof(glm::mat4);
-  rotation_buffers_.resize(swap_chain_images_.size());
-  rotation_buffers_memory_.resize(swap_chain_image_views_.size());
-  for (size_t i(0); i < swap_chain_images_.size(); ++i) {
-    CreateBuffer(buffer_size, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
-                 VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
-                     VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
-                 rotation_buffers_[i], rotation_buffers_memory_[i]);
-  }
-}
-
-void VulkanRendererAPI::CreateDescriptorPool() {
-  std::array<VkDescriptorPoolSize, 2> pool_sizes = {};
-  pool_sizes[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-  pool_sizes[0].descriptorCount =
-      static_cast<uint32_t>(swap_chain_images_.size() * 2);
-  pool_sizes[1].type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-  pool_sizes[1].descriptorCount =
-      static_cast<uint32_t>(swap_chain_images_.size());
-  VkDescriptorPoolCreateInfo pool_info = {};
-  pool_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
-  pool_info.poolSizeCount = static_cast<uint32_t>(pool_sizes.size());
-  pool_info.pPoolSizes = pool_sizes.data();
-  pool_info.maxSets = static_cast<uint32_t>(swap_chain_images_.size());
-  if (vkCreateDescriptorPool(device_, &pool_info, nullptr, &descriptor_pool_) !=
-      VK_SUCCESS) {
-    throw std::runtime_error("failed to create descriptor pool");
-  }
-}
-
-void VulkanRendererAPI::CreateDescriptorSets() {
-  std::vector<VkDescriptorSetLayout> layouts(swap_chain_images_.size(),
-                                             descriptor_set_layout_);
-  VkDescriptorSetAllocateInfo alloc_info = {};
-  alloc_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
-  alloc_info.descriptorPool = descriptor_pool_;
-  alloc_info.descriptorSetCount =
-      static_cast<uint32_t>(swap_chain_images_.size());
-  alloc_info.pSetLayouts = layouts.data();
-  descriptor_sets_.resize(swap_chain_images_.size());
-  if (vkAllocateDescriptorSets(device_, &alloc_info, descriptor_sets_.data()) !=
-      VK_SUCCESS) {
-    throw std::runtime_error("failed to allocate descriptor sets");
-  }
-  for (size_t i(0); i < swap_chain_images_.size(); ++i) {
-    VkDescriptorBufferInfo buffer_info = {};
-    buffer_info.buffer = uniform_buffers_[i];
-    buffer_info.offset = 0;
-    buffer_info.range = sizeof(Camera);
-
-    VkDescriptorBufferInfo rotation_info = {};
-    rotation_info.buffer = rotation_buffers_[i];
-    rotation_info.offset = 0;
-    rotation_info.range = sizeof(glm::mat4);
-
-    VkDescriptorImageInfo image_info = {};
-    image_info.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-    image_info.imageView = texture_image_view_;
-    image_info.sampler = texture_sampler_;
-
-    std::array<VkWriteDescriptorSet, 3> descriptor_writes = {};
-    descriptor_writes[0].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-    descriptor_writes[0].dstSet = descriptor_sets_[i];
-    descriptor_writes[0].dstBinding = 0;
-    descriptor_writes[0].dstArrayElement = 0;
-    descriptor_writes[0].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-    descriptor_writes[0].descriptorCount = 1;
-    descriptor_writes[0].pBufferInfo = &buffer_info;
-    descriptor_writes[0].pImageInfo = nullptr;
-    descriptor_writes[0].pTexelBufferView = nullptr;
-
-    descriptor_writes[1].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-    descriptor_writes[1].dstSet = descriptor_sets_[i];
-    descriptor_writes[1].dstBinding = 1;
-    descriptor_writes[1].dstArrayElement = 0;
-    descriptor_writes[1].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-    descriptor_writes[1].descriptorCount = 1;
-    descriptor_writes[1].pBufferInfo = &rotation_info;
-    descriptor_writes[1].pImageInfo = nullptr;
-    descriptor_writes[1].pTexelBufferView = nullptr;
-
-    descriptor_writes[2].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-    descriptor_writes[2].dstSet = descriptor_sets_[i];
-    descriptor_writes[2].dstBinding = 2;
-    descriptor_writes[2].dstArrayElement = 0;
-    descriptor_writes[2].descriptorType =
-        VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-    descriptor_writes[2].descriptorCount = 1;
-    descriptor_writes[2].pBufferInfo = nullptr;
-    descriptor_writes[2].pImageInfo = &image_info;
-    descriptor_writes[2].pTexelBufferView = nullptr;
-
-    vkUpdateDescriptorSets(device_,
-                           static_cast<uint32_t>(descriptor_writes.size()),
-                           descriptor_writes.data(), 0, nullptr);
   }
 }
 
@@ -1090,18 +925,18 @@ void VulkanRendererAPI::UpdateCommandBuffers() {
                          VK_SUBPASS_CONTENTS_INLINE);
     vkCmdBindPipeline(command_buffers_[i], VK_PIPELINE_BIND_POINT_GRAPHICS,
                       graphics_pipeline_);
-    for (auto uid: buffer_uids_) {
+    for (auto[uid, object]: objects_) {
       vkCmdBindVertexBuffers(command_buffers_[i], 0, 1,
-                             &vertex_buffers_[uid],
-                             &vertex_offsets_[uid]);
+                             &vertex_buffers_[object.vertex_uid],
+                             &vertex_offsets_[object.vertex_uid]);
       vkCmdBindIndexBuffer(command_buffers_[i],
-                           index_buffers_[uid], 0,
+                           index_buffers_[object.index_uid], 0,
                            VK_INDEX_TYPE_UINT16);
       vkCmdBindDescriptorSets(command_buffers_[i],
                               VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline_layout_,
-                              0, 1, &descriptor_sets_[i], 0, nullptr);
+                              0, 1, &descriptor_sets_[uid][i], 0, nullptr);
       vkCmdDrawIndexed(command_buffers_[i],
-                       index_buffers_size_[uid], 1, 0, 0, 0);
+                       index_buffers_size_[object.index_uid], 1, 0, 0, 0);
     }
     vkCmdEndRenderPass(command_buffers_[i]);
     if (vkEndCommandBuffer(command_buffers_[i]) != VK_SUCCESS) {
@@ -1136,6 +971,140 @@ void VulkanRendererAPI::CreateFences() {
       throw std::runtime_error("failed to create fence");
     }
   }
+}
+//////////////////////////////////////////////////////
+/////////// MAIN FUNC ////////////////////////////////
+//////////////////////////////////////////////////////
+
+
+void VulkanRendererAPI::CreateCameraBuffer() {
+  VkDeviceSize buffer_size = sizeof(Camera);
+  CreateBuffer(buffer_size, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+               VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
+                   VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+               camera_buffer_, camera_buffer_memory_);
+}
+
+void VulkanRendererAPI::DestroyCameraBuffer() {
+  SL_CORE_INFO("DestroyCameraBuffer");
+  vkDestroyBuffer(device_, camera_buffer_, nullptr);
+  vkFreeMemory(device_, camera_buffer_memory_, nullptr);
+}
+
+void VulkanRendererAPI::AddRotationBuffer(size_t uid) {
+  VkDeviceSize buffer_size = sizeof(glm::mat4);
+  std::vector<VkBuffer> rotation_buffers(swap_chain_images_.size());
+  std::vector<VkDeviceMemory> rotation_buffers_memory(swap_chain_images_.size());
+  for (size_t i(0); i < swap_chain_images_.size(); ++i) {
+    CreateBuffer(buffer_size, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+                 VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
+                     VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+                 rotation_buffers[i], rotation_buffers_memory[i]);
+  }
+  rotation_buffers_.insert({uid, rotation_buffers});
+  rotation_buffers_memory_.insert({uid, rotation_buffers_memory});
+}
+
+void VulkanRendererAPI::DestroyRotationBuffer(size_t uid) {
+  SL_CORE_INFO("DestroyRotationBuffer {}", uid);
+  for (size_t i(0); i < rotation_buffers_[uid].size(); ++i) {
+    vkDestroyBuffer(device_, rotation_buffers_[uid][i], nullptr);
+    vkFreeMemory(device_, rotation_buffers_memory_[uid][i], nullptr);
+  }
+  rotation_buffers_.erase(uid);
+  rotation_buffers_memory_.erase(uid);
+}
+
+void VulkanRendererAPI::CreateDescriptorPool(uint32_t size) {
+  std::array<VkDescriptorPoolSize, 2> pool_sizes = {};
+  pool_sizes[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+  pool_sizes[0].descriptorCount =
+      static_cast<uint32_t>(swap_chain_images_.size() * 2 * size);
+  pool_sizes[1].type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+  pool_sizes[1].descriptorCount =
+      static_cast<uint32_t>(swap_chain_images_.size() * size);
+  VkDescriptorPoolCreateInfo pool_info = {};
+  pool_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
+  pool_info.poolSizeCount = static_cast<uint32_t>(pool_sizes.size());
+  pool_info.pPoolSizes = pool_sizes.data();
+  pool_info.maxSets = static_cast<uint32_t>(size);
+  if (vkCreateDescriptorPool(device_, &pool_info, nullptr, &descriptor_pool_) !=
+      VK_SUCCESS) {
+    throw std::runtime_error("failed to create descriptor pool");
+  }
+}
+
+void VulkanRendererAPI::DestroyDescriptorPool() {
+  vkDestroyDescriptorPool(device_, descriptor_pool_, nullptr);
+  descriptor_sets_.clear();
+}
+
+void VulkanRendererAPI::CreateDescriptorSet(size_t object_uid, size_t texture_uid) {
+  std::vector<VkDescriptorSetLayout> layouts(swap_chain_images_.size(),
+                                             descriptor_set_layout_);
+  VkDescriptorSetAllocateInfo alloc_info = {};
+  alloc_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+  alloc_info.descriptorPool = descriptor_pool_;
+  alloc_info.descriptorSetCount = static_cast<uint32_t>(swap_chain_images_.size());;
+  alloc_info.pSetLayouts = layouts.data();
+  std::vector<VkDescriptorSet> descriptor_sets(swap_chain_images_.size());
+  if (vkAllocateDescriptorSets(device_, &alloc_info, descriptor_sets.data()) !=
+      VK_SUCCESS) {
+    throw std::runtime_error("failed to allocate descriptor sets");
+  }
+  for (size_t i(0); i < descriptor_sets.size(); ++i) {
+    VkDescriptorBufferInfo buffer_info = {};
+    buffer_info.buffer = camera_buffer_;
+    buffer_info.offset = 0;
+    buffer_info.range = sizeof(Camera);
+
+    VkDescriptorBufferInfo rotation_info = {};
+    rotation_info.buffer = rotation_buffers_[object_uid][i];
+    rotation_info.offset = 0;
+    rotation_info.range = sizeof(glm::mat4);
+
+    VkDescriptorImageInfo image_info = {};
+    image_info.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+    image_info.imageView = texture_images_view_[texture_uid];
+    image_info.sampler = texture_sampler_;
+
+    std::array<VkWriteDescriptorSet, 3> descriptor_writes = {};
+    descriptor_writes[0].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+    descriptor_writes[0].dstSet = descriptor_sets[i];
+    descriptor_writes[0].dstBinding = 0;
+    descriptor_writes[0].dstArrayElement = 0;
+    descriptor_writes[0].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+    descriptor_writes[0].descriptorCount = 1;
+    descriptor_writes[0].pBufferInfo = &buffer_info;
+    descriptor_writes[0].pImageInfo = nullptr;
+    descriptor_writes[0].pTexelBufferView = nullptr;
+
+    descriptor_writes[1].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+    descriptor_writes[1].dstSet = descriptor_sets[i];
+    descriptor_writes[1].dstBinding = 1;
+    descriptor_writes[1].dstArrayElement = 0;
+    descriptor_writes[1].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+    descriptor_writes[1].descriptorCount = 1;
+    descriptor_writes[1].pBufferInfo = &rotation_info;
+    descriptor_writes[1].pImageInfo = nullptr;
+    descriptor_writes[1].pTexelBufferView = nullptr;
+
+    descriptor_writes[2].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+    descriptor_writes[2].dstSet = descriptor_sets[i];
+    descriptor_writes[2].dstBinding = 2;
+    descriptor_writes[2].dstArrayElement = 0;
+    descriptor_writes[2].descriptorType =
+        VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+    descriptor_writes[2].descriptorCount = 1;
+    descriptor_writes[2].pBufferInfo = nullptr;
+    descriptor_writes[2].pImageInfo = &image_info;
+    descriptor_writes[2].pTexelBufferView = nullptr;
+
+    vkUpdateDescriptorSets(device_,
+                           static_cast<uint32_t>(descriptor_writes.size()),
+                           descriptor_writes.data(), 0, nullptr);
+  }
+  descriptor_sets_.insert({object_uid, descriptor_sets});
 }
 
 //////////////////////////////////////////////////////
@@ -1448,17 +1417,20 @@ void VulkanRendererAPI::UpdateUniformBuffer(float time, uint32_t currentImage) {
   time_passed += time;
   camera_.SetRatio(static_cast<float>(swap_chain_extent_.width) /
       static_cast<float>(swap_chain_extent_.height));
-  auto rotation = glm::rotate(glm::mat4(1.0f), time_passed * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
   void *data;
-  vkMapMemory(device_, uniform_buffers_memory_[currentImage], 0, sizeof(Camera), 0,
+  vkMapMemory(device_, camera_buffer_memory_, 0, sizeof(Camera), 0,
               &data);
   memcpy(data, &camera_, sizeof(Camera));
-  vkUnmapMemory(device_, uniform_buffers_memory_[currentImage]);
+  vkUnmapMemory(device_, camera_buffer_memory_);
 
-  vkMapMemory(device_, rotation_buffers_memory_[currentImage], 0, sizeof(glm::mat4), 0,
-              &data);
-  memcpy(data, &rotation, sizeof(glm::mat4));
-  vkUnmapMemory(device_, rotation_buffers_memory_[currentImage]);
+  size_t i(0);
+  for (auto&[uid, object]: objects_) {
+    auto rotation = glm::rotate(glm::mat4(1.0f), time_passed * ++i * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+    vkMapMemory(device_, rotation_buffers_memory_[uid][currentImage], 0, sizeof(glm::mat4), 0,
+                &data);
+    memcpy(data, &rotation, sizeof(glm::mat4));
+    vkUnmapMemory(device_, rotation_buffers_memory_[uid][currentImage]);
+  }
 }
 
 void VulkanRendererAPI::CreateImage(uint32_t width, uint32_t height,

@@ -52,10 +52,9 @@ void Application::run() {
     if (!minimized_) {
       for (Layer *layer : layer_stack_)
         layer->OnUpdate(timestep);
-    }
-    window_->OnUpdate();
-    if (!minimized_)
+      window_->OnUpdate();
       Renderer::DrawFrame(timestep.GetSecond());
+    }
   }
   ResourceManager::Destroy();
   Renderer::Destroy();

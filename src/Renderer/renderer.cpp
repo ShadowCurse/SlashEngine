@@ -13,22 +13,13 @@ void Renderer::DrawFrame(float time) { api_instance_->DrawFrame(time); }
 
 void Renderer::UpdateScene() { api_instance_->UpdateScene(); }
 
-void Renderer::BindVertexBuffer(size_t uid,
-                                const std::vector<Vertex> &vertices) {
-  api_instance_->BindVertexBuffer(uid, vertices);
+void Renderer::BindModel(size_t uid,
+                         const std::vector<Vertex> &vertices, const std::vector<uint16_t> &indices) {
+  api_instance_->BindModel(uid, vertices, indices);
 }
 
-void Renderer::BindIndexBuffer(size_t uid,
-                               const std::vector<uint16_t> &indices) {
-  api_instance_->BindIndexBuffer(uid, indices);
-}
-
-void Renderer::UnBindVertexBuffer(size_t uid) {
-  api_instance_->UnBindVertexBuffer(uid);
-}
-
-void Renderer::UnBindIndexBuffer(size_t uid) {
-  api_instance_->UnBindIndexBuffer(uid);
+void Renderer::UnBindModel(size_t uid) {
+  api_instance_->UnBindModel(uid);
 }
 
 void Renderer::BindTexture(size_t uid, const Texture &texture) {

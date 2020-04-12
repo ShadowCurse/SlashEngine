@@ -34,14 +34,12 @@ void ResourceManager::RemoveModel(const std::string &model_name) {
 void ResourceManager::BindModel(const std::string &model_name) {
   auto uid = instance_->model_manager_->GetUid(model_name);
   auto model = instance_->model_manager_->GetModel(model_name);
-  Renderer::BindVertexBuffer(uid, model.Vertices());
-  Renderer::BindIndexBuffer(uid, model.Indices());
+  Renderer::BindModel(uid, model.Vertices(), model.Indices());
 }
 
 void ResourceManager::UnBindModel(const std::string &model_name) {
   auto uid = instance_->model_manager_->GetUid(model_name);
-  Renderer::UnBindVertexBuffer(uid);
-  Renderer::UnBindIndexBuffer(uid);
+  Renderer::UnBindModel(uid);
 }
 
 bool ResourceManager::LoadTexture(const std::string &texture_name, const std::string &texture_path) {
@@ -66,6 +64,7 @@ void ResourceManager::BindObject(const std::string &model_name, const std::strin
   auto model_uid = instance_->model_manager_->GetUid(model_name);
   auto texture_uid = instance_->texture_manager_->GetUid(texture_name);
   ObjectInfo object_info;
+  object_info.uid = std::hash<size_t>{}(model_uid + texture_uid);
   object_info.vertex_uid = model_uid;
   object_info.index_uid = model_uid;
   object_info.texture_uid = texture_uid;

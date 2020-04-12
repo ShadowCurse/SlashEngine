@@ -22,10 +22,8 @@ class Slash_API VulkanRendererAPI : public RendererAPI {
   void DrawFrame(float time) final;
   void UpdateScene() final;
 
-  void BindVertexBuffer(size_t uid, const std::vector<Vertex> &vertices) final;
-  void BindIndexBuffer(size_t uid, const std::vector<uint16_t> &indices) final;
-  void UnBindVertexBuffer(size_t uid) final;
-  void UnBindIndexBuffer(size_t uid) final;
+  void BindModel(size_t uid, const std::vector<Vertex> &vertices, const std::vector<uint16_t> &indices) final;
+  void UnBindModel(size_t uid) final;
 
   void BindTexture(size_t uid, const Texture &texture) final;
   void UnBindTexture(size_t uid) final;
@@ -78,6 +76,7 @@ class Slash_API VulkanRendererAPI : public RendererAPI {
     std::vector<VkPresentModeKHR> presentModes;
   };
 
+  // set up
   void CreateInstance();
   void SetUpDebugMessenger();
   void GetWindowData();
@@ -95,17 +94,25 @@ class Slash_API VulkanRendererAPI : public RendererAPI {
   void CreateFramebuffers();
   void CreateCommandPool();
   void CreateDepthResources();
-//  void CreateTextureImage(); // TODO
-//  void CreateTextureImageView();
   void CreateTextureSampler();
-  void CreateUniformBuffers(); // TODO
-  void CreateDescriptorPool();
-  void CreateDescriptorSets(); // TODO
   void CreateCommandBuffers();
   void UpdateCommandBuffers();
   void CreateSemaphores();
   void CreateFences();
 
+  // main
+
+  void CreateCameraBuffer();
+  void DestroyCameraBuffer();
+
+  void AddRotationBuffer(size_t uid);
+  void DestroyRotationBuffer(size_t uid);
+
+  void CreateDescriptorPool(uint32_t size);
+  void DestroyDescriptorPool();
+  void CreateDescriptorSet(size_t object_uid, size_t texture_uid);
+
+  // additional
   std::vector<const char *> GetRequaredExtentions();
   static VKAPI_ATTR VkBool32 VKAPI_CALL
   DebugCallBack(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
@@ -182,10 +189,6 @@ class Slash_API VulkanRendererAPI : public RendererAPI {
   std::vector<VkImageView> swap_chain_image_views_;
   VkRenderPass render_pass_;
 
-  VkDescriptorSetLayout descriptor_set_layout_;
-  VkDescriptorPool descriptor_pool_;
-  std::vector<VkDescriptorSet> descriptor_sets_;
-
   VkPipelineLayout pipeline_layout_;
   VkPipeline graphics_pipeline_;
   std::vector<VkFramebuffer> swap_chain_framebuffers_;
@@ -195,38 +198,35 @@ class Slash_API VulkanRendererAPI : public RendererAPI {
   std::vector<VkSemaphore> render_finished_semaphores_;
   std::vector<VkFence> inflight_fences_;
   std::vector<VkFence> images_inflight_;
-
   std::shared_ptr<Window> window_;
-  Window::WindowData *window_data_;
 
+  Window::WindowData *window_data_;
   Camera camera_;
 
-  std::vector<ObjectInfo> objects_;
+  std::map<size_t, ObjectInfo> objects_;
 
-  std::vector<size_t> buffer_uids_;
+  VkDescriptorSetLayout descriptor_set_layout_;
+  VkDescriptorPool descriptor_pool_;
+  std::map<size_t, std::vector<VkDescriptorSet>> descriptor_sets_;
+
+  VkBuffer camera_buffer_; // for camera
+  VkDeviceMemory camera_buffer_memory_;
+  std::map<size_t, std::vector<VkBuffer>> rotation_buffers_; // for model rotations
+  std::map<size_t, std::vector<VkDeviceMemory>> rotation_buffers_memory_;
+
+  std::vector<size_t> models_uid_;
   std::map<size_t, VkBuffer> vertex_buffers_;
   std::map<size_t, VkDeviceMemory> vertex_buffers_memory_;
   std::map<size_t, VkDeviceSize> vertex_offsets_;
-
   std::map<size_t, VkBuffer> index_buffers_;
   std::map<size_t, VkDeviceMemory> index_buffers_memory_;
   std::map<size_t, uint32_t> index_buffers_size_;
 
-  std::vector<VkBuffer> uniform_buffers_; // for camera
-  std::vector<VkDeviceMemory> uniform_buffers_memory_;
-  std::vector<VkBuffer> rotation_buffers_; // for model rotations
-  std::vector<VkDeviceMemory> rotation_buffers_memory_;
-
-  VkImage texture_image_;
-  VkDeviceMemory texture_image_memory_;
-  VkImageView texture_image_view_;
+  std::vector<size_t> texture_uids_;
+  std::map<size_t, VkImage> texture_images_;
+  std::map<size_t, VkDeviceMemory> texture_images_memory_;
+  std::map<size_t, VkImageView> texture_images_view_;
   VkSampler texture_sampler_;
-
-//  std::vector<size_t> texture_uids_;
-//  VkImage texture_image_;
-//  VkDeviceMemory texture_image_memory_;
-//  VkImageView texture_image_view_;
-//  VkSampler texture_sampler_;
 
   VkImage depth_image_;
   VkDeviceMemory depth_image_memory_;

@@ -19,12 +19,9 @@ class Slash_API RendererAPI {
   virtual void Destroy() = 0;
   virtual void DrawFrame(float time) = 0;
   virtual void UpdateScene() = 0;
-  virtual void BindVertexBuffer(size_t uid,
-                                const std::vector<Vertex> &vertices) = 0;
-  virtual void BindIndexBuffer(size_t uid,
-                               const std::vector<uint16_t> &indices) = 0;
-  virtual void UnBindVertexBuffer(size_t uid) = 0;
-  virtual void UnBindIndexBuffer(size_t uid) = 0;
+  virtual void BindModel(size_t uid,
+                         const std::vector<Vertex> &vertices, const std::vector<uint16_t> &indices) = 0;
+  virtual void UnBindModel(size_t uid) = 0;
 
   virtual void BindTexture(size_t uid, const Texture &texture) = 0;
   virtual void UnBindTexture(size_t uid) = 0;

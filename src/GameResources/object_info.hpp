@@ -6,6 +6,7 @@
 namespace slash {
 
 struct Slash_API ObjectInfo {
+  size_t uid;
   size_t vertex_uid;
   size_t index_uid;
   size_t texture_uid;
