@@ -3,31 +3,31 @@
 
 #include "Core/core.hpp"
 #include "Core/window.hpp"
-#include "Renderer/vertex.hpp"
+#include "GameResources/model.hpp"
 #include "GameResources/texture.hpp"
-#include "GameResources/object_info.hpp"
+#include "Renderer/vertex.hpp"
 
 namespace slash {
 class Slash_API RendererAPI {
- protected:
+protected:
   RendererAPI() = default;
 
- public:
+public:
   virtual ~RendererAPI() = default;
   virtual void AddWindow(std::shared_ptr<Window> window) = 0;
   virtual void Init() = 0;
   virtual void Destroy() = 0;
   virtual void DrawFrame(float time) = 0;
   virtual void UpdateScene() = 0;
-  virtual void BindModel(size_t uid,
-                         const std::vector<Vertex> &vertices, const std::vector<uint16_t> &indices) = 0;
-  virtual void UnBindModel(size_t uid) = 0;
 
-  virtual void BindTexture(size_t uid, const Texture &texture) = 0;
-  virtual void UnBindTexture(size_t uid) = 0;
+  virtual void BindModel(std::shared_ptr<Model> model) = 0;
+  virtual void UnBindModel(std::shared_ptr<Model> model) = 0;
 
-  virtual void BindObject(const ObjectInfo &object_info) = 0;
+  virtual void BindMesh(std::shared_ptr<Mesh_3D> mesh) = 0;
+  virtual void UnBindMesh(std::shared_ptr<Mesh_3D> mesh) = 0;
 
+  virtual void BindTexture(std::shared_ptr<Texture> texture) = 0;
+  virtual void UnBindTexture(std::shared_ptr<Texture> texture) = 0;
 };
 
 } // namespace slash

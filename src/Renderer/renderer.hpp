@@ -9,17 +9,15 @@
 namespace slash {
 
 class Slash_API Renderer {
- private:
+private:
   Renderer() = default;
 
- public:
+public:
   virtual ~Renderer() = default;
-  template<typename API>
-  static void Create() {
+  template <typename API> static void Create() {
     api_instance_ = CreateUnique<API>();
   }
-  template<typename API>
-  static API &GetAPI() {
+  template <typename API> static API &GetAPI() {
     return *static_cast<API *>(api_instance_.get());
   }
   static void AddWindow(std::shared_ptr<Window> window);
@@ -27,15 +25,17 @@ class Slash_API Renderer {
   static void Destroy();
   static void DrawFrame(float time);
   static void UpdateScene();
-  static void BindModel(size_t uid, const std::vector<Vertex> &vertices, const std::vector<uint16_t> &indices);
-  static void UnBindModel(size_t uid);
 
-  static void BindTexture(size_t uid, const Texture &texture);
-  static void UnBindTexture(size_t uid);
+  static void BindModel(std::shared_ptr<Model> model);
+  static void UnBindModel(std::shared_ptr<Model> model);
 
-  static void BindObject(const ObjectInfo &object_info);
+  static void BindMesh(std::shared_ptr<Mesh_3D> mesh);
+  static void UnBindMesh(std::shared_ptr<Mesh_3D> mesh);
 
- private:
+  static void BindTexture(std::shared_ptr<Texture> texture);
+  static void UnBindTexture(std::shared_ptr<Texture> texture);
+
+private:
   inline static Unique<RendererAPI> api_instance_ = nullptr;
 };
 

@@ -1,41 +1,45 @@
 #include "model_manager.hpp"
+#include "Core/log.hpp"
 
 namespace slash {
 
-Model::Model(const std::string &name, const std::vector<Vertex> &vertices,
-             const std::vector<uint16_t> &indices)
-    : name_(name), vertices_(vertices), indices_(indices) {}
-
-const std::string &Model::Name() const {
-  return name_;
-}
-
-const std::vector<Vertex> &Model::Vertices() const {
-  return vertices_;
-}
-
-const std::vector<uint16_t> &Model::Indices() const {
-  return indices_;
-}
-
-bool ModelManager::LoadModel([[maybe_unused]] const std::string &model_name,
-                             [[maybe_unused]] const std::string &model_path) { return false; }
-
-void ModelManager::AddModel(Model model) {
-  auto uid = std::hash<std::string>{}(model.name_);
-  models_.insert({uid, std::move(model)});
+void ModelManager::AddModel(const std::string &model_name,
+                            std::shared_ptr<Mesh_3D> mesh,
+                            std::shared_ptr<Texture> texture,
+                            const glm::mat4 &rotation,
+                            const glm::vec3 &position, const glm::vec2 &size) {
+  auto uid = GenUid(model_name);
+  if (models_.find(uid) != models_.end()) {
+    SL_CORE_ERROR(
+        "Trying to add model with name {}, but the name is already used",
+        model_name);
+    return;
+  }
+  models_.insert({uid, std::make_shared<Model>(model_name, uid, mesh, texture,
+                                               rotation, position, size)});
 }
 
 void ModelManager::RemoveModel(const std::string &model_name) {
-  auto uid = std::hash<std::string>{}(model_name);
+  auto uid = GenUid(model_name);
+  if (models_.find(uid) == models_.end()) {
+    SL_CORE_ERROR("Trying to remove model with name {}, but it does not exist",
+                  model_name);
+    return;
+  }
   models_.erase(uid);
 }
-size_t ModelManager::GetUid(const std::string &model_name) const {
-  return std::hash<std::string>{}(model_name);
-}
-const Model &ModelManager::GetModel(const std::string &model_name) const {
-  auto uid = std::hash<std::string>{}(model_name);
+
+std::shared_ptr<Model> ModelManager::GetModel(const std::string &model_name) {
+  auto uid = GenUid(model_name);
+  if (models_.find(uid) == models_.end()) {
+    SL_CORE_ERROR("No model with name {0} exist", model_name);
+    return {};
+  }
   return models_.at(uid);
+}
+
+size_t ModelManager::GenUid(const std::string &model_name) const {
+  return std::hash<std::string>{}("Model" + model_name);
 }
 
 } // namespace slash

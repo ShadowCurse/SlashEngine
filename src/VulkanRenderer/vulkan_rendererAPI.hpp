@@ -4,33 +4,29 @@
 #include "Core/core.hpp"
 #include "Core/window.hpp"
 #include "GLFW/glfw3.h"
+#include "Renderer/camera.hpp"
 #include "Renderer/renderer_api.hpp"
 #include "Renderer/vertex.hpp"
-#include "Renderer/camera.hpp"
-#include "GameResources/object_info.hpp"
 #include "vulkan_vertex.hpp"
 
 namespace slash {
 
 class Slash_API VulkanRendererAPI : public RendererAPI {
- public:
-  VulkanRendererAPI() = default;
-  ~VulkanRendererAPI() final = default;
+public:
   void AddWindow(std::shared_ptr<Window> window) final;
   void Init() final;
   void Destroy() final;
   void DrawFrame(float time) final;
   void UpdateScene() final;
 
-  void BindModel(size_t uid, const std::vector<Vertex> &vertices, const std::vector<uint16_t> &indices) final;
-  void UnBindModel(size_t uid) final;
+  void BindModel(std::shared_ptr<Model> model) final;
+  void UnBindModel(std::shared_ptr<Model> model) final;
+  void BindMesh(std::shared_ptr<Mesh_3D> mesh) final;
+  void UnBindMesh(std::shared_ptr<Mesh_3D> mesh) final;
+  void BindTexture(std::shared_ptr<Texture> texture) final;
+  void UnBindTexture(std::shared_ptr<Texture> texture) final;
 
-  void BindTexture(size_t uid, const Texture &texture) final;
-  void UnBindTexture(size_t uid) final;
-
-  void BindObject(const ObjectInfo &object_info) final;
-
- private:
+private:
   struct Config {
     struct InstanceConfig {
       std::string application_name = "Vulkan app";
@@ -110,7 +106,9 @@ class Slash_API VulkanRendererAPI : public RendererAPI {
 
   void CreateDescriptorPool(uint32_t size);
   void DestroyDescriptorPool();
-  void CreateDescriptorSet(size_t object_uid, size_t texture_uid);
+  void CreateDescriptorSet(size_t object_uid, size_t mesh_uid,
+                           size_t texture_uid);
+  void DestroyDescriptorSet(size_t object_uid);
 
   // additional
   std::vector<const char *> GetRequaredExtentions();
@@ -203,18 +201,21 @@ class Slash_API VulkanRendererAPI : public RendererAPI {
   Window::WindowData *window_data_;
   Camera camera_;
 
-  std::map<size_t, ObjectInfo> objects_;
+  std::vector<std::shared_ptr<Model>> models_;
 
   VkDescriptorSetLayout descriptor_set_layout_;
   VkDescriptorPool descriptor_pool_;
-  std::map<size_t, std::vector<VkDescriptorSet>> descriptor_sets_;
+  std::vector<std::pair<bool, std::vector<VkDescriptorSet>>> descriptor_sets_;
+  std::map<size_t, std::pair<bool, std::vector<VkDescriptorSet>> *>
+      model_descriptor_sets_;
 
   VkBuffer camera_buffer_; // for camera
   VkDeviceMemory camera_buffer_memory_;
-  std::map<size_t, std::vector<VkBuffer>> rotation_buffers_; // for model rotations
+
+  std::map<size_t, std::vector<VkBuffer>>
+      rotation_buffers_; // for model rotations
   std::map<size_t, std::vector<VkDeviceMemory>> rotation_buffers_memory_;
 
-  std::vector<size_t> models_uid_;
   std::map<size_t, VkBuffer> vertex_buffers_;
   std::map<size_t, VkDeviceMemory> vertex_buffers_memory_;
   std::map<size_t, VkDeviceSize> vertex_offsets_;
@@ -222,7 +223,6 @@ class Slash_API VulkanRendererAPI : public RendererAPI {
   std::map<size_t, VkDeviceMemory> index_buffers_memory_;
   std::map<size_t, uint32_t> index_buffers_size_;
 
-  std::vector<size_t> texture_uids_;
   std::map<size_t, VkImage> texture_images_;
   std::map<size_t, VkDeviceMemory> texture_images_memory_;
   std::map<size_t, VkImageView> texture_images_view_;

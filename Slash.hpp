@@ -15,6 +15,8 @@
 #include "Events/key_event.hpp"
 #include "Events/mouse_event.hpp"
 
+#include "GameResources/mesh_3d.hpp"
+#include "GameResources/model.hpp"
 #include "GameResources/model_manager.hpp"
 #include "GameResources/resource_manager.hpp"
 #include "GameResources/texture_manager.hpp"

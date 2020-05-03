@@ -1,41 +1,23 @@
-#ifndef SLASHENGINE_SRC_RESOURCEMANAGER_MODEL_MANAGER_HPP_
-#define SLASHENGINE_SRC_RESOURCEMANAGER_MODEL_MANAGER_HPP_
+#ifndef SLASHENGINE_SRC_GAMERESOURCES_MODEL_MANAGER_HPP_
+#define SLASHENGINE_SRC_GAMERESOURCES_MODEL_MANAGER_HPP_
 
 #include "Core/core.hpp"
 #include "Renderer/vertex.hpp"
+#include "model.hpp"
 
 namespace slash {
 
-class Slash_API Model {
- public:
-  friend class ModelManager;
-  Model(const std::string &name, const std::vector<Vertex> &verticies, const std::vector<uint16_t> &indices);
-  ~Model() = default;
-
-  const std::string &Name() const;
-  const std::vector<Vertex> &Vertices() const;
-  const std::vector<uint16_t> &Indices() const;
-
- private:
-  std::string name_;
-  std::vector<Vertex> vertices_;
-  std::vector<uint16_t> indices_;
-};
-
 class Slash_API ModelManager {
- public:
-  ModelManager() = default;
-  ~ModelManager() = default;
-
-  void AddModel(Model model);
-  bool LoadModel(const std::string &model_name, const std::string &model_path);
+public:
+  void AddModel(const std::string &model_name, std::shared_ptr<Mesh_3D> mesh,
+                std::shared_ptr<Texture> texture, const glm::mat4 &rotation,
+                const glm::vec3 &position, const glm::vec2 &size);
   void RemoveModel(const std::string &model_name);
+  [[nodiscard]] std::shared_ptr<Model> GetModel(const std::string &model_name);
 
-  [[nodiscard]] size_t GetUid(const std::string &model_name) const;
-  [[nodiscard]] const Model &GetModel(const std::string &model_name) const;
-
- private:
-  std::map<size_t, Model> models_;
+private:
+  [[nodiscard]] size_t GenUid(const std::string &model_name) const;
+  std::map<size_t, std::shared_ptr<Model>> models_;
 };
 
 } // namespace slash

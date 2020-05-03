@@ -27,7 +27,7 @@ add_library(SlashEngine SHARED
 
         src/Renderer/renderer.cpp
 
-        src/VulkanRenderer/vulkan_rendererAPI.cpp)
+        src/VulkanRenderer/vulkan_rendererAPI.cpp src/GameResources/mesh_3d.hpp src/GameResources/model.hpp src/GameResources/mesh_manager.cpp src/GameResources/mesh_manager.hpp)
 
 add_definitions(-DGLFW_INCLUDE_VULKAN -DGLFW_INCLUDE_NONE -DSL_LINUX -DSL_BUILD_DLL -DSL_DEBUG -DSL_ENABLE_ASSERTS)
 

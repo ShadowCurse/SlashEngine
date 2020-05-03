@@ -5,17 +5,16 @@
 #include "texture.hpp"
 
 class Slash_API TextureManager {
- public:
-  TextureManager() = default;
-  ~TextureManager() = default;
+public:
+  bool LoadTexture(const std::string &texture_name,
+                   const std::string &texture_path);
+  void RemoveTexture(const std::string &texture_name);
+  [[nodiscard]] std::shared_ptr<Texture>
+  GetTexture(const std::string &texture_name);
 
-  bool LoadTexture(const std::string &texture_name, const std::string &texture_path);
-  void DeleteTexture(const std::string &texture_name);
-  [[nodiscard]] size_t GetUid(const std::string &texture_name) const;
-  [[nodiscard]] const Texture &GetTexture(size_t uid) const;
-
- private:
-  std::map<size_t, Texture> textures_;
+private:
+  [[nodiscard]] size_t GenUid(const std::string &texture_name) const;
+  std::map<size_t, std::shared_ptr<Texture>> textures_;
 };
 
 #endif // SLASHENGINE_SRC_GAMERESOURCES_TEXTURE_MANAGER_HPP_
