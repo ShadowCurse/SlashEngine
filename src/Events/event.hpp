@@ -35,6 +35,7 @@ enum EventCategory {
 
 class Slash_API Event {
 public:
+  virtual ~Event() = default;
   bool Handled = false;
 
   [[nodiscard]] virtual EventType GetEventType() const = 0;

@@ -8,6 +8,8 @@ namespace slash {
 class Slash_API Input {
 public:
   Input(const Input &) = delete;
+  virtual ~Input() = default;
+  
   Input &operator=(const Input &) = delete;
 
   inline static bool IsKeyPressed(int keycode) {

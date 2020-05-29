@@ -11,12 +11,12 @@
 
 namespace slash {
 
-class Slash_API VulkanRendererAPI : public RendererAPI {
+class Slash_API VulkanRendererAPI final : public RendererAPI {
 public:
   void AddWindow(std::shared_ptr<Window> window) final;
   void Init() final;
   void Destroy() final;
-  void DrawFrame(float time) final;
+  void DrawFrame(double time) final;
   void UpdateScene() final;
 
   void BindModel(std::shared_ptr<Model> model) final;
@@ -85,7 +85,7 @@ private:
   void RecreateSwapChain();
   void CreateImageViews();
   void CreateRenderPass();
-  void CreateDescriptorSetLayout(); // TODO
+  void CreateDescriptorSetLayout();
   void CreateGraphicsPipeline();
   void CreateFramebuffers();
   void CreateCommandPool();
@@ -96,6 +96,8 @@ private:
   void CreateSemaphores();
   void CreateFences();
 
+  void SetUpImGui();
+  void DestroyImGui();
   // main
 
   void CreateCameraBuffer();
@@ -150,7 +152,7 @@ private:
                     VkDeviceMemory &bufferMemory);
   void CopyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size);
 
-  void UpdateUniformBuffer(float time, uint32_t currentImage);
+  void UpdateUniformBuffer(double time, uint32_t currentImage);
 
   void CreateImage(uint32_t width, uint32_t height, VkFormat format,
                    VkImageTiling tiling, VkImageUsageFlags usage,
@@ -198,6 +200,8 @@ private:
   std::vector<VkFence> images_inflight_;
   std::shared_ptr<Window> window_;
 
+  VkDescriptorPool imgui_descriptor_pool_;
+
   Window::WindowData *window_data_;
   Camera camera_;
 
@@ -234,6 +238,8 @@ private:
 
   QueueFamilyIndices queue_family_indices_ = {};
   size_t current_frame = 0;
+
+  bool have_imgui_draw = false;
 };
 
 } // namespace slash

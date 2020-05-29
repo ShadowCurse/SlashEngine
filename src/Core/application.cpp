@@ -45,15 +45,15 @@ void Application::OnEvent(Event &e) {
 
 void Application::run() {
   while (running_) {
-    float time = glfwGetTime();
-    TimeStep timestep(time - last_frame_time_);
+    double time = glfwGetTime();
+    TimeStep time_step(time - last_frame_time_);
     last_frame_time_ = time;
 
     if (!minimized_) {
       for (Layer *layer : layer_stack_)
-        layer->OnUpdate(timestep);
+        layer->OnUpdate(time_step);
       window_->OnUpdate();
-      Renderer::DrawFrame(timestep.GetSecond());
+      Renderer::DrawFrame(time_step.GetSecond());
     }
   }
   ResourceManager::Destroy();

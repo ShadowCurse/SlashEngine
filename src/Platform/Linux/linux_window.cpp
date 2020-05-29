@@ -60,30 +60,31 @@ void LinuxWindow::Init(const WindowProps &props) {
   }
 
   glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-  window_ = glfwCreateWindow(props.width, props.height, props.title.c_str(),
-                             nullptr, nullptr);
+  window_ = glfwCreateWindow(static_cast<int>(props.width),
+                             static_cast<int>(props.height),
+                             props.title.c_str(), nullptr, nullptr);
 
   glfwSetWindowUserPointer(window_, &data_);
 
   glfwSetWindowSizeCallback(
-      window_, [](GLFWwindow *window, int width, int heigh) {
+      window_, [](GLFWwindow *window, int width, int height) {
         WindowData *data =
             static_cast<WindowData *>(glfwGetWindowUserPointer(window));
-        data->width = width;
-        data->height = heigh;
+        data->width = static_cast<uint>(width);
+        data->height = static_cast<uint>(height);
 
-        WindowResizeEvent event(width, heigh);
+        WindowResizeEvent event(data->width, data->height);
         data->EventCallback(event);
       });
 
-  glfwSetFramebufferSizeCallback(
-      window_, [](GLFWwindow *window, int width, int heigh) {
-        auto data = static_cast<WindowData *>(glfwGetWindowUserPointer(window));
-        data->resized = true;
+  glfwSetFramebufferSizeCallback(window_, [](GLFWwindow *window, int width,
+                                             int heigh) {
+    auto data = static_cast<WindowData *>(glfwGetWindowUserPointer(window));
+    data->resized = true;
 
-        WindowResizeEvent event(width, heigh);
-        data->EventCallback(event);
-      });
+    WindowResizeEvent event(static_cast<uint>(width), static_cast<uint>(heigh));
+    data->EventCallback(event);
+  });
 
   glfwSetWindowCloseCallback(window_, [](GLFWwindow *window) {
     auto data = static_cast<WindowData *>(glfwGetWindowUserPointer(window));
@@ -118,7 +119,7 @@ void LinuxWindow::Init(const WindowProps &props) {
 
   glfwSetCharCallback(window_, [](GLFWwindow *window, uint keycode) {
     auto data = static_cast<WindowData *>(glfwGetWindowUserPointer(window));
-    KeyTypedEvent event(keycode);
+    KeyTypedEvent event(static_cast<int>(keycode));
     data->EventCallback(event);
   });
 

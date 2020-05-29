@@ -20,8 +20,8 @@ bool TextureManager::LoadTexture(const std::string &texture_name,
     SL_CORE_ERROR("Failed to load texture {0}", texture_path);
     return false;
   }
-  int image_size = texWidth * texHeight * 4;
-  std::vector<stbi_uc> texture_image(image_size);
+  auto image_size = texWidth * texHeight * 4;
+  std::vector<stbi_uc> texture_image(static_cast<size_t>(image_size));
   memcpy(texture_image.data(), pixels, static_cast<size_t>(image_size));
   textures_.insert({uid, std::make_shared<Texture>(
                              texture_name, uid, std::move(texture_image),

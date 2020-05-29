@@ -5,7 +5,7 @@
 
 namespace slash {
 
-class LinuxInput : public Input {
+class LinuxInput final : public Input {
 protected:
   [[nodiscard]] bool IsKeyPressedImpl(int keycode) final;
   [[nodiscard]] bool IsMouseButtonPressedImpl(int button) final;

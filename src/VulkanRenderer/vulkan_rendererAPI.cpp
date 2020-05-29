@@ -2,6 +2,10 @@
 #include "Core/application.hpp"
 #include "Core/log.hpp"
 
+#include "imgui.h"
+#include "imgui_impl_glfw.h"
+#include "imgui_impl_vulkan.h"
+
 namespace slash {
 
 void VulkanRendererAPI::AddWindow(std::shared_ptr<Window> window) {
@@ -29,10 +33,15 @@ void VulkanRendererAPI::Init() {
   CreateCommandBuffers();
   CreateSemaphores();
   CreateFences();
+
+  SetUpImGui();
 }
 
 void VulkanRendererAPI::Destroy() {
   vkDeviceWaitIdle(device_);
+
+  DestroyImGui();
+
   for (size_t i(0); i < config_.k_max_frames_in_flight; ++i) {
     vkDestroySemaphore(device_, render_finished_semaphores_[i], nullptr);
     vkDestroySemaphore(device_, image_available_semaphores_[i], nullptr);
@@ -61,7 +70,7 @@ void VulkanRendererAPI::Destroy() {
   vkDestroyInstance(instance_, nullptr);
 }
 
-void VulkanRendererAPI::DrawFrame(float time) {
+void VulkanRendererAPI::DrawFrame(double time) {
   vkWaitForFences(device_, 1, &inflight_fences_[current_frame], VK_TRUE,
                   UINT64_MAX);
   uint32_t image_index;
@@ -117,6 +126,29 @@ void VulkanRendererAPI::DrawFrame(float time) {
     throw std::runtime_error("failed to present swap chain image");
   }
   current_frame = (current_frame + 1) % config_.k_max_frames_in_flight;
+
+  static float f = 0.0f;
+  static int counter = 0;
+  static bool show_demo_window = true;
+  ImGui_ImplVulkan_NewFrame();
+  ImGui_ImplGlfw_NewFrame();
+  ImGui::NewFrame();
+  ImGui::ShowDemoWindow(&show_demo_window);
+  ImGui::Begin("Hello, world!");
+  ImGui::Text("This is some useful text.");
+  ImGui::SliderFloat("float", &f, 0.0f, 1.0f);
+  if (ImGui::Button("Button"))
+    counter++;
+  ImGui::SameLine();
+  ImGui::Text("counter = %d", counter);
+  ImGui::Text("Application average %.3f ms/frame (%.1f FPS)",
+              1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+  ImGui::End();
+  ImGui::Render();
+
+  have_imgui_draw = true;
+
+  UpdateCommandBuffers();
 }
 
 void VulkanRendererAPI::UpdateScene() { UpdateCommandBuffers(); }
@@ -489,9 +521,6 @@ void VulkanRendererAPI::DestroySwapChain() {
   for (auto &image_view : swap_chain_image_views_)
     vkDestroyImageView(device_, image_view, nullptr);
   vkDestroySwapchainKHR(device_, swap_chain_, nullptr);
-  //  for (auto &[uid, object] : objects_) {
-  //    DestroyRotationBuffer(uid);
-  //  }
   DestroyDescriptorPool();
 }
 
@@ -505,14 +534,15 @@ void VulkanRendererAPI::RecreateSwapChain() {
   CreateGraphicsPipeline();
   CreateDepthResources();
   CreateFramebuffers();
-  //  for (auto &[uid, object] : objects_)
-  //    AddRotationBuffer(uid);
   CreateDescriptorPool(10);
   for (auto &model : models_)
     CreateDescriptorSet(model->uid_, model->p_mesh_->uid_,
                         model->p_texture->uid_);
   CreateCommandBuffers();
   UpdateCommandBuffers();
+
+  ImGui_ImplVulkan_SetMinImageCount(
+      static_cast<uint32_t>(swap_chain_images_.size()));
 }
 
 void VulkanRendererAPI::CreateImageViews() {
@@ -905,8 +935,6 @@ void VulkanRendererAPI::CreateCommandBuffers() {
 }
 
 void VulkanRendererAPI::UpdateCommandBuffers() {
-  if (models_.empty())
-    return;
   vkDeviceWaitIdle(device_);
   for (size_t i(0); i < command_buffers_.size(); ++i) {
     vkResetCommandBuffer(command_buffers_[i], 0);
@@ -924,7 +952,7 @@ void VulkanRendererAPI::UpdateCommandBuffers() {
     render_pass_info.renderArea.offset = {0, 0};
     render_pass_info.renderArea.extent = swap_chain_extent_;
     std::array<VkClearValue, 2> clear_values = {};
-    clear_values[0].color = {{0.0f, 0.0f, 0.0f, 1.0f}};
+    clear_values[0].color = {{0.25f, 0.25f, 0.25f, 1.0f}};
     clear_values[1].depthStencil = {1.0f, 0};
     render_pass_info.clearValueCount =
         static_cast<uint32_t>(clear_values.size());
@@ -947,7 +975,11 @@ void VulkanRendererAPI::UpdateCommandBuffers() {
       vkCmdDrawIndexed(command_buffers_[i],
                        index_buffers_size_[model->p_mesh_->uid_], 1, 0, 0, 0);
     }
+    if (have_imgui_draw)
+      ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(),
+                                      command_buffers_[i]);
     vkCmdEndRenderPass(command_buffers_[i]);
+
     if (vkEndCommandBuffer(command_buffers_[i]) != VK_SUCCESS) {
       throw std::runtime_error("failed to record command buffer");
     }
@@ -981,6 +1013,73 @@ void VulkanRendererAPI::CreateFences() {
     }
   }
 }
+
+void VulkanRendererAPI::SetUpImGui() {
+
+  std::array<VkDescriptorPoolSize, 11> pool_sizes = {
+      VkDescriptorPoolSize{VK_DESCRIPTOR_TYPE_SAMPLER, 1000},
+      {VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1000},
+      {VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, 1000},
+      {VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 1000},
+      {VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER, 1000},
+      {VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER, 1000},
+      {VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1000},
+      {VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 1000},
+      {VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 1000},
+      {VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC, 1000},
+      {VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT, 1000}};
+  VkDescriptorPoolCreateInfo pool_info = {};
+  pool_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
+  pool_info.poolSizeCount = static_cast<uint32_t>(pool_sizes.size());
+  pool_info.pPoolSizes = pool_sizes.data();
+  pool_info.maxSets = 1000;
+  if (vkCreateDescriptorPool(device_, &pool_info, nullptr,
+                             &imgui_descriptor_pool_) != VK_SUCCESS) {
+    throw std::runtime_error("failed to create imgui_descriptor_pool_");
+  }
+
+  SL_CORE_INFO("INITIALIZING IMGUI");
+  // Setup Dear ImGui context
+  IMGUI_CHECKVERSION();
+  ImGui::CreateContext();
+  //  ImGuiIO &io = ImGui::GetIO();
+  //  (void)io;
+  // io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable
+  // Keyboard Controls io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad; //
+  // Enable Gamepad Controls
+
+  ImGui::StyleColorsDark();
+
+  // Setup Platform/Renderer bindings
+  ImGui_ImplGlfw_InitForVulkan(
+      static_cast<GLFWwindow *>(window_->GetNativeWindow()), true);
+  ImGui_ImplVulkan_InitInfo init_info = {};
+  init_info.Instance = instance_;
+  init_info.PhysicalDevice = physical_device_;
+  init_info.Device = device_;
+  init_info.QueueFamily = queue_family_indices_.graphicsFamily.value();
+  init_info.Queue = graphics_queue_;
+  init_info.PipelineCache = VK_NULL_HANDLE;
+  init_info.DescriptorPool = imgui_descriptor_pool_;
+  init_info.Allocator = nullptr;
+  init_info.MinImageCount = 2;
+  init_info.ImageCount = static_cast<uint32_t>(swap_chain_images_.size());
+  init_info.CheckVkResultFn = nullptr;
+  ImGui_ImplVulkan_Init(&init_info, render_pass_);
+
+  VkCommandBuffer command_buffer = BeginSingleTimeCommand();
+  ImGui_ImplVulkan_CreateFontsTexture(command_buffer);
+  EndSingleTimeCommand(command_buffer);
+  ImGui_ImplVulkan_DestroyFontUploadObjects();
+}
+void VulkanRendererAPI::DestroyImGui() {
+  SL_CORE_INFO("DESTROYING IMGUI");
+  vkDestroyDescriptorPool(device_, imgui_descriptor_pool_, nullptr);
+  ImGui_ImplVulkan_Shutdown();
+  ImGui_ImplGlfw_Shutdown();
+  ImGui::DestroyContext();
+}
+
 //////////////////////////////////////////////////////
 /////////// MAIN FUNC ////////////////////////////////
 //////////////////////////////////////////////////////
@@ -1067,21 +1166,6 @@ void VulkanRendererAPI::DestroyDescriptorPool() {
 void VulkanRendererAPI::CreateDescriptorSet(size_t object_uid,
                                             [[maybe_unused]] size_t mesh_uid,
                                             size_t texture_uid) {
-  //  std::vector<VkDescriptorSetLayout> layouts(swap_chain_images_.size(),
-  //                                             descriptor_set_layout_);
-  //  VkDescriptorSetAllocateInfo alloc_info = {};
-  //  alloc_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
-  //  alloc_info.descriptorPool = descriptor_pool_;
-  //  alloc_info.descriptorSetCount =
-  //      static_cast<uint32_t>(swap_chain_images_.size());
-  //  ;
-  //  alloc_info.pSetLayouts = layouts.data();
-  //  std::vector<VkDescriptorSet> descriptor_sets(swap_chain_images_.size());
-  //  if (vkAllocateDescriptorSets(device_, &alloc_info, descriptor_sets.data())
-  //  !=
-  //      VK_SUCCESS) {
-  //    throw std::runtime_error("failed to allocate descriptor sets");
-  //  }
   auto descriptor_set =
       std::find_if(descriptor_sets_.begin(), descriptor_sets_.end(),
                    [](auto &pair) { return !pair.first; });
@@ -1269,7 +1353,7 @@ VulkanRendererAPI::FindQueueFamilies(const VkPhysicalDevice &device) {
                                            queueFamilies.data());
 
   // Pick needed queue family
-  int i = 0;
+  uint32_t i = 0;
   for (const auto &queueFamily : queueFamilies) {
     if (queueFamily.queueCount > config_.queue_family_config.min_queue_count &&
         queueFamily.queueFlags & config_.queue_family_config.queue_flags) {
@@ -1384,7 +1468,7 @@ std::vector<char> VulkanRendererAPI::readShader(const std::string &filename) {
   size_t size = static_cast<size_t>(file.tellg());
   std::vector<char> buffer(size);
   file.seekg(0);
-  file.read(buffer.data(), size);
+  file.read(buffer.data(), static_cast<std::streamsize>(size));
   return buffer;
 }
 
@@ -1458,8 +1542,9 @@ void VulkanRendererAPI::CopyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer,
   EndSingleTimeCommand(command_buffer);
 }
 
-void VulkanRendererAPI::UpdateUniformBuffer(float time, uint32_t currentImage) {
-  static float time_passed = 0;
+void VulkanRendererAPI::UpdateUniformBuffer(double time,
+                                            uint32_t currentImage) {
+  static double time_passed = 0;
   time_passed += time;
   camera_.SetRatio(static_cast<float>(swap_chain_extent_.width) /
                    static_cast<float>(swap_chain_extent_.height));

@@ -9,7 +9,7 @@ void Renderer::Init() { api_instance_->Init(); }
 
 void Renderer::Destroy() { api_instance_->Destroy(); }
 
-void Renderer::DrawFrame(float time) { api_instance_->DrawFrame(time); }
+void Renderer::DrawFrame(double time) { api_instance_->DrawFrame(time); }
 
 void Renderer::UpdateScene() { api_instance_->UpdateScene(); }
 

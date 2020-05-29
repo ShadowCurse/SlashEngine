@@ -31,7 +31,7 @@ private:
   LayerStack layer_stack_;
   bool running_ = true;
   bool minimized_ = false;
-  float last_frame_time_ = 0.0f;
+  double last_frame_time_ = 0.0;
 
   inline static Application *p_application_ = nullptr;
 };

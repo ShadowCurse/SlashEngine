@@ -7,10 +7,10 @@ namespace slash {
 
 class Slash_API MouseMovedEvent : public Event {
 public:
-  MouseMovedEvent(float x, float y) : mouse_x_(x), mouse_y_(y) {}
+  MouseMovedEvent(double x, double y) : mouse_x_(x), mouse_y_(y) {}
 
-  [[nodiscard]] float GetX() const { return mouse_x_; }
-  [[nodiscard]] inline float GetY() const { return mouse_y_; }
+  [[nodiscard]] double GetX() const { return mouse_x_; }
+  [[nodiscard]] inline double GetY() const { return mouse_y_; }
 
   [[nodiscard]] std::string ToString() const override {
     std::stringstream ss;
@@ -22,17 +22,17 @@ public:
   EVENT_CLASS_CATEGORY(EventCategoryMouse | EventCategoryInput)
 
 private:
-  float mouse_x_;
-  float mouse_y_;
+  double mouse_x_;
+  double mouse_y_;
 };
 
 class Slash_API MouseScrolledEvent : public Event {
 public:
-  MouseScrolledEvent(float xOffset, float yOffset)
+  MouseScrolledEvent(double xOffset, double yOffset)
       : x_offset_(xOffset), y_offset_(yOffset) {}
 
-  [[nodiscard]] inline float GetXOffset() const { return x_offset_; }
-  [[nodiscard]] inline float GetYOffset() const { return y_offset_; }
+  [[nodiscard]] inline double GetXOffset() const { return x_offset_; }
+  [[nodiscard]] inline double GetYOffset() const { return y_offset_; }
 
   [[nodiscard]] std::string ToString() const override {
     std::stringstream ss;
@@ -44,8 +44,8 @@ public:
   EVENT_CLASS_CATEGORY(EventCategoryMouse | EventCategoryInput)
 
 private:
-  float x_offset_;
-  float y_offset_;
+  double x_offset_;
+  double y_offset_;
 };
 
 class Slash_API MouseButtonEvent : public Event {

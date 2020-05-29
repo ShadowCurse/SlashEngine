@@ -23,7 +23,7 @@ public:
   static void AddWindow(std::shared_ptr<Window> window);
   static void Init();
   static void Destroy();
-  static void DrawFrame(float time);
+  static void DrawFrame(double time);
   static void UpdateScene();
 
   static void BindModel(std::shared_ptr<Model> model);

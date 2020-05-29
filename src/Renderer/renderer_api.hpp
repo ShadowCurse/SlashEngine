@@ -17,7 +17,7 @@ public:
   virtual void AddWindow(std::shared_ptr<Window> window) = 0;
   virtual void Init() = 0;
   virtual void Destroy() = 0;
-  virtual void DrawFrame(float time) = 0;
+  virtual void DrawFrame(double time) = 0;
   virtual void UpdateScene() = 0;
 
   virtual void BindModel(std::shared_ptr<Model> model) = 0;

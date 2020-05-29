@@ -22,7 +22,8 @@ public:
   using EventCallBackFn = std::function<void(Event &)>;
   struct WindowData {
     std::string title;
-    uint width, height;
+    uint width;
+    uint height;
     bool VSync;
     bool resized = false;
 

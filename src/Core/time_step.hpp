@@ -5,15 +5,15 @@ namespace slash {
 
 class TimeStep {
 public:
-  explicit TimeStep(float time = 0.0f) : time_(time) {}
+  explicit TimeStep(double time = 0.0) : time_(time) {}
 
-  explicit operator float() const { return time_; }
+  explicit operator double() const { return time_; }
 
-  [[nodiscard]] float GetSecond() const { return time_; }
-  [[nodiscard]] float GetMilliseconds() const { return time_ * 1000.0f; }
+  [[nodiscard]] double GetSecond() const { return time_; }
+  [[nodiscard]] double GetMilliseconds() const { return time_ * 1000.0; }
 
 private:
-  float time_;
+  double time_;
 };
 
 } // namespace slash

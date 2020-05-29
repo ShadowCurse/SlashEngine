@@ -2,6 +2,7 @@
 Makefile
 SlashPCH.hpp.gch
 .vscode
-/vendor/vulkan
+/vendor
 .idea
 *.spv
+cmake-build-debug
