@@ -2,9 +2,9 @@
 #include "Core/application.hpp"
 #include "Core/log.hpp"
 
-#include "imgui.h"
-#include "imgui_impl_glfw.h"
-#include "imgui_impl_vulkan.h"
+//#include "imgui.h"
+//#include "imgui_impl_glfw.h"
+//#include "imgui_impl_vulkan.h"
 
 namespace slash {
 
@@ -34,13 +34,19 @@ void VulkanRendererAPI::Init() {
   CreateSemaphores();
   CreateFences();
 
-  SetUpImGui();
+  imgui_.Init(static_cast<GLFWwindow *>(window_->GetNativeWindow()), instance_,
+             physical_device_, device_,
+             queue_family_indices_.graphicsFamily.value(), graphics_queue_,
+             VK_NULL_HANDLE, swap_chain_format_, FindDepthFormat(),
+             swap_chain_image_views_.size());
+  //  SetUpImGui();
 }
 
 void VulkanRendererAPI::Destroy() {
   vkDeviceWaitIdle(device_);
 
-  DestroyImGui();
+  //  DestroyImGui();
+  imgui_.Destroy();
 
   for (size_t i(0); i < config_.k_max_frames_in_flight; ++i) {
     vkDestroySemaphore(device_, render_finished_semaphores_[i], nullptr);
@@ -89,17 +95,22 @@ void VulkanRendererAPI::DrawFrame(double time) {
                     UINT64_MAX);
   }
   // imagesInFlight[imageIndex] = inFlightFences[current_frame];
+
+  imgui_.UpdateCommandBuffers(swap_chain_framebuffers_[image_index], swap_chain_extent_);
+
   UpdateUniformBuffer(time, image_index);
   VkSubmitInfo submit_info = {};
   submit_info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
   VkSemaphore waitSemaphores[] = {image_available_semaphores_[current_frame]};
   VkPipelineStageFlags waitStages[] = {
       VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT};
+  VkCommandBuffer command_buffers[] = {command_buffers_[image_index],
+                                       imgui_.CommandBuffer()};
   submit_info.waitSemaphoreCount = 1;
   submit_info.pWaitSemaphores = waitSemaphores;
   submit_info.pWaitDstStageMask = waitStages;
-  submit_info.commandBufferCount = 1;
-  submit_info.pCommandBuffers = &command_buffers_[image_index];
+  submit_info.commandBufferCount = 2;
+  submit_info.pCommandBuffers = command_buffers;
   VkSemaphore signalSemaphores[] = {render_finished_semaphores_[current_frame]};
   submit_info.signalSemaphoreCount = 1;
   submit_info.pSignalSemaphores = signalSemaphores;
@@ -126,29 +137,6 @@ void VulkanRendererAPI::DrawFrame(double time) {
     throw std::runtime_error("failed to present swap chain image");
   }
   current_frame = (current_frame + 1) % config_.k_max_frames_in_flight;
-
-  static float f = 0.0f;
-  static int counter = 0;
-  static bool show_demo_window = true;
-  ImGui_ImplVulkan_NewFrame();
-  ImGui_ImplGlfw_NewFrame();
-  ImGui::NewFrame();
-  ImGui::ShowDemoWindow(&show_demo_window);
-  ImGui::Begin("Hello, world!");
-  ImGui::Text("This is some useful text.");
-  ImGui::SliderFloat("float", &f, 0.0f, 1.0f);
-  if (ImGui::Button("Button"))
-    counter++;
-  ImGui::SameLine();
-  ImGui::Text("counter = %d", counter);
-  ImGui::Text("Application average %.3f ms/frame (%.1f FPS)",
-              1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
-  ImGui::End();
-  ImGui::Render();
-
-  have_imgui_draw = true;
-
-  UpdateCommandBuffers();
 }
 
 void VulkanRendererAPI::UpdateScene() { UpdateCommandBuffers(); }
@@ -541,8 +529,9 @@ void VulkanRendererAPI::RecreateSwapChain() {
   CreateCommandBuffers();
   UpdateCommandBuffers();
 
-  ImGui_ImplVulkan_SetMinImageCount(
-      static_cast<uint32_t>(swap_chain_images_.size()));
+//  ImGui_ImplVulkan_SetMinImageCount(
+//      static_cast<uint32_t>(swap_chain_images_.size()));
+  imgui_.SetMinimalImageCount( static_cast<uint32_t>(swap_chain_images_.size()));
 }
 
 void VulkanRendererAPI::CreateImageViews() {
@@ -563,7 +552,10 @@ void VulkanRendererAPI::CreateRenderPass() {
   color_attachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
   color_attachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
   color_attachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-  color_attachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+  color_attachment.finalLayout =
+      VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL; // VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+                                                // //
+                                                // VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 
   VkAttachmentReference color_attachment_ref = {};
   color_attachment_ref.attachment = 0;
@@ -585,20 +577,20 @@ void VulkanRendererAPI::CreateRenderPass() {
   depth_attachment_ref.layout =
       VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 
-  VkSubpassDescription subpass = {};
-  subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
-  subpass.colorAttachmentCount = 1;
-  subpass.pColorAttachments = &color_attachment_ref;
-  subpass.pDepthStencilAttachment = &depth_attachment_ref;
+  std::array<VkSubpassDescription, 1> subpasses = {};
+  subpasses[0].pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
+  subpasses[0].colorAttachmentCount = 1;
+  subpasses[0].pColorAttachments = &color_attachment_ref;
+  subpasses[0].pDepthStencilAttachment = &depth_attachment_ref;
 
-  VkSubpassDependency dependency = {};
-  dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
-  dependency.dstSubpass = 0;
-  dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-  dependency.srcAccessMask = 0;
-  dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-  dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT |
-                             VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+  std::array<VkSubpassDependency, 1> dependency = {};
+  dependency[0].srcSubpass = VK_SUBPASS_EXTERNAL;
+  dependency[0].dstSubpass = 0;
+  dependency[0].srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+  dependency[0].dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+  dependency[0].srcAccessMask = 0;
+  dependency[0].dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT |
+                                VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
 
   std::array<VkAttachmentDescription, 2> attachemnts = {color_attachment,
                                                         depth_attachment};
@@ -606,10 +598,10 @@ void VulkanRendererAPI::CreateRenderPass() {
   render_pass_info.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
   render_pass_info.attachmentCount = static_cast<uint32_t>(attachemnts.size());
   render_pass_info.pAttachments = attachemnts.data();
-  render_pass_info.subpassCount = 1;
-  render_pass_info.pSubpasses = &subpass;
-  render_pass_info.dependencyCount = 1;
-  render_pass_info.pDependencies = &dependency;
+  render_pass_info.subpassCount = static_cast<uint32_t>(subpasses.size());
+  render_pass_info.pSubpasses = subpasses.data();
+  render_pass_info.dependencyCount = static_cast<uint32_t>(dependency.size());
+  render_pass_info.pDependencies = dependency.data();
 
   if (vkCreateRenderPass(device_, &render_pass_info, nullptr, &render_pass_) !=
       VK_SUCCESS) {
@@ -975,9 +967,8 @@ void VulkanRendererAPI::UpdateCommandBuffers() {
       vkCmdDrawIndexed(command_buffers_[i],
                        index_buffers_size_[model->p_mesh_->uid_], 1, 0, 0, 0);
     }
-    if (have_imgui_draw)
-      ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(),
-                                      command_buffers_[i]);
+    //    vkCmdExecuteCommands(command_buffers_[i], 1,
+    //    &command_buffers_[0]);
     vkCmdEndRenderPass(command_buffers_[i]);
 
     if (vkEndCommandBuffer(command_buffers_[i]) != VK_SUCCESS) {
@@ -1012,72 +1003,6 @@ void VulkanRendererAPI::CreateFences() {
       throw std::runtime_error("failed to create fence");
     }
   }
-}
-
-void VulkanRendererAPI::SetUpImGui() {
-
-  std::array<VkDescriptorPoolSize, 11> pool_sizes = {
-      VkDescriptorPoolSize{VK_DESCRIPTOR_TYPE_SAMPLER, 1000},
-      {VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1000},
-      {VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, 1000},
-      {VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 1000},
-      {VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER, 1000},
-      {VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER, 1000},
-      {VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1000},
-      {VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 1000},
-      {VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 1000},
-      {VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC, 1000},
-      {VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT, 1000}};
-  VkDescriptorPoolCreateInfo pool_info = {};
-  pool_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
-  pool_info.poolSizeCount = static_cast<uint32_t>(pool_sizes.size());
-  pool_info.pPoolSizes = pool_sizes.data();
-  pool_info.maxSets = 1000;
-  if (vkCreateDescriptorPool(device_, &pool_info, nullptr,
-                             &imgui_descriptor_pool_) != VK_SUCCESS) {
-    throw std::runtime_error("failed to create imgui_descriptor_pool_");
-  }
-
-  SL_CORE_INFO("INITIALIZING IMGUI");
-  // Setup Dear ImGui context
-  IMGUI_CHECKVERSION();
-  ImGui::CreateContext();
-  //  ImGuiIO &io = ImGui::GetIO();
-  //  (void)io;
-  // io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable
-  // Keyboard Controls io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad; //
-  // Enable Gamepad Controls
-
-  ImGui::StyleColorsDark();
-
-  // Setup Platform/Renderer bindings
-  ImGui_ImplGlfw_InitForVulkan(
-      static_cast<GLFWwindow *>(window_->GetNativeWindow()), true);
-  ImGui_ImplVulkan_InitInfo init_info = {};
-  init_info.Instance = instance_;
-  init_info.PhysicalDevice = physical_device_;
-  init_info.Device = device_;
-  init_info.QueueFamily = queue_family_indices_.graphicsFamily.value();
-  init_info.Queue = graphics_queue_;
-  init_info.PipelineCache = VK_NULL_HANDLE;
-  init_info.DescriptorPool = imgui_descriptor_pool_;
-  init_info.Allocator = nullptr;
-  init_info.MinImageCount = 2;
-  init_info.ImageCount = static_cast<uint32_t>(swap_chain_images_.size());
-  init_info.CheckVkResultFn = nullptr;
-  ImGui_ImplVulkan_Init(&init_info, render_pass_);
-
-  VkCommandBuffer command_buffer = BeginSingleTimeCommand();
-  ImGui_ImplVulkan_CreateFontsTexture(command_buffer);
-  EndSingleTimeCommand(command_buffer);
-  ImGui_ImplVulkan_DestroyFontUploadObjects();
-}
-void VulkanRendererAPI::DestroyImGui() {
-  SL_CORE_INFO("DESTROYING IMGUI");
-  vkDestroyDescriptorPool(device_, imgui_descriptor_pool_, nullptr);
-  ImGui_ImplVulkan_Shutdown();
-  ImGui_ImplGlfw_Shutdown();
-  ImGui::DestroyContext();
 }
 
 //////////////////////////////////////////////////////

@@ -25,8 +25,8 @@ class Slash_API Camera {
     proj_[1][1] *= -1;
   }
 
-  [[nodiscard]] const glm::mat4 GetView() const { return view_; }
-  [[nodiscard]] const glm::mat4 GetProj() const { return proj_; }
+  [[nodiscard]] constexpr glm::mat4 GetView() const { return view_; }
+  [[nodiscard]] constexpr glm::mat4 GetProj() const { return proj_; }
 
  private:
   glm::mat4 view_;

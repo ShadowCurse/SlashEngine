@@ -1,7 +1,6 @@
 #include "resource_manager.hpp"
 #include "Core/log.hpp"
-#include "Renderer/renderer.hpp"
-#include "slash_pch.hpp"
+#include "RendererModule/render_module.hpp"
 
 namespace slash {
 
@@ -19,6 +18,11 @@ void ResourceManager::Destroy() {
   delete instance_->mesh_manager_;
   delete instance_->model_manager_;
   delete instance_;
+}
+
+void ResourceManager::CreateRenderableObject(const std::string &object_name) {
+  RenderModule::ResourceManager()->CreateRenderableObject(
+      instance_->model_manager_->GetModel(object_name).get());
 }
 
 void ResourceManager::AddModel(const std::string &name,
@@ -41,31 +45,31 @@ void ResourceManager::RemoveModel(const std::string &name) {
   instance_->model_manager_->RemoveModel(name);
 }
 
-void ResourceManager::BindModel(const std::string &name) {
-  auto model = instance_->model_manager_->GetModel(name);
-  if (std::find(instance_->model_binded_.begin(),
-                instance_->model_binded_.end(),
-                model) != instance_->model_binded_.end()) {
-    SL_CORE_WARN("Model {} already binded", model->name_);
-    return;
-  }
-  instance_->AddDependencies(model);
-  Renderer::BindModel(model);
-  instance_->model_binded_.emplace_back(model);
-}
-
-void ResourceManager::UnBindModel(const std::string &name) {
-  auto model = instance_->model_manager_->GetModel(name);
-  auto iter = std::find(instance_->model_binded_.begin(),
-                        instance_->model_binded_.end(), model);
-  if (iter == instance_->model_binded_.end()) {
-    SL_CORE_WARN("Model {} not binded", model->name_);
-    return;
-  }
-  Renderer::UnBindModel(model);
-  instance_->RemoveDependencies(model);
-  instance_->model_binded_.erase(iter);
-}
+// void ResourceManager::BindModel(const std::string &name) {
+//  auto model = instance_->model_manager_->GetModel(name);
+//  if (std::find(instance_->model_binded_.begin(),
+//                instance_->model_binded_.end(),
+//                model) != instance_->model_binded_.end()) {
+//    SL_CORE_WARN("Model {} already binded", model->name_);
+//    return;
+//  }
+//  instance_->AddDependencies(model);
+//  RenderModule::ResourceManager()->BindModel(model.get());
+//  instance_->model_binded_.emplace_back(model);
+//}
+//
+// void ResourceManager::UnBindModel(const std::string &name) {
+//  auto model = instance_->model_manager_->GetModel(name);
+//  auto iter = std::find(instance_->model_binded_.begin(),
+//                        instance_->model_binded_.end(), model);
+//  if (iter == instance_->model_binded_.end()) {
+//    SL_CORE_WARN("Model {} not binded", model->name_);
+//    return;
+//  }
+//  RenderModule::ResourceManager()->UnBindModel(model.get());
+//  instance_->RemoveDependencies(model);
+//  instance_->model_binded_.erase(iter);
+//}
 
 void ResourceManager::AddMesh(const std::string &name,
                               const std::vector<Vertex> &vertices,
@@ -87,40 +91,45 @@ void ResourceManager::RemoveTexture(const std::string &name) {
 }
 
 void ResourceManager::AddDependencies(std::shared_ptr<Model> model) {
-  if (texture_usages.find(model->p_texture) == texture_usages.end()) {
-    Renderer::BindTexture(model->p_texture);
-    texture_usages.insert({model->p_texture, {model}});
+  if (instance_->texture_usages.find(model->p_texture) ==
+      instance_->texture_usages.end()) {
+    RenderModule::ResourceManager()->BindTexture(model->p_texture.get());
+    instance_->texture_usages.insert({model->p_texture, {model}});
   } else {
-    texture_usages[model->p_texture].push_back(model);
+    instance_->texture_usages[model->p_texture].push_back(model);
   }
-  if (meshes_usages.find(model->p_mesh_) == meshes_usages.end()) {
-    Renderer::BindMesh(model->p_mesh_);
-    meshes_usages.insert({model->p_mesh_, {model}});
+  if (instance_->meshes_usages.find(model->p_mesh_) ==
+      instance_->meshes_usages.end()) {
+    RenderModule::ResourceManager()->BindMesh(model->p_mesh_.get());
+    instance_->meshes_usages.insert({model->p_mesh_, {model}});
   } else {
-    meshes_usages[model->p_mesh_].push_back(model);
+    instance_->meshes_usages[model->p_mesh_].push_back(model);
   }
 }
+
 void ResourceManager::RemoveDependencies(std::shared_ptr<Model> model) {
-  if (texture_usages.find(model->p_texture) == texture_usages.end()) {
+  if (instance_->texture_usages.find(model->p_texture) ==
+      instance_->texture_usages.end()) {
     SL_CORE_WARN("While removing model {} texture {} was already removed",
                  model->name_, model->p_texture->name_);
   } else {
-    auto usages = texture_usages[model->p_texture];
+    auto usages = instance_->texture_usages[model->p_texture];
     usages.erase(std::find(usages.begin(), usages.end(), model));
     if (usages.empty()) {
-      Renderer::UnBindTexture(model->p_texture);
-      texture_usages.erase(model->p_texture);
+      RenderModule::ResourceManager()->UnBindTexture(model->p_texture.get());
+      instance_->texture_usages.erase(model->p_texture);
     }
   }
-  if (meshes_usages.find(model->p_mesh_) == meshes_usages.end()) {
+  if (instance_->meshes_usages.find(model->p_mesh_) ==
+      instance_->meshes_usages.end()) {
     SL_CORE_WARN("While removing model {} mesh {} was already removed",
                  model->name_, model->p_mesh_->name_);
   } else {
-    auto usages = meshes_usages[model->p_mesh_];
+    auto usages = instance_->meshes_usages[model->p_mesh_];
     usages.erase(std::find(usages.begin(), usages.end(), model));
     if (usages.empty()) {
-      Renderer::UnBindMesh(model->p_mesh_);
-      meshes_usages.erase(model->p_mesh_);
+      RenderModule::ResourceManager()->UnBindMesh(model->p_mesh_.get());
+      instance_->meshes_usages.erase(model->p_mesh_);
     }
   }
 }

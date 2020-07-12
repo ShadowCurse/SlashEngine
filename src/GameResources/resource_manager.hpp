@@ -5,6 +5,7 @@
 #include "mesh_manager.hpp"
 #include "model_manager.hpp"
 #include "texture_manager.hpp"
+#include <VulkanResources/vulkan_renderable_object.hpp>
 
 namespace slash {
 
@@ -13,14 +14,16 @@ public:
   static void Init();
   static void Destroy();
 
+  static void CreateRenderableObject(const std::string& object_name);
+
   static void AddModel(const std::string &name, const std::string &mesh_name,
                        const std::string &texture_name,
                        const glm::mat4 &rotation, const glm::vec3 &position,
                        const glm::vec2 &size);
+
   static std::shared_ptr<Model> GetModel(const std::string &name);
+
   static void RemoveModel(const std::string &name);
-  static void BindModel(const std::string &name);
-  static void UnBindModel(const std::string &name);
 
   static void AddMesh(const std::string &name,
                       const std::vector<Vertex> &vertices,
@@ -31,9 +34,10 @@ public:
                           const std::string &texture_path);
   static void RemoveTexture(const std::string &name);
 
+  static void AddDependencies(std::shared_ptr<Model> model);
+
+  static void RemoveDependencies(std::shared_ptr<Model> model);
 private:
-  void AddDependencies(std::shared_ptr<Model> model);
-  void RemoveDependencies(std::shared_ptr<Model> model);
 
   ModelManager *model_manager_;
   MeshManager *mesh_manager_;

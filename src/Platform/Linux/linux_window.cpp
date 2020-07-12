@@ -4,7 +4,6 @@
 #include "Events/application_event.hpp"
 #include "Events/key_event.hpp"
 #include "Events/mouse_event.hpp"
-#include "Renderer/renderer_api.hpp"
 
 namespace slash {
 

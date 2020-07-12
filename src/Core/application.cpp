@@ -1,7 +1,7 @@
 #include "application.hpp"
 #include "GameResources/resource_manager.hpp"
-#include "Renderer/renderer.hpp"
-#include "VulkanRenderer/vulkan_rendererAPI.hpp"
+#include "RendererModule/render_module.hpp"
+#include "Scene/scene_manager.hpp"
 #include "log.hpp"
 #include "slash_pch.hpp"
 
@@ -16,9 +16,7 @@ Application::Application() {
   window_ = std::shared_ptr<Window>(Window::Create());
   window_->SetEventCallback(BIND_EVENT_FN(OnEvent));
 
-  Renderer::Create<VulkanRendererAPI>();
-  Renderer::AddWindow(window_);
-  Renderer::Init();
+  RenderModule::Init(window_, RenderType::Vulkan);
 
   ResourceManager::Init();
 }
@@ -50,14 +48,16 @@ void Application::run() {
     last_frame_time_ = time;
 
     if (!minimized_) {
-      for (Layer *layer : layer_stack_)
+      for (Layer *layer : layer_stack_) {
         layer->OnUpdate(time_step);
+      }
       window_->OnUpdate();
-      Renderer::DrawFrame(time_step.GetSecond());
+      SceneManager::PrepareScene();
+      SceneManager::DrawScene(time_step.GetSecond());
     }
   }
   ResourceManager::Destroy();
-  Renderer::Destroy();
+  SL_CORE_INFO("Application shutdown");
 }
 
 bool Application::OnWindowClose(WindowCloseEvent &e) {
@@ -72,7 +72,7 @@ bool Application::OnWindowResize(WindowResizeEvent &e) {
     return false;
   }
 
-  //Renderer::OnWindowResize(e.GetWidth(), e.GetHeigth());
+  // Renderer::OnWindowResize(e.GetWidth(), e.GetHeigth());
 
   minimized_ = false;
 

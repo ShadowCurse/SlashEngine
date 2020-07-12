@@ -15,5 +15,7 @@
 #include <string>
 #include <string_view>
 #include <vector>
+#include <bitset>
+#include <queue>
 
 #endif // SLASHENGINE_PCH_H_

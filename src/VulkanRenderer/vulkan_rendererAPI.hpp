@@ -5,14 +5,16 @@
 #include "Core/window.hpp"
 #include "GLFW/glfw3.h"
 #include "Renderer/camera.hpp"
-#include "Renderer/renderer_api.hpp"
+//#include "Renderer/renderer_api.hpp"
 #include "Renderer/vertex.hpp"
+#include "vulkan_imgui.hpp"
 #include "vulkan_vertex.hpp"
 
 namespace slash {
 
 class Slash_API VulkanRendererAPI final : public RendererAPI {
 public:
+  VulkanRendererAPI(Window *window) {}
   void AddWindow(std::shared_ptr<Window> window) final;
   void Init() final;
   void Destroy() final;
@@ -96,8 +98,6 @@ private:
   void CreateSemaphores();
   void CreateFences();
 
-  void SetUpImGui();
-  void DestroyImGui();
   // main
 
   void CreateCameraBuffer();
@@ -200,7 +200,7 @@ private:
   std::vector<VkFence> images_inflight_;
   std::shared_ptr<Window> window_;
 
-  VkDescriptorPool imgui_descriptor_pool_;
+  VulkanImGui imgui_;
 
   Window::WindowData *window_data_;
   Camera camera_;
@@ -238,8 +238,6 @@ private:
 
   QueueFamilyIndices queue_family_indices_ = {};
   size_t current_frame = 0;
-
-  bool have_imgui_draw = false;
 };
 
 } // namespace slash
