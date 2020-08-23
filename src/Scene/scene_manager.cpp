@@ -4,10 +4,12 @@
 namespace slash {
 
 void SceneManager::PrepareScene() {
+  RenderModule::Renderer()->NewFrame();
   auto render_command = RenderModule::Renderer()->StartRenderCommand();
   for (auto &object : RenderModule::ResourceManager()->GetRenderableObjects())
     render_command->AddRenderableObject(object);
   RenderModule::Renderer()->EndRenderCommand(render_command);
+  // Renderer->SubmitNewFrame()
 }
 
 void SceneManager::DrawScene(double dt) {

@@ -15,14 +15,20 @@ public:
   [[nodiscard]] std::shared_ptr<VulkanCommandBuffer> CreateBuffer();
   void FreeBuffer(std::shared_ptr<VulkanCommandBuffer> buffer);
   [[nodiscard]] std::vector<VkCommandBuffer> GetBuffers();
+  void SwitchFrame();
+  [[nodiscard]] std::shared_ptr<VulkanCommandBuffer> CreateFrameCommandBuffer();
+  void FreeFrameCommandBuffer(std::shared_ptr<VulkanCommandBuffer> buffer);
 
 private:
   VulkanCore *vcore_;
   uint32_t queue_family_index_;
-  std::array<std::vector<std::shared_ptr<VulkanCommandBuffer>>, 2>
-      command_buffers_;
-  bool page_;
-  VulkanCommandPool pool_;
+  std::vector<std::shared_ptr<VulkanCommandBuffer>> command_buffers_;
+  VulkanCommandPool pool_; // should be 3 pools
+
+  std::array<std::vector<std::shared_ptr<VulkanCommandBuffer>>, 3>
+      frame_command_buffers_;
+  std::array<VulkanCommandPool, 3> pools_;
+  uint8_t current_pool = 0;
 };
 
 } // namespace slash

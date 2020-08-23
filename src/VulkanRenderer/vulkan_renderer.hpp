@@ -35,6 +35,7 @@ public:
 
   [[nodiscard]] VulkanDescriptorSet *CreateDescriptorSet() const;
 
+  void NewFrame();
   [[nodiscard]] std::shared_ptr<VulkanCommandBuffer> StartRenderCommand() const;
   void EndRenderCommand(std::shared_ptr<VulkanCommandBuffer> buffer);
 

@@ -3,14 +3,17 @@
 
 #ifdef SL_LINUX
 // #include "Application.hpp"
+#include <iostream>
 
 extern slash::Application *slash::CreateApplication();
 
 int main(int argc, char **argv) {
   slash::Log::Init();
+  std::cout << "Starting application\n";
   auto app = slash::CreateApplication();
   app->run();
   delete app;
+  std::cout << "Application shutdown\n";
 }
 
 #endif

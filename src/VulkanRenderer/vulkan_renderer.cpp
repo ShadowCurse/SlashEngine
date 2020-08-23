@@ -211,10 +211,12 @@ VulkanDescriptorSet *VulkanRenderer::CreateDescriptorSet() const {
   return descriptor_manager_->CreateDescriptorSet(descriptor_set_layout_);
 }
 
+void VulkanRenderer::NewFrame() { command_buffer_manager_->SwitchFrame(); }
+
 std::shared_ptr<VulkanCommandBuffer>
 VulkanRenderer::StartRenderCommand() const {
-  auto command_buffer = command_buffer_manager_->CreateBuffer();
-  vkResetCommandBuffer(command_buffer->GetBuffer(), 0);
+  auto command_buffer = command_buffer_manager_->CreateFrameCommandBuffer();
+  //  vkResetCommandBuffer(command_buffer->GetBuffer(), 0);
   VkCommandBufferBeginInfo begin_info = {};
   begin_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
   begin_info.flags = 0;
@@ -241,7 +243,6 @@ VulkanRenderer::StartRenderCommand() const {
                     VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline_->GetPipeline());
   return command_buffer;
 }
-
 void VulkanRenderer::EndRenderCommand(
     std::shared_ptr<VulkanCommandBuffer> buffer) {
   vkCmdEndRenderPass(buffer->GetBuffer());
