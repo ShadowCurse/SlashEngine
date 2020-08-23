@@ -20,14 +20,18 @@ VulkanDescriptorSet *VulkanDescriptorManager::CreateDescriptorSet(
   const auto &bindings = layout->GetBindings();
   for (auto &pool : pools_) {
     if (pool->CanAllocate(bindings)) {
-      sets_.emplace_back(VulkanDescriptorSet(vcore_, pool.get(), layout));
-      return &sets_.back();
+      auto set =
+          std::make_shared<VulkanDescriptorSet>(vcore_, pool.get(), layout);
+      sets_.emplace_back(set);
+      return set.get();
     }
   }
-  pools_.emplace_back(std::make_shared<VulkanDescriptorPool>(
-      vcore_, bindings, default_pool_size_));
-  sets_.emplace_back(VulkanDescriptorSet(vcore_, pools_.back().get(), layout));
-  return &sets_.back();
+  auto pool = std::make_shared<VulkanDescriptorPool>(vcore_, bindings,
+                                                     default_pool_size_);
+  auto set = std::make_shared<VulkanDescriptorSet>(vcore_, pool.get(), layout);
+  pools_.emplace_back(pool);
+  sets_.emplace_back(set);
+  return set.get();
 }
 
 } // namespace slash

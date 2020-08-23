@@ -21,7 +21,7 @@ public:
 private:
   VulkanCore *vcore_;
   std::vector<VulkanDescriptorSetLayout> layouts_;
-  std::vector<VulkanDescriptorSet> sets_;
+  std::vector<std::shared_ptr<VulkanDescriptorSet>> sets_;
   std::vector<std::shared_ptr<VulkanDescriptorPool>> pools_;
   uint32_t default_pool_size_;
 };
