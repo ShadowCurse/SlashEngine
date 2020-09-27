@@ -22,15 +22,15 @@ VulkanDescriptorSet *VulkanDescriptorManager::CreateDescriptorSet(
     if (pool->CanAllocate(bindings)) {
       auto set =
           std::make_shared<VulkanDescriptorSet>(vcore_, pool.get(), layout);
-      sets_.emplace_back(set);
+      sets_.push_back(set);
       return set.get();
     }
   }
   auto pool = std::make_shared<VulkanDescriptorPool>(vcore_, bindings,
                                                      default_pool_size_);
   auto set = std::make_shared<VulkanDescriptorSet>(vcore_, pool.get(), layout);
-  pools_.emplace_back(pool);
-  sets_.emplace_back(set);
+  pools_.push_back(pool);
+  sets_.push_back(set);
   return set.get();
 }
 

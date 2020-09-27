@@ -11,7 +11,7 @@
 namespace slash {
 
 class Slash_API Application {
-public:
+ public:
   Application();
   virtual ~Application() = default;
 
@@ -20,10 +20,10 @@ public:
   void PushLayer(Layer *layer);
   void PushOverlay(Layer *layer);
 
-  inline Window &GetWindow() { return *window_; }
-  inline static Application &Get() { return *p_application_; }
+  auto GetWindow() -> Window & { return *window_; }
+  static auto Get() ->  Application & { return *application_; }
 
-private:
+ private:
   bool OnWindowClose(WindowCloseEvent &e);
   bool OnWindowResize(WindowResizeEvent &e);
 
@@ -33,7 +33,7 @@ private:
   bool minimized_ = false;
   double last_frame_time_ = 0.0;
 
-  inline static Application *p_application_ = nullptr;
+  inline static Application *application_ = nullptr;
 };
 
 Application *CreateApplication();

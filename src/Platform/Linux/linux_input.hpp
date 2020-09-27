@@ -5,13 +5,13 @@
 
 namespace slash {
 
-class LinuxInput final : public Input {
-protected:
+class Slash_API LinuxInput final : public Input {
+ protected:
   [[nodiscard]] bool IsKeyPressedImpl(int keycode) final;
   [[nodiscard]] bool IsMouseButtonPressedImpl(int button) final;
-  [[nodiscard]] std::pair<float, float> GetMousePositionImpl() final;
-  [[nodiscard]] float GetMouseXImpl() final;
-  [[nodiscard]] float GetMouseYImpl() final;
+  [[nodiscard]] auto GetMousePositionImpl() -> std::pair<float, float> final;
+  [[nodiscard]] auto GetMouseXImpl() -> float final;
+  [[nodiscard]] auto GetMouseYImpl() -> float final;
 };
 
 } // namespace slash

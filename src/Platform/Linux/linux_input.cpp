@@ -1,7 +1,7 @@
+#include "slash_pch.hpp"
 #include "linux_input.hpp"
 #include "Core/application.hpp"
 #include "GLFW/glfw3.h"
-#include "slash_pch.hpp"
 
 namespace slash {
 
@@ -28,12 +28,12 @@ std::pair<float, float> LinuxInput::GetMousePositionImpl() {
 }
 
 float LinuxInput::GetMouseXImpl() {
-  auto [x, y] = GetMousePositionImpl();
+  auto[x, y] = GetMousePositionImpl();
   return x;
 }
 
 float LinuxInput::GetMouseYImpl() {
-  auto [x, y] = GetMousePositionImpl();
+  auto[x, y] = GetMousePositionImpl();
   return y;
 }
 } // namespace Slash

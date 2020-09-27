@@ -6,8 +6,8 @@
 
 namespace slash {
 
-class LinuxWindow final: public Window {
-public:
+class Slash_API LinuxWindow final : public Window {
+ public:
   explicit LinuxWindow(const WindowProps &props);
   ~LinuxWindow() final;
 
@@ -19,10 +19,11 @@ public:
   void SetEventCallback(const EventCallBackFn &callback) final;
   void *GetNativeWindow() const final;
 
-private:
+ private:
   void Init(const WindowProps &props);
   void Shutdown();
 
+  static inline bool GLFW_initialized_ = false;
   GLFWwindow *window_ = nullptr;
   WindowData data_;
 };

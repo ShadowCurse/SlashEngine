@@ -6,14 +6,7 @@
 
 namespace slash {
 
-class Mesh_3D {
-public:
-  Mesh_3D(std::string name, size_t uid, std::vector<Vertex> vertices,
-          std::vector<uint16_t> indices)
-      : name_(std::move(name)), uid_(uid), vertices_(std::move(vertices)),
-        indices_(std::move(indices)) {}
-  std::string name_;
-  size_t uid_;
+struct Mesh_3D {
   std::vector<Vertex> vertices_;
   std::vector<uint16_t> indices_;
 };

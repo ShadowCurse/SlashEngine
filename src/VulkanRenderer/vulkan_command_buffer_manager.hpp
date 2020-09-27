@@ -10,7 +10,7 @@ namespace slash {
 class VulkanCommandBufferManager {
 public:
   VulkanCommandBufferManager(VulkanCore *vcore, uint32_t queue_family_index);
-  ~VulkanCommandBufferManager() = default;
+  ~VulkanCommandBufferManager();
 
   [[nodiscard]] std::shared_ptr<VulkanCommandBuffer> CreateBuffer();
   void FreeBuffer(std::shared_ptr<VulkanCommandBuffer> buffer);

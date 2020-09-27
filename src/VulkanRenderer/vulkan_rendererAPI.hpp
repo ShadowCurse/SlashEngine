@@ -4,7 +4,7 @@
 #include "Core/core.hpp"
 #include "Core/window.hpp"
 #include "GLFW/glfw3.h"
-#include "Renderer/camera.hpp"
+#include "Scene/camera.hpp"
 //#include "Renderer/renderer_api.hpp"
 #include "Renderer/vertex.hpp"
 #include "vulkan_imgui.hpp"

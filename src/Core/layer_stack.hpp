@@ -8,7 +8,7 @@
 namespace slash {
 
 class Slash_API LayerStack {
-public:
+ public:
   LayerStack() = default;
   virtual ~LayerStack();
 
@@ -17,10 +17,10 @@ public:
   void PopLayer(Layer *layer);
   void PopOverlay(Layer *layer);
 
-  std::vector<Layer *>::iterator begin() { return layers_.begin(); }
-  std::vector<Layer *>::iterator end() { return layers_.end(); }
+  auto begin() -> std::vector<Layer *>::iterator { return layers_.begin(); }
+  auto end() -> std::vector<Layer *>::iterator { return layers_.end(); }
 
-private:
+ private:
   std::vector<Layer *> layers_;
   uint layer_insert_index_ = 0;
 };

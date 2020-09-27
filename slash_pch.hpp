@@ -17,5 +17,8 @@
 #include <vector>
 #include <bitset>
 #include <queue>
+#include <typeinfo>
+
+#include <stb_image.h>
 
 #endif // SLASHENGINE_PCH_H_

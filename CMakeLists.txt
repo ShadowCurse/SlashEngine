@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.15)
 
-project(SlashEngine)
+project(SlashEngine CXX)
 
 include(cmake/StandardProjectSettings.cmake)
 # Link this 'library' to set the c++ standard / compile-time options requested
@@ -23,9 +23,12 @@ include(cmake/StaticAnalyzers.cmake)
 
 target_precompile_headers(project_options INTERFACE slash_pch.hpp)
 
+# adding vendor libs
 add_subdirectory(vendor/spdlog)
 target_compile_options(spdlog PRIVATE -fPIC)
 add_subdirectory(vendor/glfw3)
+set(BUILD_STATIC_LIBS 1)
+add_subdirectory(vendor/glm/glm)
 
 add_library(SlashEngine SHARED
         src/Core/application.cpp
@@ -33,16 +36,17 @@ add_library(SlashEngine SHARED
         src/Core/layer_stack.cpp
 
         src/GameResources/resource_manager.cpp
-        src/GameResources/model_manager.cpp
-        src/GameResources/texture_manager.cpp
-        src/GameResources/mesh_manager.cpp
+        src/GameResources/transform.hpp
 
         src/Platform/Linux/linux_input.cpp
         src/Platform/Linux/linux_window.cpp
 
+        src/Ecs/ecs.hpp
+        src/Ecs/entity.hpp
+        src/Ecs/componenet.hpp
+
         src/Renderer/imgui_layer.cpp
 
-#        src/VulkanRenderer/vulkan_rendererAPI.cpp
         src/VulkanRenderer/vulkan_imgui.cpp
         src/VulkanRenderer/vulkan_core.cpp
         src/VulkanRenderer/vulkan_queue.cpp
@@ -82,37 +86,42 @@ add_library(SlashEngine SHARED
         src/VulkanResources/vulkan_index_buffer.hpp
         src/VulkanRenderer/vulkan_command_buffer_manager.cpp
         src/VulkanRenderer/vulkan_command_buffer_manager.hpp
-
         src/VulkanResources/vulkan_resource_manager.cpp
         src/VulkanResources/vulkan_resource_manager.hpp
         src/VulkanResources/vulkan_texture.cpp
         src/VulkanResources/vulkan_texture.hpp
         src/VulkanResources/vulkan_renderable_object.hpp
         src/VulkanResources/vulkan_mesh.hpp
+        src/VulkanResources/vulkan_frame_buffer.cpp
+        src/VulkanResources/vulkan_frame_buffer.hpp
 
         src/RendererModule/render_module.cpp
         src/RendererModule/render_module.hpp
 
         src/Scene/scene_manager.cpp
         src/Scene/scene_manager.hpp
+        src/Scene/scene.cpp
+        src/Scene/scene.hpp
+        src/Scene/camera.cpp
+        src/Scene/camera.hpp
 
         vendor/imgui/imgui.cpp
         vendor/imgui/imgui_demo.cpp
         vendor/imgui/imgui_draw.cpp
         vendor/imgui/imgui_widgets.cpp
         vendor/imgui/examples/imgui_impl_vulkan.cpp
-        vendor/imgui/examples/imgui_impl_glfw.cpp
-        src/VulkanResources/vulkan_frame_buffer.cpp src/VulkanResources/vulkan_frame_buffer.hpp)
+        vendor/imgui/examples/imgui_impl_glfw.cpp)
 
-target_include_directories(SlashEngine PRIVATE ${CMAKE_SOURCE_DIR}/vendor/spdlog/include)
-target_include_directories(SlashEngine PRIVATE ${CMAKE_SOURCE_DIR}/vendor/glfw3/include)
-target_include_directories(SlashEngine PRIVATE ${CMAKE_SOURCE_DIR}/vendor/vulkan/x86_64/include)
-target_include_directories(SlashEngine PRIVATE ${CMAKE_SOURCE_DIR}/vendor/stb)
-target_include_directories(SlashEngine PRIVATE ${CMAKE_SOURCE_DIR}/vendor/glm)
-target_include_directories(SlashEngine PRIVATE ${CMAKE_SOURCE_DIR}/vendor/imgui/examples)
-target_include_directories(SlashEngine PRIVATE ${CMAKE_SOURCE_DIR}/vendor/imgui)
-target_include_directories(SlashEngine PRIVATE ${CMAKE_SOURCE_DIR}/src)
-target_include_directories(SlashEngine PRIVATE ${CMAKE_SOURCE_DIR})
+
+target_include_directories(SlashEngine PUBLIC ${CMAKE_SOURCE_DIR}/vendor/spdlog/include)
+target_include_directories(SlashEngine PUBLIC ${CMAKE_SOURCE_DIR}/vendor/glfw3/include)
+target_include_directories(SlashEngine PUBLIC ${CMAKE_SOURCE_DIR}/vendor/vulkan/x86_64/include)
+target_include_directories(SlashEngine PUBLIC ${CMAKE_SOURCE_DIR}/vendor/stb)
+target_include_directories(SlashEngine PUBLIC ${CMAKE_SOURCE_DIR}/vendor/glm)
+target_include_directories(SlashEngine PUBLIC ${CMAKE_SOURCE_DIR}/vendor/imgui/examples)
+target_include_directories(SlashEngine PUBLIC ${CMAKE_SOURCE_DIR}/vendor/imgui)
+target_include_directories(SlashEngine PUBLIC ${CMAKE_SOURCE_DIR}/src)
+target_include_directories(SlashEngine PUBLIC ${CMAKE_SOURCE_DIR})
 
 target_link_directories(SlashEngine PRIVATE ${CMAKE_SOURCE_DIR}/vendor/vulkan/x86_64/lib)
 target_link_directories(SlashEngine PRIVATE ${CMAKE_BINARY_DIR}/vendor/glfw3/src)
@@ -121,4 +130,22 @@ target_link_directories(SlashEngine PRIVATE ${CMAKE_BINARY_DIR}/vendor/spdlog)
 add_definitions(-DGLFW_INCLUDE_VULKAN -DGLFW_INCLUDE_NONE -DSL_LINUX -DSL_BUILD_DLL -DSL_DEBUG -DSL_ENABLE_ASSERTS -DSL_RENDERER_VALIDATION)
 
 set_target_properties(SlashEngine PROPERTIES PUBLIC_HEADER Slash.hpp)
-target_link_libraries(SlashEngine PRIVATE project_options vulkan glfw3 spdlog X11 dl)
+target_link_libraries(SlashEngine PRIVATE project_options vulkan glfw3 spdlog glm_static X11 dl)
+
+
+#TestApp
+add_executable(TestApp Test/TestApp.cpp)
+target_include_directories(TestApp PRIVATE ${CMAKE_SOURCE_DIR})
+target_include_directories(TestApp PRIVATE ${CMAKE_SOURCE_DIR}/src)
+target_include_directories(TestApp PRIVATE ${CMAKE_SOURCE_DIR}/vendor/stb)
+target_include_directories(TestApp PRIVATE ${CMAKE_SOURCE_DIR}/vendor/glm)
+target_include_directories(TestApp PRIVATE ${CMAKE_SOURCE_DIR}/vendor/spdlog/include)
+target_include_directories(TestApp PRIVATE ${CMAKE_SOURCE_DIR}/vendor/glfw3/include)
+target_include_directories(TestApp PRIVATE ${CMAKE_SOURCE_DIR}/vendor/vulkan/x86_64/include)
+target_include_directories(TestApp PRIVATE ${CMAKE_SOURCE_DIR}/vendor/imgui)
+target_include_directories(TestApp PRIVATE ${CMAKE_SOURCE_DIR}/vendor/imgui/examples)
+
+target_link_directories(TestApp PRIVATE ${CMAKE_SOURCE_DIR}/../SlashEngine/cmake-build-debug)
+
+set_target_properties(TestApp PROPERTIES CXX_STANDARD 17)
+target_link_libraries(TestApp PRIVATE SlashEngine)

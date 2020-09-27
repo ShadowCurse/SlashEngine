@@ -12,27 +12,28 @@ enum class RenderType {
   None, Vulkan
 };
 
-class RenderModule {
+class Slash_API RenderModule {
 public:
   static void Init(Shared<Window> window);
   static void Init(Shared<Window> window, RenderType render_type);
+  static void Destroy();
 
   static void SetRenderer(RenderType render_type);
-  static  RenderType GetRenderType();
+  static auto GetRenderType() -> RenderType;
 
-  static VulkanRenderer* Renderer() { return instance_->renderer_; }
-  static VulkanResourceManager* ResourceManager() { return instance_->resource_manager_; }
+  static auto Renderer() -> VulkanRenderer& { return *instance_->renderer_; }
+  static auto ResourceManager() -> VulkanResourceManager& { return *instance_->resource_manager_; }
 
 private:
   RenderModule(Shared<Window> window, RenderType render_type);
-  ~RenderModule();
+  ~RenderModule() = default;
   inline static RenderModule* instance_ = nullptr;
 
   Shared<Window> window_;
   RenderType render_type_;
 
-  VulkanRenderer* renderer_;
-  VulkanResourceManager* resource_manager_;
+  std::unique_ptr<VulkanRenderer> renderer_;
+  std::unique_ptr<VulkanResourceManager> resource_manager_;
 };
 
 }

@@ -19,20 +19,21 @@ VulkanCommandBuffer::VulkanCommandBuffer(VulkanCore *vcore,
 }
 
 VulkanCommandBuffer::~VulkanCommandBuffer() {
-  vkFreeCommandBuffers(vcore_->GetDevice(), command_pool_->GetPool(), 1,
-                       &buffer_);
+//  vkFreeCommandBuffers(vcore_->GetDevice(), command_pool_->GetPool(), 1,
+//                       &buffer_);
 }
-void VulkanCommandBuffer::AddRenderableObject(VulkanRenderableObject *object) {
-  auto vertex_buffer = object->mesh_->vertex_buffer->GetBuffer();
-  auto vertex_offset = object->mesh_->vertex_buffer->GetOffset();
+
+void VulkanCommandBuffer::AddRenderableObject(VulkanRenderableObject &object) {
+  auto vertex_buffer = object.mesh_->VertexBuffer()->GetBuffer();
+  auto vertex_offset = object.mesh_->VertexBuffer()->GetOffset();
   vkCmdBindVertexBuffers(buffer_, 0, 1, &vertex_buffer, &vertex_offset);
-  auto index_buffer = object->mesh_->index_buffer->GetBuffer();
+  auto index_buffer = object.mesh_->IndexBuffer()->GetBuffer();
   vkCmdBindIndexBuffer(buffer_, index_buffer, 0, VK_INDEX_TYPE_UINT16);
-  auto pipeline_layout = object->pipeline_->GetPipelineLayout();
+  auto pipeline_layout = object.pipeline_->GetPipelineLayout();
   vkCmdBindDescriptorSets(
       buffer_, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline_layout, 0, 1,
-      &object->descriptor_set_->GetDescriptor(), 0, nullptr);
-  vkCmdDrawIndexed(buffer_, object->mesh_->index_buffer->GetElementsNum(), 1, 0,
+      &object.descriptor_set_->GetDescriptor(), 0, nullptr);
+  vkCmdDrawIndexed(buffer_, object.mesh_->IndexBuffer()->GetElementsNum(), 1, 0,
                    0, 0);
 }
 

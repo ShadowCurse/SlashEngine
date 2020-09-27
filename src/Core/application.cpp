@@ -10,15 +10,15 @@ namespace slash {
 #define BIND_EVENT_FN(x) std::bind(&Application::x, this, std::placeholders::_1)
 
 Application::Application() {
-  SL_CORE_ASSERT(!p_application_, "Application already exists");
-  p_application_ = this;
+  SL_CORE_ASSERT(!application_, "Application already exists");
+  application_ = this;
 
   window_ = std::shared_ptr<Window>(Window::Create());
   window_->SetEventCallback(BIND_EVENT_FN(OnEvent));
 
-  RenderModule::Init(window_, RenderType::Vulkan);
-
+  SceneManager::Init();
   ResourceManager::Init();
+  RenderModule::Init(window_, RenderType::Vulkan);
 }
 
 void Application::PushLayer(Layer *layer) { layer_stack_.PushLayer(layer); }
@@ -56,7 +56,10 @@ void Application::run() {
       SceneManager::DrawScene(time_step.GetSecond());
     }
   }
+  RenderModule::Renderer().WaitIdle();
+  SceneManager::Destroy();
   ResourceManager::Destroy();
+  RenderModule::Destroy();
   SL_CORE_INFO("Application shutdown");
 }
 
@@ -67,12 +70,12 @@ bool Application::OnWindowClose(WindowCloseEvent &e) {
 }
 
 bool Application::OnWindowResize(WindowResizeEvent &e) {
-  if (e.GetWidth() == 0 || e.GetHeigth() == 0) {
+  if (e.GetWidth() == 0 || e.GetHeight() == 0) {
     minimized_ = true;
     return false;
   }
 
-  // Renderer::OnWindowResize(e.GetWidth(), e.GetHeigth());
+  // Renderer::OnWindowResize(e.GetWidth(), e.GetHeight());
 
   minimized_ = false;
 

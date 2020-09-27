@@ -1,6 +1,8 @@
 #ifndef SLASHENGINE_CORE_CORE_H_
 #define SLASHENGINE_CORE_CORE_H_
 
+#include "slash_pch.hpp"
+
 #ifdef SL_WINDOWS
 //  Microsoft
 #ifdef SL_BUILD_DLL
@@ -9,8 +11,6 @@
 #define Slash_API __declspec(dllimport)
 #endif
 #elif defined SL_LINUX
-#include "slash_pch.hpp"
-//  GCC
 #ifdef SL_BUILD_DLL
 #define Slash_API __attribute__((visibility("default")))
 #else

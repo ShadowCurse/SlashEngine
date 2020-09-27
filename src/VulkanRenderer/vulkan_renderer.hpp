@@ -24,6 +24,7 @@ public:
   ~VulkanRenderer();
 
   void DrawFrame(double time);
+  void WaitIdle();
 
   [[nodiscard]] constexpr inline VulkanCore *GetCore() const { return vcore_; }
   [[nodiscard]] constexpr inline VulkanPipeline *GetPipeline() const {
@@ -31,12 +32,13 @@ public:
   }
   [[nodiscard]] std::shared_ptr<VulkanCommandBuffer>
   BeginOneTimeCommand() const;
+
   void EndOneTimeCommand(std::shared_ptr<VulkanCommandBuffer> command_buffer);
 
   [[nodiscard]] VulkanDescriptorSet *CreateDescriptorSet() const;
-
   void NewFrame();
   [[nodiscard]] std::shared_ptr<VulkanCommandBuffer> StartRenderCommand() const;
+
   void EndRenderCommand(std::shared_ptr<VulkanCommandBuffer> buffer);
 
 private:

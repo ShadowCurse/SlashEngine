@@ -6,26 +6,26 @@ namespace slash {
 
 void RenderModule::Init(Shared<Window> window) {
   instance_ = new RenderModule(std::move(window), RenderType::None);
-  instance_->renderer_ = nullptr;
-  instance_->resource_manager_ = nullptr;
 }
 
 void RenderModule::Init(Shared<Window> window, RenderType render_type) {
   instance_ = new RenderModule(std::move(window), render_type);
   switch (render_type) {
   case RenderType::None: {
-    instance_->renderer_ = nullptr;
-    instance_->resource_manager_ = nullptr;
     break;
   }
   case RenderType::Vulkan: {
-    instance_->renderer_ = new VulkanRenderer(instance_->window_.get());
-    instance_->resource_manager_ = new VulkanResourceManager(instance_->renderer_);
+    instance_->renderer_ = std::make_unique<VulkanRenderer>(instance_->window_.get());
+    instance_->resource_manager_ = std::make_unique<VulkanResourceManager>(instance_->renderer_.get());
     break;
   }
   default:
     throw std::runtime_error("invalid render type");
   }
+}
+
+void RenderModule::Destroy() {
+  delete instance_;
 }
 
 void RenderModule::SetRenderer(RenderType render_type) {
@@ -51,10 +51,5 @@ RenderType RenderModule::GetRenderType() { return instance_->render_type_; }
 
 RenderModule::RenderModule(Shared<Window> window, RenderType render_type)
     : window_(window), render_type_(render_type) {}
-
-RenderModule::~RenderModule() {
-  delete renderer_;
-  delete resource_manager_;
-}
 
 } // namespace slash

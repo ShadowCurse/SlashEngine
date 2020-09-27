@@ -7,8 +7,6 @@
 
 namespace slash {
 
-static bool GLFWInitialized = false;
-
 static void GLFWErrorCallback(int error, const char *description) {
   SL_CORE_ERROR("GLFW error ({0}): {1}", error, description);
 }
@@ -51,11 +49,11 @@ void LinuxWindow::Init(const WindowProps &props) {
   SL_CORE_INFO("Creating window Title: {0}, Width: {1}, Height: {2}",
                props.title, props.width, props.height);
 
-  if (!GLFWInitialized) {
+  if (!GLFW_initialized_) {
     int success = glfwInit();
-    SL_CORE_ASSERT(success, "Could not initialized GLFW with Vulcan");
+    SL_CORE_ASSERT(success, "Could not initialized GLFW with Vulkan");
     glfwSetErrorCallback(GLFWErrorCallback);
-    GLFWInitialized = true;
+    GLFW_initialized_ = true;
   }
 
   glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
@@ -96,23 +94,22 @@ void LinuxWindow::Init(const WindowProps &props) {
                                  [[maybe_unused]] int mods) {
     auto data = static_cast<WindowData *>(glfwGetWindowUserPointer(window));
     switch (action) {
-    case GLFW_PRESS: {
-      KeyPressedEvent event(key, 0);
-      data->EventCallback(event);
-      break;
-    }
-    case GLFW_RELEASE: {
-      KeyReleasedEvent event(key);
-      data->EventCallback(event);
-      break;
-    }
-    case GLFW_REPEAT: {
-      KeyPressedEvent event(key, 1);
-      data->EventCallback(event);
-      break;
-    }
-    default:
-      break;
+      case GLFW_PRESS: {
+        KeyPressedEvent event(key, 0);
+        data->EventCallback(event);
+        break;
+      }
+      case GLFW_RELEASE: {
+        KeyReleasedEvent event(key);
+        data->EventCallback(event);
+        break;
+      }
+      case GLFW_REPEAT: {
+        KeyPressedEvent event(key, 1);
+        data->EventCallback(event);
+        break;
+      }
+      default:break;
     }
   });
 
@@ -127,18 +124,17 @@ void LinuxWindow::Init(const WindowProps &props) {
                                          [[maybe_unused]] int mods) {
     auto data = static_cast<WindowData *>(glfwGetWindowUserPointer(window));
     switch (action) {
-    case GLFW_PRESS: {
-      MouseButtonPressedEvent event(button);
-      data->EventCallback(event);
-      break;
-    }
-    case GLFW_RELEASE: {
-      MouseButtonReleasedEvent event(button);
-      data->EventCallback(event);
-      break;
-    }
-    default:
-      break;
+      case GLFW_PRESS: {
+        MouseButtonPressedEvent event(button);
+        data->EventCallback(event);
+        break;
+      }
+      case GLFW_RELEASE: {
+        MouseButtonReleasedEvent event(button);
+        data->EventCallback(event);
+        break;
+      }
+      default:break;
     }
   });
 

@@ -7,20 +7,20 @@
 namespace slash {
 
 class Slash_API Log {
-private:
+ private:
   Log() = default;
 
-public:
+ public:
   static void Init();
 
-  inline static Shared<spdlog::logger> &GetEngineLogger() {
+  static auto GetEngineLogger() -> Shared<spdlog::logger> & {
     return engineLogger;
   }
-  inline static Shared<spdlog::logger> &GetApplicationLogger() {
+  static auto GetApplicationLogger() -> Shared<spdlog::logger> & {
     return applicationLogger;
   }
 
-private:
+ private:
   static Shared<spdlog::logger> engineLogger;
   static Shared<spdlog::logger> applicationLogger;
 };

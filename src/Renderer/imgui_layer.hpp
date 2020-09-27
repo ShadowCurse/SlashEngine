@@ -7,7 +7,7 @@
 
 namespace slash {
 
-class ImGuiOverlay final : public Layer {
+class Slash_API ImGuiOverlay final : public Layer {
 public:
   ImGuiOverlay(slash::ImGuiDrawFn &fn);
   ~ImGuiOverlay() final;

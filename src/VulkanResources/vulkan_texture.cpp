@@ -94,6 +94,7 @@ VulkanTexture::VulkanTexture(VulkanCore *vcore, uint32_t width, uint32_t height,
 }
 
 VulkanTexture::~VulkanTexture() {
+  vkDestroyImageView(vcore_->GetDevice(), image_view_, nullptr);
   vkDestroyImage(vcore_->GetDevice(), image_, nullptr);
   vkFreeMemory(vcore_->GetDevice(), memory_, nullptr);
 }

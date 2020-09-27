@@ -22,6 +22,7 @@ private:
 
 class VulkanTexture {
 public:
+  VulkanTexture() = default;
   VulkanTexture(VulkanCore *vcore, uint32_t width, uint32_t height,
                 VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage,
                 VkMemoryPropertyFlags properties);

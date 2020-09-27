@@ -20,7 +20,7 @@ public:
   void EndRenderPass();
   void BindPipeline();
 
-  void AddRenderableObject(VulkanRenderableObject *object);
+  void AddRenderableObject(VulkanRenderableObject &object);
 
   [[nodiscard]] constexpr VkCommandBuffer GetBuffer() const { return buffer_; };
 

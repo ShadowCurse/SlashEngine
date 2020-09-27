@@ -104,7 +104,7 @@ VulkanSwapChain::VulkanSwapChain(VulkanCore *vcore,
 
 VulkanSwapChain::~VulkanSwapChain() {
   for (size_t i(0); i < images_.size(); ++i) {
-    vkDestroyImage(vcore_->GetDevice(), images_[i], nullptr);
+//    vkDestroyImage(vcore_->GetDevice(), images_[i], nullptr);
     vkDestroyImageView(vcore_->GetDevice(), image_views_[i], nullptr);
   }
   vkDestroySwapchainKHR(vcore_->GetDevice(), swap_chain_, nullptr);

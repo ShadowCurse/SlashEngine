@@ -37,12 +37,12 @@ public:
   VulkanRenderPass(VulkanCore *vcore, VulkanSwapChain* swap_chain);
   ~VulkanRenderPass();
 
-  const VkRenderPass GetRenderPass() const;
+  VkRenderPass GetRenderPass() const;
 
 private:
   VulkanCore* vcore_;
   VulkanSwapChain* swap_chain_;
-  VkRenderPass render_pass_;
+  VkRenderPass render_pass_ = VK_NULL_HANDLE;
 };
 
 } // namespace slash

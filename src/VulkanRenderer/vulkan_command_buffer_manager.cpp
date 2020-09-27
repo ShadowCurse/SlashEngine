@@ -14,6 +14,12 @@ VulkanCommandBufferManager::VulkanCommandBufferManager(
               {vcore_, queue_family_index,
                VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT}}} {}
 
+VulkanCommandBufferManager::~VulkanCommandBufferManager() {
+  vkResetCommandPool(vcore_->GetDevice(), pool_.GetPool(), 0);
+  for (auto& pool : pools_)
+    vkResetCommandPool(vcore_->GetDevice(), pool.GetPool(), 0);
+}
+
 std::shared_ptr<VulkanCommandBuffer>
 VulkanCommandBufferManager::CreateBuffer() {
   auto buffer = std::make_shared<VulkanCommandBuffer>(
@@ -52,7 +58,6 @@ VulkanCommandBufferManager::CreateFrameCommandBuffer() {
   frame_command_buffers_[current_pool].push_back(buffer);
   return buffer;
 }
-
 void VulkanCommandBufferManager::FreeFrameCommandBuffer(
     std::shared_ptr<VulkanCommandBuffer> buffer) {}
 

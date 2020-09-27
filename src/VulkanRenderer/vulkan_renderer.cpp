@@ -93,7 +93,6 @@ void VulkanRenderer::DrawFrame(double time) {
       image_available_semaphores_[current_frame_]->GetSemaphore(),
       VK_NULL_HANDLE, &current_index_);
   if (result == VK_ERROR_OUT_OF_DATE_KHR) {
-    //    window_data_->resized = false;
     RecreateSwapChain();
     return;
   } else if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR) {
@@ -143,8 +142,12 @@ void VulkanRenderer::DrawFrame(double time) {
   current_frame_ = (current_frame_ + 1) % max_frames_;
 }
 
-void VulkanRenderer::RecreateSwapChain() {
+void VulkanRenderer::WaitIdle() {
+  vkDeviceWaitIdle(vcore_->GetDevice());
+}
 
+void VulkanRenderer::RecreateSwapChain() {
+  vkDeviceWaitIdle(vcore_->GetDevice());
   for (auto &frame_buffer : frame_buffers_) {
     delete frame_buffer;
   }
@@ -155,6 +158,7 @@ void VulkanRenderer::RecreateSwapChain() {
   delete swap_chain_;
 
   swap_chain_ = new VulkanSwapChain(vcore_, {graphics_queue_, present_queue_});
+  // TODO wait for fix
   render_pass_ = new VulkanRenderPass(vcore_, swap_chain_);
   VulkanShader vertex_shader(
       vcore_, "/home/antaraz/Projects/SlashEngine/src/Shaders/vert.spv");

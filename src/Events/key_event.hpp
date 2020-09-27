@@ -6,39 +6,39 @@
 namespace slash {
 
 class Slash_API KeyEvent : public Event {
-public:
-  [[nodiscard]] inline int GetKeyCode() const { return key_code_; }
+ public:
+  [[nodiscard]] auto GetKeyCode() const -> int { return key_code_; }
 
   EVENT_CLASS_CATEGORY(EventCategoryKeyboard | EventCategoryInput)
-protected:
+ protected:
   explicit KeyEvent(int keyCode) : key_code_(keyCode) {}
 
   int key_code_;
 };
 
 class Slash_API KeyPressedEvent : public KeyEvent {
-public:
+ public:
   KeyPressedEvent(int keycode, int repeatCount)
       : KeyEvent(keycode), repeat_count_(repeatCount) {}
 
-  [[nodiscard]] inline int GetRepeatCount() const { return repeat_count_; }
+  [[nodiscard]] auto GetRepeatCount() const -> int { return repeat_count_; }
 
-  [[nodiscard]] std::string ToString() const final {
+  [[nodiscard]] auto ToString() const -> std::string final {
     std::stringstream ss;
     ss << "KeyPressedEvent: " << key_code_ << ", " << repeat_count_;
     return ss.str();
   }
 
   EVENT_CLASS_TYPE(KeyPressed)
-private:
+ private:
   int repeat_count_;
 };
 
 class Slash_API KeyReleasedEvent : public KeyEvent {
-public:
+ public:
   explicit KeyReleasedEvent(int keyCode) : KeyEvent(keyCode) {}
 
-  [[nodiscard]] std::string ToString() const final {
+  [[nodiscard]] auto ToString() const -> std::string final {
     std::stringstream ss;
     ss << "KeyReleasedEvent: " << key_code_;
     return ss.str();
@@ -47,10 +47,10 @@ public:
 };
 
 class Slash_API KeyTypedEvent : public KeyEvent {
-public:
+ public:
   explicit KeyTypedEvent(int keycode) : KeyEvent(keycode) {}
 
-  [[nodiscard]] std::string ToString() const final {
+  [[nodiscard]] auto ToString() const -> std::string final {
     std::stringstream ss;
     ss << "KeyTypedEvent: " << key_code_;
     return ss.str();

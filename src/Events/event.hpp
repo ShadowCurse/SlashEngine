@@ -34,34 +34,35 @@ enum EventCategory {
 };
 
 class Slash_API Event {
-public:
+ public:
   virtual ~Event() = default;
   bool Handled = false;
 
-  [[nodiscard]] virtual EventType GetEventType() const = 0;
-  [[nodiscard]] virtual const char *GetName() const = 0; // only for debug
-  [[nodiscard]] virtual int GetCategoryFlags() const = 0;
-  [[nodiscard]] virtual std::string ToString() const { return GetName(); }
-  [[nodiscard]] inline bool IsInCategory(EventCategory category) {
+  [[nodiscard]] virtual auto GetEventType() const -> EventType = 0;
+  [[nodiscard]] virtual auto GetName() const -> const char * = 0; // only for debug
+  [[nodiscard]] virtual auto GetCategoryFlags() const -> int = 0;
+  [[nodiscard]] virtual auto ToString() const -> std::string { return GetName(); }
+  [[nodiscard]] auto IsInCategory(EventCategory category) -> bool {
     return GetCategoryFlags() & category;
   }
 };
 
 #define EVENT_CLASS_TYPE(type)                                                 \
-  static EventType GetStaticType() { return EventType::type; }                 \
-  virtual EventType GetEventType() const override { return GetStaticType(); }  \
-  virtual const char *GetName() const override { return #type; }
+  static auto GetStaticType() ->EventType { return EventType::type; }                 \
+  virtual auto GetEventType() const -> EventType override { return GetStaticType(); }  \
+  virtual auto GetName() const -> const char * override { return #type; }
 
 #define EVENT_CLASS_CATEGORY(category)                                         \
-  virtual int GetCategoryFlags() const override { return category; }
+  virtual auto GetCategoryFlags() const -> int override { return category; }
 
-class EventDispatcher {
-  template <typename T> using EventFn = std::function<bool(T &)>;
+class Slash_API EventDispatcher {
+  template<typename T> using EventFn = std::function<bool(T &)>;
 
-public:
+ public:
   explicit EventDispatcher(Event &event) : event_(event) {}
 
-  template <typename T> bool Dispatch(EventFn<T> func) {
+  template<typename T>
+  auto Dispatch(EventFn<T> func) -> bool {
     if (event_.GetEventType() == T::GetStaticType()) {
       event_.Handled = func(static_cast<T &>(event_));
       return true;
@@ -69,14 +70,9 @@ public:
     return false;
   }
 
-private:
+ private:
   Event &event_;
 };
-
-inline std::ostream &operator<<(std::ostream &os, const Event &e) {
-  os << e.ToString();
-  return os;
-}
 
 } // namespace slash
 

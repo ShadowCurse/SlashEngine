@@ -81,7 +81,7 @@ VulkanRenderPass::~VulkanRenderPass() {
   vkDestroyRenderPass(vcore_->GetDevice(), render_pass_, nullptr);
 }
 
-const VkRenderPass VulkanRenderPass::GetRenderPass() const {
+VkRenderPass VulkanRenderPass::GetRenderPass() const {
   return render_pass_;
 }
 

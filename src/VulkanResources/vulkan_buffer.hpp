@@ -8,6 +8,7 @@ namespace slash {
 
 class VulkanBuffer {
 public:
+  VulkanBuffer() = default;
   VulkanBuffer(VulkanCore *vcore, VkDeviceSize buffer_size,
                VkBufferUsageFlags usage_flags,
                VkMemoryPropertyFlags memory_property_flags);

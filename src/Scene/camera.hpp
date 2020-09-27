@@ -1,9 +1,11 @@
-#ifndef SLASHENGINE_SRC_RENDERER_CAMERA_HPP_
-#define SLASHENGINE_SRC_RENDERER_CAMERA_HPP_
+#ifndef SLASHENGINE_CAMERA_HPP
+#define SLASHENGINE_CAMERA_HPP
 
 #include "Core/core.hpp"
+
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
+
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
 
@@ -16,6 +18,7 @@ class Slash_API Camera {
         glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f),
                     glm::vec3(0.0f, 0.0f, 1.0f));
   }
+
   ~Camera() = default;
 
   void SetRatio(float ratio) {
@@ -26,6 +29,7 @@ class Slash_API Camera {
   }
 
   [[nodiscard]] constexpr glm::mat4 GetView() const { return view_; }
+
   [[nodiscard]] constexpr glm::mat4 GetProj() const { return proj_; }
 
  private:
@@ -35,4 +39,6 @@ class Slash_API Camera {
 
 } // namespace slash
 
-#endif //SLASHENGINE_SRC_RENDERER_CAMERA_HPP_
+
+
+#endif //SLASHENGINE_CAMERA_HPP

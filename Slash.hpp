@@ -10,19 +10,26 @@
 #include "Core/time_step.hpp"
 #include "Core/window.hpp"
 
+#include "Ecs/componenet.hpp"
+#include "Ecs/ecs.hpp"
+#include "Ecs/entity.hpp"
+
 #include "Events/application_event.hpp"
 #include "Events/event.hpp"
 #include "Events/key_event.hpp"
 #include "Events/mouse_event.hpp"
 
 #include "GameResources/mesh_3d.hpp"
-#include "GameResources/model.hpp"
-#include "GameResources/model_manager.hpp"
+#include "GameResources/texture.hpp"
+#include "GameResources/transform.hpp"
 #include "GameResources/resource_manager.hpp"
-#include "GameResources/texture_manager.hpp"
 
 #include "Renderer/vertex.hpp"
 
+#include "RendererModule/render_module.hpp"
+
+#include "Scene/camera.hpp"
+#include "Scene/scene.hpp"
 #include "Scene/scene_manager.hpp"
 
 // -------------------
