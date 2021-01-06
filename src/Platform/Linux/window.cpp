@@ -1,3 +1,6 @@
+
+#include <WindowModule/window.hpp>
+
 #include "linux_window.hpp"
 
 #include "Core/log.hpp"
@@ -13,21 +16,22 @@ static void GLFWErrorCallback(int error, const char *description) {
 
 // body of static Create method in core/Window.hpp
 Window *Window::Create(const WindowProps &props) {
-  return new LinuxWindow(props);
+  return new Window(props);
 }
 
-LinuxWindow::LinuxWindow(const WindowProps &props) { Init(props); }
+Window::Window(const WindowProps &props) { Init(props); }
 
-LinuxWindow::~LinuxWindow() { Shutdown(); }
+Window::~Window() { Shutdown(); }
 
-void LinuxWindow::OnUpdate() { glfwPollEvents(); }
 
-uint LinuxWindow::GetWidth() const { return data_.width; }
-uint LinuxWindow::GetHeight() const { return data_.height; }
+void Window::OnUpdate() { glfwPollEvents(); }
 
-bool LinuxWindow::IsVSync() const { return data_.VSync; }
+uint Window::GetWidth() const { return data_.width; }
+uint Window::GetHeight() const { return data_.height; }
 
-void LinuxWindow::SetVSync([[maybe_unused]] bool enabled) {
+bool Window::IsVSync() const { return data_.VSync; }
+
+void Window::SetVSync([[maybe_unused]] bool enabled) {
   // if(enabled)
   //     glfwSwapInterval(1);
   // else
@@ -35,13 +39,13 @@ void LinuxWindow::SetVSync([[maybe_unused]] bool enabled) {
   // _data.VSync = enabled;
 }
 
-void LinuxWindow::SetEventCallback(const EventCallBackFn &callback) {
+void Window::SetEventCallback(const EventCallBackFn &callback) {
   data_.EventCallback = callback;
 }
 
-void *LinuxWindow::GetNativeWindow() const { return window_; }
+void *Window::GetNativeWindow() const { return window_; }
 
-void LinuxWindow::Init(const WindowProps &props) {
+void Window::Init(const WindowProps &props) {
   data_.title = props.title;
   data_.width = props.width;
   data_.height = props.height;
@@ -153,9 +157,10 @@ void LinuxWindow::Init(const WindowProps &props) {
       });
 }
 
-void LinuxWindow::Shutdown() {
+void Window::Shutdown() {
   glfwDestroyWindow(window_);
   glfwTerminate();
 }
+
 
 } // namespace slash

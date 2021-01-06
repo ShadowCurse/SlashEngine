@@ -3,7 +3,7 @@
 namespace slash {
 
 VulkanRenderer::VulkanRenderer(Window *window) {
-  vcore_ = new VulkanCore(static_cast<GLFWwindow *>(window->GetNativeWindow()));
+  vcore_ = new VulkanCore(window->get_native_window());
   auto queue_families = vcore_->GetQueueFamilies();
   graphics_queue_ =
       new VulkanQueue(vcore_, queue_families.graphicsFamily.value());

@@ -1,15 +1,15 @@
-#ifndef SLASHENGINE_PLATFORM_LINUX_LINUX_WINDOW_H_
-#define SLASHENGINE_PLATFORM_LINUX_LINUX_WINDOW_H_
+#ifndef SLASHENGINE_WINDOWMODULE_WINDOW_H_
+#define SLASHENGINE_WINDOWMODULE_WINDOW_H_
 
 #include "Core/window.hpp"
 #include <GLFW/glfw3.h>
 
 namespace slash {
 
-class Slash_API LinuxWindow final : public Window {
+class Slash_API Window final : public Window {
  public:
-  explicit LinuxWindow(const WindowProps &props);
-  ~LinuxWindow() final;
+  explicit Window(const WindowProps &props);
+  ~Window() final;
 
   void OnUpdate() final;
   uint GetWidth() const final;
@@ -30,4 +30,4 @@ class Slash_API LinuxWindow final : public Window {
 
 } // namespace slash
 
-#endif // SLASHENGINE_PLATFORM_LINUX_LINUX_WINDOW_H_
+#endif // SLASHENGINE_WINDOWMODULE_WINDOW_H_

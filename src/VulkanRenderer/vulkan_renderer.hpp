@@ -2,7 +2,7 @@
 #define SLASHENGINE_SRC_VULKANRENDERER_VULKAN_RENDERER_HPP_
 
 #include "Core/core.hpp"
-#include "Core/window.hpp"
+#include "WindowModule/window.hpp"
 #include "VulkanResources/vulkan_frame_buffer.hpp"
 #include "vulkan_command_buffer.hpp"
 #include "vulkan_command_buffer_manager.hpp"

@@ -44,23 +44,23 @@ class Slash_API WindowMovedEvent : public Event {
   EVENT_CLASS_CATEGORY(EventCategoryApplication)
 };
 
-class Slash_API AppTickEvent : public Event {
- public:
-  EVENT_CLASS_TYPE(AppTick)
-  EVENT_CLASS_CATEGORY(EventCategoryApplication)
-};
-
-class Slash_API AppUpdateEvent : public Event {
- public:
-  EVENT_CLASS_TYPE(AppUpdate)
-  EVENT_CLASS_CATEGORY(EventCategoryApplication)
-};
-
-class Slash_API AppRenderEvent : public Event {
- public:
-  EVENT_CLASS_TYPE(AppRender)
-  EVENT_CLASS_CATEGORY(EventCategoryApplication)
-};
+//class Slash_API AppTickEvent : public Event {
+// public:
+//  EVENT_CLASS_TYPE(AppTick)
+//  EVENT_CLASS_CATEGORY(EventCategoryApplication)
+//};
+//
+//class Slash_API AppUpdateEvent : public Event {
+// public:
+//  EVENT_CLASS_TYPE(AppUpdate)
+//  EVENT_CLASS_CATEGORY(EventCategoryApplication)
+//};
+//
+//class Slash_API AppRenderEvent : public Event {
+// public:
+//  EVENT_CLASS_TYPE(AppRender)
+//  EVENT_CLASS_CATEGORY(EventCategoryApplication)
+//};
 
 } // namespace slash
 

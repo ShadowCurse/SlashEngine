@@ -1,11 +1,11 @@
 // main header file for Slash
 
-#include "Core/application.hpp"
+#include "Core/app.hpp"
 #include "Core/core.hpp"
 #include "Core/input.hpp"
 #include "Core/key_codes.hpp"
-#include "Core/layer.hpp"
-#include "Core/layer_stack.hpp"
+#include "src/LayerModule/layer.hpp"
+#include "src/LayerModule/layer_stack.hpp"
 #include "Core/log.hpp"
 #include "Core/time_step.hpp"
 #include "Core/window.hpp"
@@ -31,6 +31,10 @@
 #include "Scene/camera.hpp"
 #include "Scene/scene.hpp"
 #include "Scene/scene_manager.hpp"
+
+
+#include "WindowModule/module.hpp"
+#include "LayerModule/module.hpp"
 
 // -------------------
 

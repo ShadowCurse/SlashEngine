@@ -21,72 +21,72 @@ void VulkanImGui::Init(GLFWwindow *window, VkInstance instance,
   render_pass_depth_format_ = render_pass_depth_format;
   image_count_ = image_count;
   SL_CORE_INFO("INITIALIZING IMGUI");
-  CreateDescriptorPool();
-  CreateCommandPool();
-  CreateCommandBuffers();
-  CreateRenderPass();
-
-  IMGUI_CHECKVERSION();
-  ImGui::CreateContext();
-  //  ImGuiIO &io = ImGui::GetIO();
-  //  (void)io;
-  // io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable
-  // Keyboard Controls io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad; //
-  // Enable Gamepad Controls
-
-  ImGui::StyleColorsDark();
-
-  ImGui_ImplGlfw_InitForVulkan(window_, false);
-  ImGui_ImplVulkan_InitInfo init_info = {};
-  init_info.Instance = instance_;
-  init_info.PhysicalDevice = physical_device_;
-  init_info.Device = device_;
-  init_info.QueueFamily = queue_family_;
-  init_info.Queue = graphics_queue_;
-  init_info.PipelineCache = pipeline_cache_;
-  init_info.DescriptorPool = descriptor_pool_;
-  init_info.Allocator = nullptr;
-  init_info.MinImageCount = 2;
-  init_info.ImageCount = image_count_;
-  init_info.CheckVkResultFn = nullptr;
-  ImGui_ImplVulkan_Init(&init_info, render_pass_);
-
-  VkCommandBufferAllocateInfo alloc_info = {};
-  alloc_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-  alloc_info.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-  alloc_info.commandPool = command_pool_;
-  alloc_info.commandBufferCount = 1;
-  VkCommandBuffer command_buffer;
-  vkAllocateCommandBuffers(device_, &alloc_info, &command_buffer);
-  VkCommandBufferBeginInfo begin_info = {};
-  begin_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-  begin_info.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
-
-  vkBeginCommandBuffer(command_buffer, &begin_info);
-  ImGui_ImplVulkan_CreateFontsTexture(command_buffer);
-  vkEndCommandBuffer(command_buffer);
-
-  VkSubmitInfo submit_info = {};
-  submit_info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-  submit_info.commandBufferCount = 1;
-  submit_info.pCommandBuffers = &command_buffer;
-  vkQueueSubmit(graphics_queue_, 1, &submit_info, VK_NULL_HANDLE);
-  vkQueueWaitIdle(graphics_queue_);
-  vkFreeCommandBuffers(device_, command_pool_, 1, &command_buffer);
-
-  ImGui_ImplVulkan_DestroyFontUploadObjects();
+//  CreateDescriptorPool();
+//  CreateCommandPool();
+//  CreateCommandBuffers();
+//  CreateRenderPass();
+//
+//  IMGUI_CHECKVERSION();
+//  ImGui::CreateContext();
+//  //  ImGuiIO &io = ImGui::GetIO();
+//  //  (void)io;
+//  // io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable
+//  // Keyboard Controls io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad; //
+//  // Enable Gamepad Controls
+//
+//  ImGui::StyleColorsDark();
+//
+//  ImGui_ImplGlfw_InitForVulkan(window_, false);
+//  ImGui_ImplVulkan_InitInfo init_info = {};
+//  init_info.Instance = instance_;
+//  init_info.PhysicalDevice = physical_device_;
+//  init_info.Device = device_;
+//  init_info.QueueFamily = queue_family_;
+//  init_info.Queue = graphics_queue_;
+//  init_info.PipelineCache = pipeline_cache_;
+//  init_info.DescriptorPool = descriptor_pool_;
+//  init_info.Allocator = nullptr;
+//  init_info.MinImageCount = 2;
+//  init_info.ImageCount = image_count_;
+//  init_info.CheckVkResultFn = nullptr;
+//  ImGui_ImplVulkan_Init(&init_info, render_pass_);
+//
+//  VkCommandBufferAllocateInfo alloc_info = {};
+//  alloc_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+//  alloc_info.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+//  alloc_info.commandPool = command_pool_;
+//  alloc_info.commandBufferCount = 1;
+//  VkCommandBuffer command_buffer;
+//  vkAllocateCommandBuffers(device_, &alloc_info, &command_buffer);
+//  VkCommandBufferBeginInfo begin_info = {};
+//  begin_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+//  begin_info.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+//
+//  vkBeginCommandBuffer(command_buffer, &begin_info);
+//  ImGui_ImplVulkan_CreateFontsTexture(command_buffer);
+//  vkEndCommandBuffer(command_buffer);
+//
+//  VkSubmitInfo submit_info = {};
+//  submit_info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+//  submit_info.commandBufferCount = 1;
+//  submit_info.pCommandBuffers = &command_buffer;
+//  vkQueueSubmit(graphics_queue_, 1, &submit_info, VK_NULL_HANDLE);
+//  vkQueueWaitIdle(graphics_queue_);
+//  vkFreeCommandBuffers(device_, command_pool_, 1, &command_buffer);
+//
+//  ImGui_ImplVulkan_DestroyFontUploadObjects();
 }
 
 void VulkanImGui::Destroy() {
   SL_CORE_INFO("DESTROYING IMGUI");
-
-  vkDestroyCommandPool(device_, command_pool_, nullptr);
-  vkDestroyRenderPass(device_, render_pass_, nullptr);
-  vkDestroyDescriptorPool(device_, descriptor_pool_, nullptr);
-
-  ImGui_ImplVulkan_Shutdown();
-  ImGui_ImplGlfw_Shutdown();
-  ImGui::DestroyContext();
+//
+//  vkDestroyCommandPool(device_, command_pool_, nullptr);
+//  vkDestroyRenderPass(device_, render_pass_, nullptr);
+//  vkDestroyDescriptorPool(device_, descriptor_pool_, nullptr);
+//
+//  ImGui_ImplVulkan_Shutdown();
+//  ImGui_ImplGlfw_Shutdown();
+//  ImGui::DestroyContext();
 }
 
 void VulkanImGui::SetDrawFn(ImGuiDrawFn& fn) {
@@ -96,53 +96,53 @@ void VulkanImGui::SetDrawFn(ImGuiDrawFn& fn) {
 void VulkanImGui::UpdateCommandBuffers(VkFramebuffer framebuffer,
                                        VkExtent2D extend) {
 
-  static float f = 0.0f;
-  static int counter = 0;
-  static bool show_demo_window = true;
-  ImGui_ImplVulkan_NewFrame();
-  ImGui_ImplGlfw_NewFrame();
-  ImGui::NewFrame();
-  if (draw_fn_) draw_fn_();
-  ImGui::ShowDemoWindow(&show_demo_window);
-//  ImGui::Begin("Hello, world!");
-//  ImGui::Text("This is some useful text.");
-//  ImGui::SliderFloat("float", &f, 0.0f, 1.0f);
-//  if (ImGui::Button("Button"))
-//    counter++;
-//  ImGui::SameLine();
-//  ImGui::Text("counter = %d", counter);
-//  ImGui::Text("Application average %.3f ms/frame (%.1f FPS)",
-//              1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
-//  ImGui::End();
-  ImGui::Render();
-
-  vkDeviceWaitIdle(device_);
-  vkResetCommandBuffer(command_buffer_, 0);
-  VkCommandBufferBeginInfo begin_info = {};
-  begin_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-  begin_info.flags = VK_COMMAND_BUFFER_USAGE_RENDER_PASS_CONTINUE_BIT;
-  begin_info.pInheritanceInfo = nullptr; //&inheritance_info;
-  if (vkBeginCommandBuffer(command_buffer_, &begin_info) != VK_SUCCESS) {
-    throw std::runtime_error("failed to begin recording command buffer");
-  }
-  VkRenderPassBeginInfo render_pass_info = {};
-  render_pass_info.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-  render_pass_info.renderPass = render_pass_;
-  render_pass_info.framebuffer = framebuffer;
-  render_pass_info.renderArea.offset = {0, 0};
-  render_pass_info.renderArea.extent = extend;
-  std::array<VkClearValue, 2> clear_values = {};
-  clear_values[0].color = {{0.0f, 0.0f, 0.0f, 0.0f}};
-  clear_values[1].depthStencil = {1.0f, 0};
-  render_pass_info.clearValueCount = static_cast<uint32_t>(clear_values.size());
-  render_pass_info.pClearValues = clear_values.data();
-  vkCmdBeginRenderPass(command_buffer_, &render_pass_info,
-                       VK_SUBPASS_CONTENTS_INLINE);
-  ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), command_buffer_);
-  vkCmdEndRenderPass(command_buffer_);
-  if (vkEndCommandBuffer(command_buffer_) != VK_SUCCESS) {
-    throw std::runtime_error("failed to record imgui command buffer");
-  }
+//  static float f = 0.0f;
+//  static int counter = 0;
+//  static bool show_demo_window = true;
+//  ImGui_ImplVulkan_NewFrame();
+//  ImGui_ImplGlfw_NewFrame();
+//  ImGui::NewFrame();
+//  if (draw_fn_) draw_fn_();
+//  ImGui::ShowDemoWindow(&show_demo_window);
+////  ImGui::Begin("Hello, world!");
+////  ImGui::Text("This is some useful text.");
+////  ImGui::SliderFloat("float", &f, 0.0f, 1.0f);
+////  if (ImGui::Button("Button"))
+////    counter++;
+////  ImGui::SameLine();
+////  ImGui::Text("counter = %d", counter);
+////  ImGui::Text("Application average %.3f ms/frame (%.1f FPS)",
+////              1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+////  ImGui::End();
+//  ImGui::Render();
+//
+//  vkDeviceWaitIdle(device_);
+//  vkResetCommandBuffer(command_buffer_, 0);
+//  VkCommandBufferBeginInfo begin_info = {};
+//  begin_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+//  begin_info.flags = VK_COMMAND_BUFFER_USAGE_RENDER_PASS_CONTINUE_BIT;
+//  begin_info.pInheritanceInfo = nullptr; //&inheritance_info;
+//  if (vkBeginCommandBuffer(command_buffer_, &begin_info) != VK_SUCCESS) {
+//    throw std::runtime_error("failed to begin recording command buffer");
+//  }
+//  VkRenderPassBeginInfo render_pass_info = {};
+//  render_pass_info.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+//  render_pass_info.renderPass = render_pass_;
+//  render_pass_info.framebuffer = framebuffer;
+//  render_pass_info.renderArea.offset = {0, 0};
+//  render_pass_info.renderArea.extent = extend;
+//  std::array<VkClearValue, 2> clear_values = {};
+//  clear_values[0].color = {{0.0f, 0.0f, 0.0f, 0.0f}};
+//  clear_values[1].depthStencil = {1.0f, 0};
+//  render_pass_info.clearValueCount = static_cast<uint32_t>(clear_values.size());
+//  render_pass_info.pClearValues = clear_values.data();
+//  vkCmdBeginRenderPass(command_buffer_, &render_pass_info,
+//                       VK_SUBPASS_CONTENTS_INLINE);
+//  ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), command_buffer_);
+//  vkCmdEndRenderPass(command_buffer_);
+//  if (vkEndCommandBuffer(command_buffer_) != VK_SUCCESS) {
+//    throw std::runtime_error("failed to record imgui command buffer");
+//  }
 }
 
 VkCommandBuffer VulkanImGui::CommandBuffer() {
@@ -150,7 +150,7 @@ VkCommandBuffer VulkanImGui::CommandBuffer() {
 }
 
 void VulkanImGui::SetMinimalImageCount(uint32_t image_count) {
-  ImGui_ImplVulkan_SetMinImageCount(image_count);
+//  ImGui_ImplVulkan_SetMinImageCount(image_count);
 }
 
 void VulkanImGui::CreateDescriptorPool() {

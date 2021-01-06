@@ -1,14 +1,16 @@
 #include "render_module.hpp"
+
+#include <utility>
 #include "VulkanRenderer/vulkan_renderer.hpp"
 #include "VulkanResources/vulkan_resource_manager.hpp"
 
 namespace slash {
 
-void RenderModule::Init(Shared<Window> window) {
+void RenderModule::Init(std::shared_ptr<Window> window) {
   instance_ = new RenderModule(std::move(window), RenderType::None);
 }
 
-void RenderModule::Init(Shared<Window> window, RenderType render_type) {
+void RenderModule::Init(std::shared_ptr<Window> window, RenderType render_type) {
   instance_ = new RenderModule(std::move(window), render_type);
   switch (render_type) {
   case RenderType::None: {
@@ -49,7 +51,7 @@ void RenderModule::SetRenderer(RenderType render_type) {
 
 RenderType RenderModule::GetRenderType() { return instance_->render_type_; }
 
-RenderModule::RenderModule(Shared<Window> window, RenderType render_type)
-    : window_(window), render_type_(render_type) {}
+RenderModule::RenderModule(std::shared_ptr<Window> window, RenderType render_type)
+    : window_(std::move(window)), render_type_(render_type) {}
 
 } // namespace slash

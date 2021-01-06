@@ -14,8 +14,8 @@ enum class RenderType {
 
 class Slash_API RenderModule {
 public:
-  static void Init(Shared<Window> window);
-  static void Init(Shared<Window> window, RenderType render_type);
+  static void Init(std::shared_ptr<Window> window);
+  static void Init(std::shared_ptr<Window> window, RenderType render_type);
   static void Destroy();
 
   static void SetRenderer(RenderType render_type);
@@ -25,11 +25,11 @@ public:
   static auto ResourceManager() -> VulkanResourceManager& { return *instance_->resource_manager_; }
 
 private:
-  RenderModule(Shared<Window> window, RenderType render_type);
+  RenderModule(std::shared_ptr<Window> window, RenderType render_type);
   ~RenderModule() = default;
   inline static RenderModule* instance_ = nullptr;
 
-  Shared<Window> window_;
+  std::shared_ptr<Window> window_;
   RenderType render_type_;
 
   std::unique_ptr<VulkanRenderer> renderer_;

@@ -34,7 +34,7 @@ protected:
   virtual float GetMouseYImpl() = 0;
 
 private:
-  static Unique<Input> p_instance_;
+  static std::unique_ptr<Input> p_instance_;
 };
 } // namespace slash
 #endif // SLASHENGINE_CORE_INPUT_H
