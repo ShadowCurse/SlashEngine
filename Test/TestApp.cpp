@@ -1,7 +1,7 @@
 #include "Slash.hpp"
 #include <iostream>
 
- class TestLayer : public slash::layer::Layer {
+ class TestLayer : public slash::Layer {
  public:
   TestLayer() {
 //    const std::vector<slash::Vertex> square_vertices = {
@@ -116,11 +116,15 @@ class TestModule {
 auto main() -> int {
 
     slash::App app;
-    app.init_module_2<TestModule>(12)
-       .init_module_2<slash::WindowModule>(slash::WindowParams("Test", 800,400));
+  app.init_module<TestModule>(12)
+      .init_module<slash::WindowModule>(slash::WindowParams("Test", 800, 400));
 
-    auto& wm = app.get_resource<slash::WindowManager>();
-    wm.add_window(slash::WindowParams{"Test2", 300, 200 });
+  auto& wm = app.get_resource<slash::WindowManager>();
+  wm.add_window(slash::WindowParams{"Test2", 300, 200 });
 
-    app.run();
+  app.init_module<slash::LayerModule>();
+  auto& layer_stack = app.get_resource<slash::LayerStack>();
+  layer_stack.push_layer<TestLayer>();
+
+  app.run();
 }

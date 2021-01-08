@@ -32,18 +32,8 @@ class Slash_API App {
 
   void update() {}
 
-  template<typename Module, typename ... Args>
-  void init_module(Args &&... arg) {
-    Module::init(std::forward<Args>(arg)...);
-  }
-
-  template<typename Module>
-  void uninit_module() {
-    Module::uninit();
-  }
-
   template<typename M, typename ... Args>
-  auto init_module_2(Args &&... args) -> App & {
+  auto init_module(Args &&... args) -> App & {
     modules_.push_back(std::make_unique<NewModule<M>>(*this, std::forward<Args>(args)...));
     return *this;
   }

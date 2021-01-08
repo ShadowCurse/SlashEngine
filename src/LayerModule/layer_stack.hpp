@@ -4,9 +4,10 @@
 #include "slash_pch.hpp"
 
 #include "Core/core.hpp"
+#include "Events/event.hpp"
 #include "layer.hpp"
 
-namespace slash::layer {
+namespace slash {
 
 class Slash_API LayerStack {
  public:
@@ -22,6 +23,14 @@ class Slash_API LayerStack {
   }
   void pop_layer() {
     layers_.pop_back();
+  }
+
+  void on_event(Event &e) {
+    for (auto &layer: layers_) {
+      layer->on_event(e);
+      if (e.Handled)
+        break;
+    }
   }
 
   auto begin() -> iterator { return layers_.begin(); }

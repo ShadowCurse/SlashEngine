@@ -5,7 +5,7 @@
 #include "Core/core.hpp"
 #include "Core/time_step.hpp"
 
-namespace slash::layer {
+namespace slash {
 
 class Slash_API Layer {
  protected:
