@@ -16,7 +16,7 @@ class Slash_API Layer {
   virtual void on_attach() = 0;
   virtual void on_detach() = 0;
   virtual void on_update(TimeStep ts) = 0;
-  virtual void on_event(Event &event) = 0;
+//  virtual void on_event(Event &event) = 0;
 };
 
 } // namespace slash

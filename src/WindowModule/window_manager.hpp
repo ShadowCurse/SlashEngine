@@ -2,6 +2,7 @@
 #define SLASHENGINE_SRC_WINDOWMODULE_WINDOW_MANAGER_HPP_
 
 #include "Core/core.hpp"
+#include "Core/app.hpp"
 #include "window.hpp"
 
 namespace slash {
@@ -18,17 +19,18 @@ struct Slash_API WindowParams {
 
 class WindowManager {
  public:
-  WindowManager();
+  explicit WindowManager(App& app);
   ~WindowManager();
 
   void add_window(WindowParams params);
   [[nodiscard]] auto get_windows() const -> const std::vector<std::unique_ptr<Window>> &;
-  void run() const;
+  static void update();
 
  private:
   static void error_callback(int error, const char *description);
   void window_close_callback(size_t window_id);
 
+  App* app_ptr_;
   std::vector<std::unique_ptr<Window>> windows_;
 };
 

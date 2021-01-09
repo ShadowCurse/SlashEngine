@@ -19,19 +19,19 @@ class Slash_API LayerStack {
 
   template<typename L>
   void push_layer() {
-    layers_.template emplace_back(std::make_unique<L>());
+    layers_.emplace_back(std::make_unique<L>());
   }
   void pop_layer() {
     layers_.pop_back();
   }
 
-  void on_event(Event &e) {
-    for (auto &layer: layers_) {
-      layer->on_event(e);
-      if (e.Handled)
-        break;
-    }
-  }
+//  void on_event(Event &e) {
+//    for (auto &layer: layers_) {
+//      layer->on_event(e);
+//      if (e.Handled)
+//        break;
+//    }
+//  }
 
   auto begin() -> iterator { return layers_.begin(); }
   auto end() -> iterator { return layers_.end(); }

@@ -93,13 +93,13 @@
   void on_detach() final {};
   void on_update(slash::TimeStep ts) final {
   }
-  void on_event(slash::Event &event) final {
-//     slash::EventDispatcher dispatcher(event);
-//     if (dispatcher.Dispatch<slash::KeyPressedEvent>(std::bind(&TestLayer::Controls, this, std::placeholders::_1))) {
-//         return;
-//     }
-    SL_TRACE("{0}", event.ToString());
-  }
+//  void on_event(slash::Event &event) final {
+////     slash::EventDispatcher dispatcher(event);
+////     if (dispatcher.Dispatch<slash::KeyPressedEvent>(std::bind(&TestLayer::Controls, this, std::placeholders::_1))) {
+////         return;
+////     }
+//    SL_TRACE("{0}", event.ToString());
+//  }
 
 //  slash::Entity square_entity;
 
@@ -113,18 +113,44 @@ class TestModule {
   }
 };
 
+
+void mouse_move_callback(slash::MouseMovedEvent& e) {
+  SL_INFO("Mouse move event: x:{}, y:{}", e.x, e.y);
+}
+void mouse_scroll_callback(slash::MouseScrolledEvent& e) {
+  SL_INFO("Mouse scroll event: x_offset:{}, y_offset:{}", e.x_offset, e.y_offset);
+}
+void mouse_button_pressed_callback(slash::MouseButtonPressedEvent& e) {
+  SL_INFO("Mouse button press event: button:{}", e.button);
+}
+void mouse_button_release_callback(slash::MouseButtonReleasedEvent& e) {
+  SL_INFO("Mouse button release event: button:{}", e.button);
+}
+void key_pressed_callback(slash::KeyPressedEvent& e) {
+  SL_INFO("Key pressed event: key:{}, repeat:{}", e.key_code, e.repeat_count);
+}
+void key_release_callback(slash::KeyReleasedEvent& e) {
+  SL_INFO("Key release event: key:{}", e.key_code);
+}
+
 auto main() -> int {
 
     slash::App app;
   app.init_module<TestModule>(12)
       .init_module<slash::WindowModule>(slash::WindowParams("Test", 800, 400));
 
-  auto& wm = app.get_resource<slash::WindowManager>();
-  wm.add_window(slash::WindowParams{"Test2", 300, 200 });
+//  auto& wm = app.get_resource<slash::WindowManager>();
+//  wm.add_window(slash::WindowParams{"Test2", 300, 200 });
 
-  app.init_module<slash::LayerModule>();
-  auto& layer_stack = app.get_resource<slash::LayerStack>();
-  layer_stack.push_layer<TestLayer>();
+//  app.init_module<slash::LayerModule>();
+//  auto& layer_stack = app.get_resource<slash::LayerStack>();
+//  layer_stack.push_layer<TestLayer>();
 
+  app.get_event<slash::MouseMovedEvent>().subscribe(mouse_move_callback);
+  app.get_event<slash::MouseButtonPressedEvent>().subscribe(mouse_button_pressed_callback);
+  app.get_event<slash::MouseButtonReleasedEvent>().subscribe(mouse_button_release_callback);
+  app.get_event<slash::MouseScrolledEvent>().subscribe(mouse_scroll_callback);
+  app.get_event<slash::KeyPressedEvent>().subscribe(key_pressed_callback);
+  app.get_event<slash::KeyReleasedEvent>().subscribe(key_release_callback);
   app.run();
 }

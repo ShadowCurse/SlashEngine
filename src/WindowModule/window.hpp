@@ -3,7 +3,8 @@
 
 #include "Core/core.hpp"
 #include "Core/log.hpp"
-#include "Core/window.hpp"
+#include "Core/app.hpp"
+#include "Events/event.hpp"
 #include <GLFW/glfw3.h>
 
 namespace slash {
@@ -11,7 +12,7 @@ namespace slash {
 class Slash_API Window {
  public:
   using window_close_callback_fn = std::function<void(size_t)>;//void(*)(GLFWwindow*);
-  using event_callback_fn = std::function<void(Event &)>;
+//  using event_callback_fn = std::function<void(Event<MouseMovedEvent> &)>;
 
   struct WindowData {
     size_t id;
@@ -21,7 +22,7 @@ class Slash_API Window {
     bool VSync = false;
     bool resized = false;
 
-    event_callback_fn event_callback;
+    App* app_ptr;
     window_close_callback_fn close_callback;
   };
  public:
@@ -34,7 +35,7 @@ class Slash_API Window {
   [[nodiscard]] auto height() const -> uint;
   [[nodiscard]] auto vsync() const -> bool;
 
-  void set_event_callback(const event_callback_fn &callback);
+//  void set_event_callback(const event_callback_fn &callback);
 //  void SetVSync(bool enabled);
   [[nodiscard]] GLFWwindow *get_native_window() const;
 

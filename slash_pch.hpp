@@ -18,6 +18,8 @@
 #include <bitset>
 #include <queue>
 #include <typeinfo>
+#include <cassert>
+#include <utility>
 
 #include <stb_image.h>
 

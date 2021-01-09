@@ -15,9 +15,9 @@ class LayerModule {
 
     auto &layer_stack = app.get_resource<LayerStack>();
 
-    for (const auto &window: app.get_resource<WindowManager>().get_windows()) {
-      window->set_event_callback([&](Event &e) { layer_stack.on_event(e); });
-    }
+//    for (const auto &window: app.get_resource<WindowManager>().get_windows()) {
+//      window->set_event_callback([&](Event &e) { layer_stack.on_event(e); });
+//    }
   }
 };
 

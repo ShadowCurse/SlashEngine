@@ -113,7 +113,7 @@ add_library(SlashEngine STATIC
         src/WindowModule/module.hpp
 
         src/LayerModule/module.hpp
-        src/Core/resource.hpp src/WindowModule/window_manager.cpp src/WindowModule/window_manager.hpp)
+        src/Core/resource.hpp src/WindowModule/window_manager.cpp src/WindowModule/window_manager.hpp src/WindowModule/events.hpp src/Core/events.hpp)
 
 target_include_directories(SlashEngine PUBLIC ${CMAKE_SOURCE_DIR}/src)
 target_include_directories(SlashEngine PUBLIC ${CMAKE_SOURCE_DIR})
