@@ -4,7 +4,7 @@
 #include "slash_pch.hpp"
 
 #include "Core/core.hpp"
-#include "Events/event.hpp"
+#include "src/Core/event.hpp"
 #include "layer.hpp"
 
 namespace slash {

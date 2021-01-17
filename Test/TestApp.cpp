@@ -1,7 +1,7 @@
 #include "Slash.hpp"
 #include <iostream>
 
- class TestLayer : public slash::Layer {
+class TestLayer : public slash::Layer {
  public:
   TestLayer() {
 //    const std::vector<slash::Vertex> square_vertices = {
@@ -46,23 +46,23 @@
 //    //slash::SceneManager::AddToScene("qube");
 //
 //    auto& ecs = slash::SceneManager::GetScene().GetECS();
-//    square_entity = ecs.CreateEntity();
+//    square_entity = ecs.create_entity();
 //    auto qube_mesh = slash::Mesh_3D{square_vertices, square_indices};
-//    ecs.AddComponent(square_entity, qube_mesh);
+//    ecs.add_component(square_entity, qube_mesh);
 //    auto qube_texture = Texture::Load("../../src/Textures/texture.jpg");
-//    ecs.AddComponent(square_entity, qube_texture);
+//    ecs.add_component(square_entity, qube_texture);
 //    auto transform = slash::Transform();
 //    transform.rotation = rotation;
 //    transform.position = {5, 5, 5};
 //    transform.size = {1, 1};
-//    ecs.AddComponent(square_entity, transform);
+//    ecs.add_component(square_entity, transform);
 //    slash::SceneManager::AddToScene(square_entity);
 //    //
-//    auto triangle_entity = ecs.CreateEntity();
+//    auto triangle_entity = ecs.create_entity();
 //    auto triange_mesh = slash::Mesh_3D{triangle_vertices, triangle_indices};
-//    ecs.AddComponent(triangle_entity, triange_mesh);
-//    ecs.AddComponent(triangle_entity, qube_texture); // double texture
-//    ecs.AddComponent(triangle_entity, transform);
+//    ecs.add_component(triangle_entity, triange_mesh);
+//    ecs.add_component(triangle_entity, qube_texture); // double texture
+//    ecs.add_component(triangle_entity, transform);
 //    slash::SceneManager::AddToScene(triangle_entity);
 //    //
 //    //
@@ -70,7 +70,7 @@
 //    //auto scene = slash::GetScene();
 //    //auto ecs = scene.GetEcs();
 //    //auto entity = ecs.AddEntity("qube");
-//    //ecs.AddComponent(entity, slash::Mesh("qube", qube_vertices, qube_indices));
+//    //ecs.add_component(entity, slash::Mesh("qube", qube_vertices, qube_indices));
 //    //..
 //    //scene.PullRequirements(entity); // loads compoenets for entity or do nothing
 //
@@ -81,7 +81,7 @@
 
 //   bool Controls(slash::KeyPressedEvent &e) {
 //       if (e.GetKeyCode() == SL_KEY_A) {
-//         auto& transform = slash::SceneManager::GetScene().GetECS().GetComponent<slash::Transform>(square_entity);
+//         auto& transform = slash::SceneManager::GetScene().GetECS().get_component<slash::Transform>(square_entity);
 //       } else if (e.GetKeyCode() == SL_KEY_D) {
 //       } else if (e.GetKeyCode() == SL_KEY_W) {
 //       } else if (e.GetKeyCode() == SL_KEY_S) {
@@ -108,34 +108,49 @@
 
 class TestModule {
  public:
-  TestModule(slash::App& app, int a) {
+  TestModule(slash::App &app, int a) {
     std::cout << "TestModule\n";
   }
 };
 
-
-void mouse_move_callback(slash::MouseMovedEvent& e) {
+void mouse_move_callback(slash::MouseMovedEvent &e) {
   SL_INFO("Mouse move event: x:{}, y:{}", e.x, e.y);
 }
-void mouse_scroll_callback(slash::MouseScrolledEvent& e) {
+void mouse_scroll_callback(slash::MouseScrolledEvent &e) {
   SL_INFO("Mouse scroll event: x_offset:{}, y_offset:{}", e.x_offset, e.y_offset);
 }
-void mouse_button_pressed_callback(slash::MouseButtonPressedEvent& e) {
+void mouse_button_pressed_callback(slash::MouseButtonPressedEvent &e) {
   SL_INFO("Mouse button press event: button:{}", e.button);
 }
-void mouse_button_release_callback(slash::MouseButtonReleasedEvent& e) {
+void mouse_button_release_callback(slash::MouseButtonReleasedEvent &e) {
   SL_INFO("Mouse button release event: button:{}", e.button);
 }
-void key_pressed_callback(slash::KeyPressedEvent& e) {
+void key_pressed_callback(slash::KeyPressedEvent &e) {
   SL_INFO("Key pressed event: key:{}, repeat:{}", e.key_code, e.repeat_count);
 }
-void key_release_callback(slash::KeyReleasedEvent& e) {
+void key_release_callback(slash::KeyReleasedEvent &e) {
   SL_INFO("Key release event: key:{}", e.key_code);
 }
 
+struct Velocity {
+  float velocity{};
+};
+
+void velocity_system(Velocity& velocity) {
+  if (velocity.velocity > 2.0f)
+    velocity.velocity -= 0.1f;
+  else
+    velocity.velocity += 0.1f;
+}
+
+struct Position {
+  float x{};
+  float y{};
+};
+
 auto main() -> int {
 
-    slash::App app;
+  slash::App app;
   app.init_module<TestModule>(12)
       .init_module<slash::WindowModule>(slash::WindowParams("Test", 800, 400));
 
@@ -146,11 +161,33 @@ auto main() -> int {
 //  auto& layer_stack = app.get_resource<slash::LayerStack>();
 //  layer_stack.push_layer<TestLayer>();
 
-  app.get_event<slash::MouseMovedEvent>().subscribe(mouse_move_callback);
-  app.get_event<slash::MouseButtonPressedEvent>().subscribe(mouse_button_pressed_callback);
-  app.get_event<slash::MouseButtonReleasedEvent>().subscribe(mouse_button_release_callback);
-  app.get_event<slash::MouseScrolledEvent>().subscribe(mouse_scroll_callback);
-  app.get_event<slash::KeyPressedEvent>().subscribe(key_pressed_callback);
-  app.get_event<slash::KeyReleasedEvent>().subscribe(key_release_callback);
+//  app.get_event<slash::MouseMovedEvent>().subscribe(mouse_move_callback);
+//  app.get_event<slash::MouseButtonPressedEvent>().subscribe(mouse_button_pressed_callback);
+//  app.get_event<slash::MouseButtonReleasedEvent>().subscribe(mouse_button_release_callback);
+//  app.get_event<slash::MouseScrolledEvent>().subscribe(mouse_scroll_callback);
+//  app.get_event<slash::KeyPressedEvent>().subscribe(key_pressed_callback);
+//  app.get_event<slash::KeyReleasedEvent>().subscribe(key_release_callback);
+
+  app.register_component<Velocity>();
+  app.register_component<Position>();
+  auto e = app.create_entity();
+  app.add_component(e, Position{0.0f, 1.0f});
+  app.add_component(e, Velocity{1.2f});
+//  app.add_system(velocity_system);
+
+  app.add_system([&](slash::App& app){
+    auto& wm = app.get_resource<slash::WindowManager>();
+    if (wm.get_windows()[0]->is_key_pressed(SL_KEY_A)) {
+      SL_INFO("key pressed");
+      auto& pos = app.get_component<Position>(e);
+      SL_INFO("curr pos: x:{} y:{}", pos.x, pos.y);
+      auto query = app.get_component_query<Velocity, Position>();
+      for (auto [vel, pos]: query) {
+        pos.x += vel.velocity;
+        SL_INFO("new pos: x:{} y:{}", pos.x, pos.y);
+      }
+    }
+  });
+
   app.run();
 }

@@ -7,9 +7,9 @@
 namespace slash {
 
 void ResourceManager::Init() {
-  SceneManager::GetScene().GetECS().RegisterComponent<Mesh_3D>();
-  SceneManager::GetScene().GetECS().RegisterComponent<Texture>();
-  SceneManager::GetScene().GetECS().RegisterComponent<Transform>();
+  SceneManager::GetScene().GetECS().register_component<Mesh_3D>();
+  SceneManager::GetScene().GetECS().register_component<Texture>();
+  SceneManager::GetScene().GetECS().register_component<Transform>();
 }
 
 void ResourceManager::Destroy() {

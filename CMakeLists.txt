@@ -37,7 +37,6 @@ add_library(SlashEngine STATIC
         src/GameResources/resource_manager.cpp
         src/GameResources/transform.hpp
 
-        src/WindowModule/input.cpp
         src/WindowModule/window.cpp
 
         src/Ecs/ecs.hpp
@@ -113,7 +112,7 @@ add_library(SlashEngine STATIC
         src/WindowModule/module.hpp
 
         src/LayerModule/module.hpp
-        src/Core/resource.hpp src/WindowModule/window_manager.cpp src/WindowModule/window_manager.hpp src/WindowModule/events.hpp src/Core/events.hpp)
+        src/Core/resource.hpp src/WindowModule/window_manager.cpp src/WindowModule/window_manager.hpp src/WindowModule/events.hpp src/Core/events.hpp src/Core/systems.hpp)
 
 target_include_directories(SlashEngine PUBLIC ${CMAKE_SOURCE_DIR}/src)
 target_include_directories(SlashEngine PUBLIC ${CMAKE_SOURCE_DIR})
@@ -123,7 +122,6 @@ add_definitions(-DGLFW_INCLUDE_VULKAN -DGLFW_INCLUDE_NONE -DSL_LINUX -DSL_BUILD_
 set_target_properties(SlashEngine PROPERTIES PUBLIC_HEADER Slash.hpp)
 #target_link_libraries(SlashEngine PRIVATE project_options vulkan glfw3 spdlog glm_static X11 dl)
 target_link_libraries(SlashEngine PRIVATE ${CONAN_LIBS} project_options vulkan)
-
 
 #TestApp
 add_executable(TestApp Test/TestApp.cpp)

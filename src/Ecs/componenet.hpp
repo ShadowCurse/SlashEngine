@@ -9,7 +9,7 @@ namespace slash {
 class BasicComponenetArray {
  public:
   virtual ~BasicComponenetArray() = default;
-  virtual void EntityDestroyed(Entity entity) = 0;
+  virtual void entity_destroyed(Entity entity) = 0;
 };
 
 template<typename T>
@@ -40,15 +40,15 @@ class ComponenetArray final : public BasicComponenetArray {
     return Iterator(this, size_);
   }
 
-  void InsertData(Entity entity, T componet) {
+  void insert_data(Entity entity, T component) {
     size_t new_index = size_;
     entity_to_index_[entity] = new_index;
     index_to_entity_[new_index] = entity;
-    components_[new_index] = std::move(componet);
+    components_[new_index] = std::move(component);
     ++size_;
   }
 
-  void RemoveData(Entity entity) {
+  void remove_data(Entity entity) {
     // copy element at the end into deleted element place
     auto index_of_remove_entity = entity_to_index_[entity];
     auto index_of_lat_element = size_ - 1;
@@ -65,13 +65,13 @@ class ComponenetArray final : public BasicComponenetArray {
     --size_;
   }
 
-  auto GetData(Entity entity) -> T & {
+  auto get_data(Entity entity) -> T & {
     return components_[entity_to_index_[entity]];
   }
 
-  void EntityDestroyed(Entity entity) final {
+  void entity_destroyed(Entity entity) final {
     if (entity_to_index_.find(entity) != entity_to_index_.end())
-      RemoveData(entity);
+      remove_data(entity);
   }
 
  private:
@@ -84,7 +84,7 @@ class ComponenetArray final : public BasicComponenetArray {
 class ComponenetManager {
  public:
   template<typename T>
-  void RegisterComponent() {
+  void register_component() {
     const char *type_name = typeid(T).name();
     component_types_.insert({type_name, next_component_type_});
     component_arrays_.insert({type_name, std::make_shared<ComponenetArray<T>>()});
@@ -92,35 +92,35 @@ class ComponenetManager {
   }
 
   template<typename T>
-  auto GetCompponentType() -> ComponenetType {
+  auto get_compponent_type() -> ComponenetType {
     const char *type_name = typeid(T).name();
     return component_types_[type_name];
   }
 
   template<typename T>
-  void AddComponent(Entity entity, T component) {
-    GetComponentArray<T>()->InsertData(entity, component);
+  void add_component(Entity entity, T component) {
+    get_component_array<T>()->insert_data(entity, component);
   }
 
   template<typename T>
-  void RemoveComponent(Entity entity) {
-    GetComponentArray<T>()->RemoveData(entity);
+  void remove_component(Entity entity) {
+    get_component_array<T>()->remove_data(entity);
   }
 
   template<typename T>
-  auto GetComponent(Entity entity) -> T & {
-    return GetComponentArray<T>()->GetData(entity);
+  auto get_component(Entity entity) -> T & {
+    return get_component_array<T>()->get_data(entity);
   }
 
   template<typename T>
-  auto GetComponentArray() -> std::shared_ptr<ComponenetArray<T>> {
+  auto get_component_array() -> std::shared_ptr<ComponenetArray<T>> {
     const char *type_name = typeid(T).name();
     return std::static_pointer_cast<ComponenetArray<T>>(component_arrays_[type_name]);
   }
 
-  void EntityDestroyed(Entity entity) {
+  void entity_destroyed(Entity entity) {
     for (auto &pair : component_arrays_)
-      pair.second->EntityDestroyed(entity);
+      pair.second->entity_destroyed(entity);
   }
  private:
   std::unordered_map<const char *, ComponenetType> component_types_;

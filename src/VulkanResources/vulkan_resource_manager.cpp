@@ -9,10 +9,10 @@ VulkanResourceManager::VulkanResourceManager(VulkanRenderer *renderer)
   CreateTextureSampler();
 
   // TODO replace with just component system
-  SceneManager::GetScene().GetECS().RegisterComponent<VulkanRenderableObject>();
-//  SceneManager::GetScene().GetECS().RegisterComponent<VulkanBuffer>(); // transform
-//  SceneManager::GetScene().GetECS().RegisterComponent<VulkanMesh>();
-//  SceneManager::GetScene().GetECS().RegisterComponent<VulkanTexture>();
+  SceneManager::GetScene().GetECS().register_component<VulkanRenderableObject>();
+//  SceneManager::GetScene().GetECS().register_component<VulkanBuffer>(); // transform
+//  SceneManager::GetScene().GetECS().register_component<VulkanMesh>();
+//  SceneManager::GetScene().GetECS().register_component<VulkanTexture>();
 
 }
 
@@ -42,7 +42,7 @@ void VulkanResourceManager::CreateRenderableObject(Entity entity) {
   rotation_info.offset = 0;
   rotation_info.range = transform->GetBufferSize();// rotation_buffers_[model->uid_]->GetBufferSize();
 
-//  auto& texture = ecs.GetComponent<VulkanTexture>(entity);
+//  auto& texture = ecs.get_component<VulkanTexture>(entity);
   VkDescriptorImageInfo texture_info = {};
   texture_info.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
   texture_info.imageView = texture->GetImageView(); //texture_uids_[model->p_texture->uid_]->GetImageView();
@@ -85,14 +85,14 @@ void VulkanResourceManager::CreateRenderableObject(Entity entity) {
                          descriptor_writes.data(), 0, nullptr);
 
   VulkanRenderableObject object{mesh, texture, transform, descriptor_set, renderer_->GetPipeline()};
-  object.mesh_ = mesh;//&ecs.GetComponent<VulkanMesh>(entity);//&mesh_uids_[model->p_mesh_->uid_];
+  object.mesh_ = mesh;//&ecs.get_component<VulkanMesh>(entity);//&mesh_uids_[model->p_mesh_->uid_];
   object.descriptor_set_ = descriptor_set;
   object.pipeline_ = renderer_->GetPipeline();
-  ecs.AddComponent(entity, object);
+  ecs.add_component(entity, object);
 }
 
 auto VulkanResourceManager::CreateMesh(Entity entity) -> std::shared_ptr<VulkanMesh> {
-  auto &mesh = SceneManager::GetScene().GetECS().GetComponent<Mesh_3D>(entity);
+  auto &mesh = SceneManager::GetScene().GetECS().get_component<Mesh_3D>(entity);
   VkDeviceSize index_buffer_size =
       sizeof(mesh.indices_[0]) * mesh.indices_.size();
   SL_CORE_INFO("Mesh indices size: {}", mesh.indices_.size());
@@ -116,7 +116,7 @@ auto VulkanResourceManager::CreateMesh(Entity entity) -> std::shared_ptr<VulkanM
 }
 
 auto VulkanResourceManager::CreateTexture(Entity entity) -> std::shared_ptr<VulkanTexture> {
-  auto &texture = SceneManager::GetScene().GetECS().GetComponent<Texture>(entity);
+  auto &texture = SceneManager::GetScene().GetECS().get_component<Texture>(entity);
   VkDeviceSize image_size = texture.width_ * texture.height_ * 4;
   SL_CORE_INFO("Texture: width: {} height: {}", texture.width_, texture.height_);
   auto staging_buffer = VulkanStagingBuffer(renderer_->GetCore(), image_size);
@@ -138,7 +138,7 @@ auto VulkanResourceManager::CreateTexture(Entity entity) -> std::shared_ptr<Vulk
 }
 
 auto VulkanResourceManager::CreateTransform(Entity entity) -> std::shared_ptr<VulkanBuffer> {
-  auto &transform = SceneManager::GetScene().GetECS().GetComponent<Transform>(entity);
+  auto &transform = SceneManager::GetScene().GetECS().get_component<Transform>(entity);
   VkDeviceSize buffer_size = sizeof(Transform);
   auto rotation_buffer = std::make_shared<VulkanBuffer>(
       renderer_->GetCore(), buffer_size, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,

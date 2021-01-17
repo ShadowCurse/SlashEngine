@@ -14,10 +14,7 @@
 #include "Ecs/ecs.hpp"
 #include "Ecs/entity.hpp"
 
-#include "Events/application_event.hpp"
-#include "Events/event.hpp"
-#include "Events/key_event.hpp"
-#include "Events/mouse_event.hpp"
+#include "src/Core/event.hpp"
 
 #include "GameResources/mesh_3d.hpp"
 #include "GameResources/texture.hpp"

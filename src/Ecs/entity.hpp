@@ -21,28 +21,43 @@ class EntityManager {
     for (Entity e(0); e < MAX_ENTITIES; ++e)
       availabe_entities_.push(e);
   }
-  auto CreateEntity() -> Entity {
+  auto create_entity() -> Entity {
     auto e = availabe_entities_.front();
     availabe_entities_.pop();
     ++living_entity_count_;
     return e;
   }
-  void DestroyEntity(Entity entity) {
+  void destroy_entity(Entity entity) {
     signatures_[entity].reset();
     availabe_entities_.push(entity);
     --living_entity_count_;
   }
-  void SetSignature(Entity entity, Signature signature) {
-    signatures_[entity] = signature;
-  }
-  auto GetSignature(Entity entity) -> Signature {
+//  void SetSignature(Entity entity, Signature signature) {
+//    signatures_[entity] = signature;
+//  }
+  auto get_signature(Entity entity) -> Signature & {
     return signatures_[entity];
+  }
+
+  auto get_entities_with_components(const std::vector<ComponenetType> &component_types) -> std::vector<Entity> {
+    std::vector<Entity> ret;
+    for (const auto &signature: signatures_) {
+      bool has_components{true};
+      for (const auto type: component_types)
+        if (!signature.test(type)) {
+          has_components = false;
+          break;
+        }
+      if (has_components)
+        ret.emplace_back(&signature - &signatures_[0]);
+    }
+    return ret;
   }
 
  private:
   std::queue<Entity> availabe_entities_;
   std::array<Signature, MAX_ENTITIES> signatures_;
-  uint32_t living_entity_count_;
+  uint32_t living_entity_count_{};
 };
 
 }

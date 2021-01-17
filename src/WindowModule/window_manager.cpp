@@ -7,7 +7,7 @@ namespace slash {
 WindowManager::WindowManager(App& app) : app_ptr_{&app}{
   SL_CORE_ASSERT(glfwInit(), "Could not initialized GLFW")
   glfwSetErrorCallback(error_callback);
-  app.add_system([]{ update(); });
+  app.add_system([](App&){ update(); });
 }
 
 WindowManager::~WindowManager() {

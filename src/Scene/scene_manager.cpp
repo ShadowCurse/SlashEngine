@@ -15,7 +15,7 @@ void SceneManager::Destroy() {
 void SceneManager::PrepareScene() {
   RenderModule::Renderer().NewFrame();
   auto render_command = RenderModule::Renderer().StartRenderCommand();
-  for (auto &object: *SceneManager::GetScene().GetECS().GetComponentArray<VulkanRenderableObject>())
+  for (auto &object: *SceneManager::GetScene().GetECS().get_component_array<VulkanRenderableObject>())
     render_command->AddRenderableObject(object);
   RenderModule::Renderer().EndRenderCommand(render_command);
 }

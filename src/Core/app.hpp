@@ -1,11 +1,13 @@
 #ifndef SLASHENGINE_CORE_APPLICATION_H_
 #define SLASHENGINE_CORE_APPLICATION_H_
 
-#include "Events/event.hpp"
+#include "event.hpp"
 #include "core.hpp"
 #include "modules.hpp"
 #include "resource.hpp"
 #include "events.hpp"
+#include "systems.hpp"
+#include "Ecs/ecs.hpp"
 
 namespace slash {
 
@@ -17,7 +19,7 @@ class Slash_API App {
   App() {
     slash::Log::Init();
     add_event<AppClose>();
-    get_event<AppClose>().subscribe([&](auto){ on_close(); });
+    get_event<AppClose>().subscribe([&](auto) { on_close(); });
   }
 
   void run() {
@@ -25,13 +27,12 @@ class Slash_API App {
 
     while (run_)
       update();
-//      runner_();
 
     SL_CORE_INFO("App shutdown");
   }
 
   void update() {
-    for (const auto& sys: systems_) sys();
+    for (const auto &sys: systems_) sys->operator()(*this);
   }
 
   template<typename M, typename ... Args>
@@ -60,8 +61,42 @@ class Slash_API App {
     return event_pool_.get_event<E>();
   }
 
-  void add_system(const std::function<void()>& system) {
-    systems_.emplace_back(system);
+  template<typename C>
+  void init_component() {
+    ecs_.register_component<C>();
+  }
+
+  void add_system(const std::function<void(App &)> &system) {
+    systems_.emplace_back(std::make_unique<System>(system));
+  }
+
+  template<typename C>
+  void register_component() {
+    ecs_.template register_component<C>();
+  }
+
+  auto create_entity() {
+    return ecs_.create_entity();
+  }
+
+  template<typename C>
+  void add_component(Entity e, C component) {
+    ecs_.add_component(e, std::move(component));
+  }
+
+  template<typename C>
+  void remove_component(Entity e) {
+    ecs_.remove_component<C>(e);
+  }
+
+  template<typename C>
+  auto get_component(Entity e) -> C & {
+    return ecs_.get_component<C>(e);
+  }
+
+  template<typename ... C>
+  [[nodiscard]] auto get_component_query() {
+    return ecs_.get_query<C...>();
   }
 
 //  void set_runner(const runner_fn &runner) {
@@ -69,7 +104,6 @@ class Slash_API App {
 //  }
 
  private:
-
   void on_close() {
     run_ = false;
   }
@@ -79,7 +113,8 @@ class Slash_API App {
   ResourcePack resource_pack_;
   EventPool event_pool_;
   std::vector<std::unique_ptr<Module>> modules_;
-  std::vector<std::function<void()>> systems_;
+  std::vector<std::unique_ptr<System>> systems_;
+  ECS ecs_;
 };
 
 } // namespace slash
