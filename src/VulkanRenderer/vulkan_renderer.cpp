@@ -4,11 +4,9 @@ namespace slash {
 
 VulkanRenderer::VulkanRenderer(Window *window) {
   vcore_ = new VulkanCore(window->get_native_window());
-  auto queue_families = vcore_->GetQueueFamilies();
-  graphics_queue_ =
-      new VulkanQueue(vcore_, queue_families.graphicsFamily.value());
-  present_queue_ =
-      new VulkanQueue(vcore_, queue_families.presentFamily.value());
+  auto queue_families = vcore_->get_queue_families();
+  graphics_queue_ = new VulkanQueue(vcore_, queue_families.graphicsFamily.value());
+  present_queue_ = new VulkanQueue(vcore_, queue_families.presentFamily.value());
   swap_chain_ = new VulkanSwapChain(vcore_, {graphics_queue_, present_queue_});
   render_pass_ = new VulkanRenderPass(vcore_, swap_chain_);
 
@@ -25,13 +23,12 @@ VulkanRenderer::VulkanRenderer(Window *window) {
       vcore_, "/home/antaraz/Projects/SlashEngine/src/Shaders/vert.spv");
   VulkanShader fragment_shader(
       vcore_, "/home/antaraz/Projects/SlashEngine/src/Shaders/frag.spv");
-  pipeline_ =
-      new VulkanPipeline(vcore_, render_pass_, swap_chain_, vertex_shader,
-                         fragment_shader, descriptor_set_layout_);
+  pipeline_ = new VulkanPipeline(vcore_, render_pass_, swap_chain_, vertex_shader,
+                                 fragment_shader, descriptor_set_layout_);
 
   depth_ = new VulkanTexture(
       vcore_, swap_chain_->GetExtent().width, swap_chain_->GetExtent().height,
-      vcore_->FindSupportedFormat(
+      vcore_->find_supported_format(
           {VK_FORMAT_D32_SFLOAT, VK_FORMAT_D32_SFLOAT_S8_UINT,
            VK_FORMAT_D32_SFLOAT_S8_UINT},
           VK_IMAGE_TILING_OPTIMAL,
@@ -39,15 +36,15 @@ VulkanRenderer::VulkanRenderer(Window *window) {
       VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT,
       VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
   for (auto &depth = depth_;
-       auto &swap_chain_image : swap_chain_->GetImageViews()) {
+      auto &swap_chain_image : swap_chain_->GetImageViews()) {
     frame_buffers_.emplace_back(new VulkanFrameBuffer(
         vcore_, render_pass_, swap_chain_->GetExtent().width,
         swap_chain_->GetExtent().height,
         {swap_chain_image, depth->GetImageView()}));
   }
 
-  descriptor_manager_ = new VulkanDescriptorManager(vcore_);
-  command_buffer_manager_ = new VulkanCommandBufferManager(
+  descriptor_manager_ = std::make_unique<VulkanDescriptorManager>(vcore_);
+  command_buffer_manager_ = std::make_unique<VulkanCommandBufferManager>(
       vcore_, queue_families.graphicsFamily.value());
   //
 
@@ -60,7 +57,7 @@ VulkanRenderer::VulkanRenderer(Window *window) {
 }
 
 VulkanRenderer::~VulkanRenderer() {
-  vkDeviceWaitIdle(vcore_->GetDevice());
+  vkDeviceWaitIdle(vcore_->get_device());
   delete inflight_fences_[0];
   delete inflight_fences_[1];
   delete image_available_semaphores_[0];
@@ -68,8 +65,8 @@ VulkanRenderer::~VulkanRenderer() {
   delete render_finished_semaphores_[0];
   delete render_finished_semaphores_[1];
 
-  delete command_buffer_manager_;
-  delete descriptor_manager_;
+  command_buffer_manager_.reset();
+  descriptor_manager_.reset();
 
   delete depth_;
   for (auto &frame_buffer : frame_buffers_)
@@ -84,16 +81,16 @@ VulkanRenderer::~VulkanRenderer() {
   delete vcore_;
 }
 
-void VulkanRenderer::DrawFrame(double time) {
-  vkWaitForFences(vcore_->GetDevice(), 1,
+void VulkanRenderer::draw_frame(double time) {
+  vkWaitForFences(vcore_->get_device(), 1,
                   &inflight_fences_[current_frame_]->GetFence(), VK_TRUE,
                   UINT64_MAX);
   auto result = vkAcquireNextImageKHR(
-      vcore_->GetDevice(), swap_chain_->GetSwapChain(), UINT64_MAX,
+      vcore_->get_device(), swap_chain_->GetSwapChain(), UINT64_MAX,
       image_available_semaphores_[current_frame_]->GetSemaphore(),
       VK_NULL_HANDLE, &current_index_);
   if (result == VK_ERROR_OUT_OF_DATE_KHR) {
-    RecreateSwapChain();
+    recreate_swap_chain();
     return;
   } else if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR) {
     throw std::runtime_error("failed to acquire swap chain image");
@@ -116,7 +113,7 @@ void VulkanRenderer::DrawFrame(double time) {
       render_finished_semaphores_[current_frame_]->GetSemaphore()};
   submit_info.signalSemaphoreCount = 1;
   submit_info.pSignalSemaphores = signalSemaphores;
-  vkResetFences(vcore_->GetDevice(), 1,
+  vkResetFences(vcore_->get_device(), 1,
                 &inflight_fences_[current_frame_]->GetFence());
   if (vkQueueSubmit(graphics_queue_->GetQueue(), 1, &submit_info,
                     inflight_fences_[current_frame_]->GetFence()) !=
@@ -135,19 +132,19 @@ void VulkanRenderer::DrawFrame(double time) {
   result = vkQueuePresentKHR(present_queue_->GetQueue(), &present_info);
   if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR) {
     //    window_data_->resized = false;
-    RecreateSwapChain();
+    recreate_swap_chain();
   } else if (result != VK_SUCCESS) {
     throw std::runtime_error("failed to present swap chain image");
   }
   current_frame_ = (current_frame_ + 1) % max_frames_;
 }
 
-void VulkanRenderer::WaitIdle() {
-  vkDeviceWaitIdle(vcore_->GetDevice());
+void VulkanRenderer::wait_idle() {
+  vkDeviceWaitIdle(vcore_->get_device());
 }
 
-void VulkanRenderer::RecreateSwapChain() {
-  vkDeviceWaitIdle(vcore_->GetDevice());
+void VulkanRenderer::recreate_swap_chain() {
+  vkDeviceWaitIdle(vcore_->get_device());
   for (auto &frame_buffer : frame_buffers_) {
     delete frame_buffer;
   }
@@ -170,7 +167,7 @@ void VulkanRenderer::RecreateSwapChain() {
 
   depth_ = new VulkanTexture(
       vcore_, swap_chain_->GetExtent().width, swap_chain_->GetExtent().height,
-      vcore_->FindSupportedFormat(
+      vcore_->find_supported_format(
           {VK_FORMAT_D32_SFLOAT, VK_FORMAT_D32_SFLOAT_S8_UINT,
            VK_FORMAT_D32_SFLOAT_S8_UINT},
           VK_IMAGE_TILING_OPTIMAL,
@@ -178,7 +175,7 @@ void VulkanRenderer::RecreateSwapChain() {
       VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT,
       VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
   for (auto &depth = depth_;
-       auto &swap_chain_image : swap_chain_->GetImageViews()) {
+      auto &swap_chain_image : swap_chain_->GetImageViews()) {
     frame_buffers_.emplace_back(new VulkanFrameBuffer(
         vcore_, render_pass_, swap_chain_->GetExtent().width,
         swap_chain_->GetExtent().height,
@@ -187,7 +184,7 @@ void VulkanRenderer::RecreateSwapChain() {
 }
 
 std::shared_ptr<VulkanCommandBuffer>
-VulkanRenderer::BeginOneTimeCommand() const {
+VulkanRenderer::begin_one_time_command() const {
   auto command = command_buffer_manager_->CreateBuffer();
 
   VkCommandBufferBeginInfo begin_info = {};
@@ -198,7 +195,7 @@ VulkanRenderer::BeginOneTimeCommand() const {
   return command;
 }
 
-void VulkanRenderer::EndOneTimeCommand(
+void VulkanRenderer::end_one_time_command(
     std::shared_ptr<VulkanCommandBuffer> command_buffer) {
   vkEndCommandBuffer(command_buffer->GetBuffer());
   VkSubmitInfo submit_info = {};
@@ -211,14 +208,14 @@ void VulkanRenderer::EndOneTimeCommand(
   command_buffer_manager_->FreeBuffer(command_buffer);
 }
 
-VulkanDescriptorSet *VulkanRenderer::CreateDescriptorSet() const {
+VulkanDescriptorSet *VulkanRenderer::create_descriptor_set() const {
   return descriptor_manager_->CreateDescriptorSet(descriptor_set_layout_);
 }
 
-void VulkanRenderer::NewFrame() { command_buffer_manager_->SwitchFrame(); }
+void VulkanRenderer::new_frame() { command_buffer_manager_->SwitchFrame(); }
 
 std::shared_ptr<VulkanCommandBuffer>
-VulkanRenderer::StartRenderCommand() const {
+VulkanRenderer::start_render_command() const {
   auto command_buffer = command_buffer_manager_->CreateFrameCommandBuffer();
   //  vkResetCommandBuffer(command_buffer->GetBuffer(), 0);
   VkCommandBufferBeginInfo begin_info = {};
@@ -247,7 +244,7 @@ VulkanRenderer::StartRenderCommand() const {
                     VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline_->GetPipeline());
   return command_buffer;
 }
-void VulkanRenderer::EndRenderCommand(
+void VulkanRenderer::end_render_command(
     std::shared_ptr<VulkanCommandBuffer> buffer) {
   vkCmdEndRenderPass(buffer->GetBuffer());
   if (vkEndCommandBuffer(buffer->GetBuffer()) != VK_SUCCESS) {

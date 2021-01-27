@@ -10,21 +10,21 @@ namespace slash {
 class VulkanRenderPassDescription {
 
   VkAttachmentDescription CreateAttachemt(VkFormat format, VkSampleCountFlagBits samples,
-                     VkAttachmentLoadOp load_op, VkAttachmentStoreOp store_op,
-                     VkAttachmentLoadOp stencil_load_op,
-                     VkAttachmentStoreOp stencil_store_op,
-                     VkImageLayout initial_layout, VkImageLayout final_layout);
+                                          VkAttachmentLoadOp load_op, VkAttachmentStoreOp store_op,
+                                          VkAttachmentLoadOp stencil_load_op,
+                                          VkAttachmentStoreOp stencil_store_op,
+                                          VkImageLayout initial_layout, VkImageLayout final_layout);
 
   VkSubpassDescription CreateSubpass(VkSubpassDescriptionFlags flags,
-                  VkPipelineBindPoint pipelineBindPoint,
-                  uint32_t inputAttachmentCount,
-                  const VkAttachmentReference *pInputAttachments,
-                  uint32_t colorAttachmentCount,
-                  const VkAttachmentReference *pColorAttachments,
-                  const VkAttachmentReference *pResolveAttachments,
-                  const VkAttachmentReference *pDepthStencilAttachment,
-                  uint32_t preserveAttachmentCount,
-                  const uint32_t *pPreserveAttachments);
+                                     VkPipelineBindPoint pipelineBindPoint,
+                                     uint32_t inputAttachmentCount,
+                                     const VkAttachmentReference *pInputAttachments,
+                                     uint32_t colorAttachmentCount,
+                                     const VkAttachmentReference *pColorAttachments,
+                                     const VkAttachmentReference *pResolveAttachments,
+                                     const VkAttachmentReference *pDepthStencilAttachment,
+                                     uint32_t preserveAttachmentCount,
+                                     const uint32_t *pPreserveAttachments);
 
   std::vector<VkAttachmentDescription> attachments_;
   std::vector<VkAttachmentReference> references_;
@@ -33,16 +33,16 @@ class VulkanRenderPassDescription {
 };
 
 class VulkanRenderPass {
-public:
-  VulkanRenderPass(VulkanCore *vcore, VulkanSwapChain* swap_chain);
+ public:
+  VulkanRenderPass(VulkanCore *vcore, VulkanSwapChain *swap_chain);
   ~VulkanRenderPass();
 
   VkRenderPass GetRenderPass() const;
 
-private:
-  VulkanCore* vcore_;
-  VulkanSwapChain* swap_chain_;
-  VkRenderPass render_pass_ = VK_NULL_HANDLE;
+ private:
+  VulkanCore *vcore_;
+  VulkanSwapChain *swap_chain_;
+  VkRenderPass render_pass_;
 };
 
 } // namespace slash

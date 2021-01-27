@@ -3,13 +3,13 @@
 namespace slash {
 
 VulkanCore::VulkanCore(GLFWwindow *window) : window_(window) {
-  CreateInstance();
-  CreateSurface();
+  create_instance();
+  create_surface();
 #if defined(SL_RENDERER_VALIDATION)
   SetUpDebugMessenger();
 #endif
-  PickPhysicalDevice();
-  CreateLogicalDevice();
+  pick_physical_device();
+  create_logical_device();
 }
 
 VulkanCore::~VulkanCore() {
@@ -21,22 +21,21 @@ VulkanCore::~VulkanCore() {
   vkDestroyInstance(instance_, nullptr);
 }
 
-const VkDevice &VulkanCore::GetDevice() const { return device_; }
-const VkSurfaceKHR &VulkanCore::GetSuface() const { return surface_; }
-const VkPhysicalDevice &VulkanCore::GetPhysicalDevice() const { return gpu_; }
-QueueFamilyIndices VulkanCore::GetQueueFamilies() const {
-  return FindQueueFamilies(gpu_);
+auto VulkanCore::get_device() const -> const VkDevice & { return device_; }
+auto VulkanCore::get_surface() const -> const VkSurfaceKHR & { return surface_; }
+auto VulkanCore::get_physical_device() const -> const VkPhysicalDevice & { return gpu_; }
+auto VulkanCore::get_queue_families() const -> QueueFamilyIndices {
+  return find_queue_families(gpu_);
 }
-std::pair<uint32_t, uint32_t> VulkanCore::GetWindowSize() const {
+auto VulkanCore::get_window_size() const -> std::pair<uint32_t, uint32_t> {
   int width, height;
   glfwGetFramebufferSize(window_, &width, &height);
   return {static_cast<uint32_t>(width), static_cast<uint32_t>(height)};
 }
 
-VkFormat
-VulkanCore::FindSupportedFormat(const std::vector<VkFormat> &candidates,
-                                VkImageTiling tiling,
-                                VkFormatFeatureFlags features) {
+auto VulkanCore::find_supported_format(const std::vector<VkFormat> &candidates,
+                                                     VkImageTiling tiling,
+                                                     VkFormatFeatureFlags features) -> VkFormat {
   for (auto format : candidates) {
     VkFormatProperties props;
     vkGetPhysicalDeviceFormatProperties(gpu_, format, &props);
@@ -44,15 +43,15 @@ VulkanCore::FindSupportedFormat(const std::vector<VkFormat> &candidates,
         (props.linearTilingFeatures & features) == features) {
       return format;
     } else if (tiling == VK_IMAGE_TILING_OPTIMAL &&
-               (props.optimalTilingFeatures & features) == features) {
+        (props.optimalTilingFeatures & features) == features) {
       return format;
     }
   }
   throw std::runtime_error("failed to find supported format");
 }
 
-uint32_t VulkanCore::FindMemoryTypeIndex(uint32_t memory_type_bits,
-                                         VkMemoryPropertyFlags property_flags) {
+auto VulkanCore::find_memory_type_index(uint32_t memory_type_bits,
+                                                      VkMemoryPropertyFlags property_flags) -> uint32_t {
   VkPhysicalDeviceMemoryProperties memory_properties;
   vkGetPhysicalDeviceMemoryProperties(gpu_, &memory_properties);
   for (uint32_t i(0); i < memory_properties.memoryTypeCount; ++i) {
@@ -65,18 +64,18 @@ uint32_t VulkanCore::FindMemoryTypeIndex(uint32_t memory_type_bits,
   throw std::runtime_error("failed to find suitable memory type");
 }
 
-SwapChainSupportDetails VulkanCore::GetSwapChainSupport() const {
-  return SwapChainSupport(gpu_);
+SwapChainSupportDetails VulkanCore::get_swap_chain_support() const {
+  return swap_chain_support(gpu_);
 }
 
-void VulkanCore::CreateInstance() {
+void VulkanCore::create_instance() {
   VkApplicationInfo app_info = {};
   app_info.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
   app_info.pApplicationName = "Vulkan app";
   app_info.applicationVersion = VK_MAKE_VERSION(0, 0, 1);
   app_info.pEngineName = "Slash";
   app_info.engineVersion = VK_MAKE_VERSION(0, 0, 1);
-  app_info.apiVersion = VK_API_VERSION_1_1;
+  app_info.apiVersion = VK_API_VERSION_1_2;
 
   uint32_t extension_count = 0;
   vkEnumerateInstanceExtensionProperties(nullptr, &extension_count, nullptr);
@@ -88,7 +87,7 @@ void VulkanCore::CreateInstance() {
   create_info.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
   create_info.pApplicationInfo = &app_info;
 
-  auto extensions = GetRequaredExtentions();
+  auto extensions = get_required_extensions();
   create_info.enabledExtensionCount = static_cast<uint32_t>(extensions.size());
   create_info.ppEnabledExtensionNames = extensions.data();
 
@@ -111,14 +110,14 @@ void VulkanCore::CreateInstance() {
   }
 }
 
-void VulkanCore::CreateSurface() {
+void VulkanCore::create_surface() {
   if (glfwCreateWindowSurface(instance_, window_, nullptr, &surface_) !=
       VK_SUCCESS) {
     throw std::runtime_error("failed to create widow surface");
   }
 }
 
-void VulkanCore::PickPhysicalDevice() {
+void VulkanCore::pick_physical_device() {
   uint32_t device_count = 0;
   vkEnumeratePhysicalDevices(instance_, &device_count, nullptr);
 
@@ -131,7 +130,7 @@ void VulkanCore::PickPhysicalDevice() {
 
   for (const auto &device : devices) {
     // TODO make some GPU score to pick one with most performance
-    if (IsDeviceSuitable(device)) {
+    if (is_device_suitable(device)) {
       gpu_ = device;
       break;
     }
@@ -141,9 +140,9 @@ void VulkanCore::PickPhysicalDevice() {
   }
 }
 
-void VulkanCore::CreateLogicalDevice() {
+void VulkanCore::create_logical_device() {
   std::vector<VkDeviceQueueCreateInfo> queue_createinfos;
-  auto queue_families = FindQueueFamilies(gpu_);
+  auto queue_families = find_queue_families(gpu_);
   std::set<uint32_t> unique_queue_families = {
       queue_families.graphicsFamily.value(),
       queue_families.presentFamily.value()};
@@ -168,8 +167,8 @@ void VulkanCore::CreateLogicalDevice() {
   create_info.pQueueCreateInfos = queue_createinfos.data();
   create_info.pEnabledFeatures = &device_features;
   create_info.enabledExtensionCount =
-      static_cast<uint32_t>(device_extentions.size());
-  create_info.ppEnabledExtensionNames = device_extentions.data();
+      static_cast<uint32_t>(device_extensions.size());
+  create_info.ppEnabledExtensionNames = device_extensions.data();
 
 #if defined(SL_RENDERER_VALIDATION)
   create_info.enabledLayerCount =
@@ -184,7 +183,7 @@ void VulkanCore::CreateLogicalDevice() {
   }
 }
 
-std::vector<const char *> VulkanCore::GetRequaredExtentions() {
+std::vector<const char *> VulkanCore::get_required_extensions() {
   uint32_t extensions_count = 0;
   const char **extensions;
   extensions = glfwGetRequiredInstanceExtensions(&extensions_count);
@@ -196,7 +195,7 @@ std::vector<const char *> VulkanCore::GetRequaredExtentions() {
   return return_extensions;
 }
 
-bool VulkanCore::IsDeviceSuitable(VkPhysicalDevice const &device) {
+bool VulkanCore::is_device_suitable(VkPhysicalDevice const &device) {
   // TODO make props and features be choosable
   // Getting device properties
   // VkPhysicalDeviceProperties deviceProperties;
@@ -207,22 +206,22 @@ bool VulkanCore::IsDeviceSuitable(VkPhysicalDevice const &device) {
 
   // Find apropriet queue families for device (specified in queue family
   // property)
-  QueueFamilyIndices indices = FindQueueFamilies(device);
-  bool extentions_supported = CheckDeviceExtensionSupport(device);
+  QueueFamilyIndices indices = find_queue_families(device);
+  bool extentions_supported = check_device_extension_support(device);
   bool swapChainAdequate = false;
   if (extentions_supported) {
-    auto swapChainSupport = SwapChainSupport(device);
+    auto swapChainSupport = swap_chain_support(device);
     swapChainAdequate = !swapChainSupport.formats.empty() &&
-                        !swapChainSupport.presentModes.empty();
+        !swapChainSupport.presentModes.empty();
   }
 
   // TODO make this configurable
-  return indices.IsComplete() && extentions_supported && swapChainAdequate &&
-         supported_features.samplerAnisotropy;
+  return indices.complete() && extentions_supported && swapChainAdequate &&
+      supported_features.samplerAnisotropy;
 }
 
 QueueFamilyIndices
-VulkanCore::FindQueueFamilies(VkPhysicalDevice const &device) const {
+VulkanCore::find_queue_families(VkPhysicalDevice const &device) const {
   QueueFamilyIndices indices;
 
   uint32_t queue_family_count = 0;
@@ -245,7 +244,7 @@ VulkanCore::FindQueueFamilies(VkPhysicalDevice const &device) const {
     if (queueFamily.queueCount > 0 && present_support) {
       indices.presentFamily = i;
     }
-    if (indices.IsComplete()) {
+    if (indices.complete()) {
       break;
     }
     ++i;
@@ -253,7 +252,7 @@ VulkanCore::FindQueueFamilies(VkPhysicalDevice const &device) const {
   return indices;
 }
 
-bool VulkanCore::CheckDeviceExtensionSupport(VkPhysicalDevice const &device) {
+bool VulkanCore::check_device_extension_support(VkPhysicalDevice const &device) {
   uint32_t extension_count;
   vkEnumerateDeviceExtensionProperties(device, nullptr, &extension_count,
                                        nullptr);
@@ -261,8 +260,8 @@ bool VulkanCore::CheckDeviceExtensionSupport(VkPhysicalDevice const &device) {
   vkEnumerateDeviceExtensionProperties(device, nullptr, &extension_count,
                                        available_extensions.data());
 
-  std::set<std::string_view> required_extensions(device_extentions.begin(),
-                                                 device_extentions.end());
+  std::set<std::string_view> required_extensions(device_extensions.begin(),
+                                                 device_extensions.end());
   for (const auto &extention : available_extensions) {
     required_extensions.erase(extention.extensionName);
   }
@@ -270,7 +269,7 @@ bool VulkanCore::CheckDeviceExtensionSupport(VkPhysicalDevice const &device) {
 }
 
 SwapChainSupportDetails
-VulkanCore::SwapChainSupport(VkPhysicalDevice const &device) const {
+VulkanCore::swap_chain_support(VkPhysicalDevice const &device) const {
   SwapChainSupportDetails details;
   vkGetPhysicalDeviceSurfaceCapabilitiesKHR(device, surface_,
                                             &details.capabilities);
@@ -331,20 +330,15 @@ VkBool32 VulkanCore::DebugCallBack(
     const VkDebugUtilsMessengerCallbackDataEXT *pCallBackData,
     void *pUserData) {
   switch (messageSeverity) {
-  case VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT:
-    SL_CORE_TRACE(pCallBackData->pMessage);
-    break;
-  case VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT:
-    SL_CORE_INFO(pCallBackData->pMessage);
-    break;
-  case VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT:
-    SL_CORE_WARN(pCallBackData->pMessage);
-    break;
-  case VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT:
-    SL_CORE_ERROR(pCallBackData->pMessage);
-    break;
-  default:
-    SL_CORE_ERROR(pCallBackData->pMessage);
+    case VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT:SL_CORE_TRACE(pCallBackData->pMessage);
+      break;
+    case VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT:SL_CORE_INFO(pCallBackData->pMessage);
+      break;
+    case VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT:SL_CORE_WARN(pCallBackData->pMessage);
+      break;
+    case VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT:SL_CORE_ERROR(pCallBackData->pMessage);
+      break;
+    default:SL_CORE_ERROR(pCallBackData->pMessage);
   }
   return VK_FALSE;
 }
@@ -376,14 +370,14 @@ void VulkanCore::SetUpDebugInfo(VkDebugUtilsMessengerCreateInfoEXT &info) {
   info = {};
   info.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
   info.messageSeverity =
-      VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT |
+//      VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT |
       //                                     VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT
       //                                     |
       VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT |
-      VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
+          VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
   info.messageType = VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT |
-                     VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT |
-                     VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
+//                     VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT |
+      VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
   info.pfnUserCallback = DebugCallBack;
   info.pUserData = nullptr;
 }

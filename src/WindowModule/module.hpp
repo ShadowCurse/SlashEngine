@@ -7,9 +7,9 @@
 
 namespace slash {
 
-class WindowModule {
+class Slash_API WindowModule {
  public:
-  WindowModule(App& app, WindowParams params) {
+  static void init(App &app, WindowParams params) {
     app.add_resource<WindowManager>(app);
 
     app.add_event<MouseMovedEvent>();
@@ -23,7 +23,10 @@ class WindowModule {
     auto &window_manager = app.get_resource<WindowManager>();
     window_manager.add_window(std::move(params));
 
-//    app.set_runner([&] { window_manager.run(); });
+  }
+  static void remove(App &app) {
+    SL_CORE_INFO("WindowModule remove");
+    app.remove_resource<WindowManager>();
   }
 };
 

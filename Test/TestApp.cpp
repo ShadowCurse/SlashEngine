@@ -108,9 +108,10 @@ class TestLayer : public slash::Layer {
 
 class TestModule {
  public:
-  TestModule(slash::App &app, int a) {
+  static void init(slash::App &app, int a) {
     std::cout << "TestModule\n";
   }
+  static void remove(slash::App &app) {}
 };
 
 void mouse_move_callback(slash::MouseMovedEvent &e) {
@@ -136,7 +137,7 @@ struct Velocity {
   float velocity{};
 };
 
-void velocity_system(Velocity& velocity) {
+void velocity_system(Velocity &velocity) {
   if (velocity.velocity > 2.0f)
     velocity.velocity -= 0.1f;
   else
@@ -152,7 +153,8 @@ auto main() -> int {
 
   slash::App app;
   app.init_module<TestModule>(12)
-      .init_module<slash::WindowModule>(slash::WindowParams("Test", 800, 400));
+      .init_module<slash::WindowModule>(slash::WindowParams("Test", 800, 400))
+      .init_module<slash::RenderModule>();
 
 //  auto& wm = app.get_resource<slash::WindowManager>();
 //  wm.add_window(slash::WindowParams{"Test2", 300, 200 });
@@ -175,14 +177,40 @@ auto main() -> int {
   app.add_component(e, Velocity{1.2f});
 //  app.add_system(velocity_system);
 
-  app.add_system([&](slash::App& app){
-    auto& wm = app.get_resource<slash::WindowManager>();
-    if (wm.get_windows()[0]->is_key_pressed(SL_KEY_A)) {
+
+  const std::vector<slash::Vertex> qube_vertices = {
+      {{-0.5f, -0.5f, 1.5f}, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}},
+      {{0.5f, -0.5f, 1.5f}, {0.0f, 1.0f, 0.0f}, {1.0f, 0.0f}},
+      {{0.5f, 0.5f, 1.5f}, {0.0f, 0.0f, 1.0f}, {1.0f, 1.0f}},
+      {{-0.5f, 0.5f, 1.5f}, {1.0f, 1.0f, 1.0f}, {0.0f, 1.0f}},
+
+      {{-0.5f, -0.5f, 1.0f}, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}},
+      {{0.5f, -0.5f, 1.0f}, {0.0f, 1.0f, 0.0f}, {1.0f, 0.0f}},
+      {{0.5f, 0.5f, 1.0f}, {0.0f, 0.0f, 1.0f}, {1.0f, 1.0f}},
+      {{-0.5f, 0.5f, 1.0f}, {1.0f, 1.0f, 1.0f}, {0.0f, 1.0f}}};
+
+  const std::vector<uint16_t> qube_indices = {0, 1, 2, 2, 3, 0,
+                                              0, 3, 7, 7, 4, 0,
+                                              0, 1, 5, 5, 4, 0,
+                                              2, 1, 5, 5, 2, 6,
+                                              3, 2, 6, 6, 7, 3,
+                                              4, 5, 6, 6, 7, 4};
+
+  auto rotation = glm::rotate(glm::mat4(1.0f), glm::radians(45.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+
+  app.add_component(e, slash::Mesh_3D{qube_vertices, qube_indices});
+//  app.add_component(e, slash::Texture::Load(""));
+  app.add_component(e, slash::Transform{rotation, {5, 5, 5}, {1, 1}});
+
+  app.add_system([&](slash::App &app) {
+    auto &wm = app.get_resource<slash::WindowManager>();
+    auto &windows = wm.get_windows();
+    if (!windows.empty() && windows[0]->is_key_pressed(SL_KEY_A)) {
       SL_INFO("key pressed");
-      auto& pos = app.get_component<Position>(e);
+      auto &pos = app.get_component<Position>(e);
       SL_INFO("curr pos: x:{} y:{}", pos.x, pos.y);
       auto query = app.get_component_query<Velocity, Position>();
-      for (auto [vel, pos]: query) {
+      for (auto[vel, pos]: query) {
         pos.x += vel.velocity;
         SL_INFO("new pos: x:{} y:{}", pos.x, pos.y);
       }

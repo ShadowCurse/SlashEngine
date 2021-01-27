@@ -12,14 +12,14 @@ VulkanCommandBuffer::VulkanCommandBuffer(VulkanCore *vcore,
   allocate_info.commandPool = command_pool_->GetPool();
   allocate_info.level = level_;
   allocate_info.pNext = nullptr;
-  if (vkAllocateCommandBuffers(vcore->GetDevice(), &allocate_info, &buffer_) !=
+  if (vkAllocateCommandBuffers(vcore->get_device(), &allocate_info, &buffer_) !=
       VK_SUCCESS) {
     throw std::runtime_error("failed to allocate command buffer");
   };
 }
 
 VulkanCommandBuffer::~VulkanCommandBuffer() {
-//  vkFreeCommandBuffers(vcore_->GetDevice(), command_pool_->GetPool(), 1,
+//  vkFreeCommandBuffers(vcore_->get_device(), command_pool_->GetPool(), 1,
 //                       &buffer_);
 }
 

@@ -15,9 +15,9 @@ VulkanCommandBufferManager::VulkanCommandBufferManager(
                VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT}}} {}
 
 VulkanCommandBufferManager::~VulkanCommandBufferManager() {
-  vkResetCommandPool(vcore_->GetDevice(), pool_.GetPool(), 0);
-  for (auto& pool : pools_)
-    vkResetCommandPool(vcore_->GetDevice(), pool.GetPool(), 0);
+  vkResetCommandPool(vcore_->get_device(), pool_.GetPool(), 0);
+  for (auto &pool : pools_)
+    vkResetCommandPool(vcore_->get_device(), pool.GetPool(), 0);
 }
 
 std::shared_ptr<VulkanCommandBuffer>
@@ -31,7 +31,7 @@ VulkanCommandBufferManager::CreateBuffer() {
 void VulkanCommandBufferManager::FreeBuffer(
     std::shared_ptr<VulkanCommandBuffer> buffer) {
   if (auto result =
-          std::find(command_buffers_.begin(), command_buffers_.end(), buffer);
+        std::find(command_buffers_.begin(), command_buffers_.end(), buffer);
       result != command_buffers_.end()) {
     command_buffers_.erase(result);
   }
@@ -48,7 +48,7 @@ std::vector<VkCommandBuffer> VulkanCommandBufferManager::GetBuffers() {
 void VulkanCommandBufferManager::SwitchFrame() {
   current_pool = (current_pool + 1) % pools_.size();
   frame_command_buffers_[current_pool].clear();
-  vkResetCommandPool(vcore_->GetDevice(), pools_[current_pool].GetPool(), 0);
+  pools_[current_pool].reset();
 }
 
 std::shared_ptr<VulkanCommandBuffer>

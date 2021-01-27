@@ -25,7 +25,7 @@ VulkanRenderPass::VulkanRenderPass(VulkanCore *vcore,
   color_attachment_ref.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 
   VkAttachmentDescription depth_attachment = {};
-  depth_attachment.format = vcore->FindSupportedFormat(
+  depth_attachment.format = vcore->find_supported_format(
       {VK_FORMAT_D32_SFLOAT, VK_FORMAT_D32_SFLOAT_S8_UINT,
        VK_FORMAT_D32_SFLOAT_S8_UINT},
       VK_IMAGE_TILING_OPTIMAL, VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT);
@@ -56,12 +56,12 @@ VulkanRenderPass::VulkanRenderPass(VulkanCore *vcore,
   dependency[0].dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
   dependency[0].srcAccessMask = 0;
   dependency[0].dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT |
-                                VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+      VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
 
   std::array<VkAttachmentDescription, 2> attachemnts = {color_attachment,
                                                         depth_attachment};
 
-  VkRenderPassCreateInfo create_info;
+  VkRenderPassCreateInfo create_info{};
   create_info.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
   create_info.attachmentCount = static_cast<uint32_t>(attachemnts.size());
   create_info.pAttachments = attachemnts.data();
@@ -71,14 +71,14 @@ VulkanRenderPass::VulkanRenderPass(VulkanCore *vcore,
   create_info.pDependencies = dependency.data();
   create_info.flags = 0;
 
-  if (vkCreateRenderPass(vcore->GetDevice(), &create_info, nullptr,
-                         &render_pass_) != VK_SUCCESS) {
+  render_pass_ = VK_NULL_HANDLE;
+  if (vkCreateRenderPass(vcore_->get_device(), &create_info, nullptr, &render_pass_) != VK_SUCCESS) {
     throw std::runtime_error("failed to create render pass");
   }
 }
 
 VulkanRenderPass::~VulkanRenderPass() {
-  vkDestroyRenderPass(vcore_->GetDevice(), render_pass_, nullptr);
+  vkDestroyRenderPass(vcore_->get_device(), render_pass_, nullptr);
 }
 
 VkRenderPass VulkanRenderPass::GetRenderPass() const {

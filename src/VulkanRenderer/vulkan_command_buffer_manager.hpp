@@ -28,7 +28,7 @@ private:
   std::array<std::vector<std::shared_ptr<VulkanCommandBuffer>>, 3>
       frame_command_buffers_;
   std::array<VulkanCommandPool, 3> pools_;
-  uint8_t current_pool = 0;
+  size_t current_pool{0};
 };
 
 } // namespace slash

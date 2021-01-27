@@ -13,6 +13,7 @@ public:
                     VkCommandPoolCreateFlags flags);
   ~VulkanCommandPool();
   [[nodiscard]] const VkCommandPool &GetPool() const;
+  void reset();
 
 private:
   VulkanCore *vcore_;

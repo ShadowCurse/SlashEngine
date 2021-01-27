@@ -10,7 +10,7 @@
 namespace slash {
 
 class VulkanSwapChain {
-public:
+ public:
   VulkanSwapChain(VulkanCore *vcore, const std::vector<VulkanQueue *> &queues);
   ~VulkanSwapChain();
   VkResult AquireImage(uint32_t timeout, const VulkanSemaphore &semaphore,
@@ -19,9 +19,9 @@ public:
   [[nodiscard]] constexpr VkSwapchainKHR GetSwapChain() const { return swap_chain_; }
   [[nodiscard]] constexpr VkFormat GetFormat() const { return format_; }
   [[nodiscard]] constexpr const VkExtent2D &GetExtent() const { return extent_2_d_; }
-  [[nodiscard]] constexpr const std::vector<VkImageView>& GetImageViews() const { return image_views_; }
+  [[nodiscard]] constexpr const std::vector<VkImageView> &GetImageViews() const { return image_views_; }
 
-private:
+ private:
   VkSurfaceFormatKHR ChooseSwapSurfaceFormat(
       const std::vector<VkSurfaceFormatKHR> &surface_formats);
   VkPresentModeKHR

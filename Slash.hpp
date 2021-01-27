@@ -19,16 +19,12 @@
 #include "GameResources/mesh_3d.hpp"
 #include "GameResources/texture.hpp"
 #include "GameResources/transform.hpp"
-#include "GameResources/resource_manager.hpp"
 
 #include "Renderer/vertex.hpp"
 
-#include "RendererModule/render_module.hpp"
+#include "RendererModule/module.hpp"
 
 #include "Scene/camera.hpp"
-#include "Scene/scene.hpp"
-#include "Scene/scene_manager.hpp"
-
 
 #include "WindowModule/module.hpp"
 #include "LayerModule/module.hpp"

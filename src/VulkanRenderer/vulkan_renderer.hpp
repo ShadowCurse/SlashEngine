@@ -19,43 +19,42 @@
 namespace slash {
 
 class VulkanRenderer {
-public:
-  VulkanRenderer(Window *window);
+ public:
+  explicit VulkanRenderer(Window *window);
   ~VulkanRenderer();
 
-  void DrawFrame(double time);
-  void WaitIdle();
+  void new_frame();
+  void draw_frame(double time);
+  void wait_idle();
 
-  [[nodiscard]] constexpr inline VulkanCore *GetCore() const { return vcore_; }
-  [[nodiscard]] constexpr inline VulkanPipeline *GetPipeline() const {
+  [[nodiscard]] constexpr inline auto get_core() const -> VulkanCore * { return vcore_; }
+  [[nodiscard]] constexpr inline auto get_pipeline() const -> VulkanPipeline * {
     return pipeline_;
   }
-  [[nodiscard]] std::shared_ptr<VulkanCommandBuffer>
-  BeginOneTimeCommand() const;
+  [[nodiscard]] auto begin_one_time_command() const -> std::shared_ptr<VulkanCommandBuffer>;
+  void end_one_time_command(std::shared_ptr<VulkanCommandBuffer> command_buffer);
 
-  void EndOneTimeCommand(std::shared_ptr<VulkanCommandBuffer> command_buffer);
+  [[nodiscard]] auto create_descriptor_set() const -> VulkanDescriptorSet *;
 
-  [[nodiscard]] VulkanDescriptorSet *CreateDescriptorSet() const;
-  void NewFrame();
-  [[nodiscard]] std::shared_ptr<VulkanCommandBuffer> StartRenderCommand() const;
+  [[nodiscard]] auto start_render_command() const -> std::shared_ptr<VulkanCommandBuffer> ;
+  void end_render_command(std::shared_ptr<VulkanCommandBuffer> buffer);
 
-  void EndRenderCommand(std::shared_ptr<VulkanCommandBuffer> buffer);
+ private:
+  void recreate_swap_chain();
 
-private:
-  void RecreateSwapChain();
+ private:
+  VulkanCore* vcore_;
+  VulkanQueue* graphics_queue_;
+  VulkanQueue* present_queue_;
+  VulkanSwapChain* swap_chain_;
+  VulkanRenderPass* render_pass_;
+  VulkanDescriptorSetLayout* descriptor_set_layout_;
+  VulkanPipeline* pipeline_;
 
-  VulkanCore *vcore_;
-  VulkanQueue *graphics_queue_;
-  VulkanQueue *present_queue_;
-  VulkanSwapChain *swap_chain_;
-  VulkanRenderPass *render_pass_;
-  VulkanDescriptorSetLayout *descriptor_set_layout_;
-  VulkanPipeline *pipeline_;
+  std::shared_ptr<VulkanDescriptorManager> descriptor_manager_;
+  std::shared_ptr<VulkanCommandBufferManager>command_buffer_manager_;
 
-  VulkanDescriptorManager *descriptor_manager_;
-  VulkanCommandBufferManager *command_buffer_manager_;
-
-  VulkanTexture* depth_;
+  VulkanTexture *depth_;
   std::vector<VulkanFrameBuffer *> frame_buffers_;
   std::vector<VulkanFence *> inflight_fences_;
   std::vector<VulkanSemaphore *> image_available_semaphores_;

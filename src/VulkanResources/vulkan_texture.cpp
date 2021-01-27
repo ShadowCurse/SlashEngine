@@ -21,14 +21,14 @@ VulkanTextureSampler::VulkanTextureSampler(VulkanCore *vcore) : vcore_(vcore) {
   sampler_info.minLod = 0.0f;
   sampler_info.maxLod = 0.0f;
 
-  if (vkCreateSampler(vcore->GetDevice(), &sampler_info, nullptr, &sampler_) !=
+  if (vkCreateSampler(vcore->get_device(), &sampler_info, nullptr, &sampler_) !=
       VK_SUCCESS) {
     throw std::runtime_error("failed to create texture sampler");
   }
 }
 
 VulkanTextureSampler::~VulkanTextureSampler() {
-  vkDestroySampler(vcore_->GetDevice(), sampler_, nullptr);
+  vkDestroySampler(vcore_->get_device(), sampler_, nullptr);
 }
 
 VulkanTexture::VulkanTexture(VulkanCore *vcore, uint32_t width, uint32_t height,
@@ -51,26 +51,26 @@ VulkanTexture::VulkanTexture(VulkanCore *vcore, uint32_t width, uint32_t height,
   image_info.samples = VK_SAMPLE_COUNT_1_BIT;
   image_info.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
-  if (vkCreateImage(vcore_->GetDevice(), &image_info, nullptr, &image_) !=
+  if (vkCreateImage(vcore_->get_device(), &image_info, nullptr, &image_) !=
       VK_SUCCESS) {
     throw std::runtime_error("failed to create image");
   }
 
   VkMemoryRequirements memory_requirements;
-  vkGetImageMemoryRequirements(vcore_->GetDevice(), image_,
+  vkGetImageMemoryRequirements(vcore_->get_device(), image_,
                                &memory_requirements);
 
   VkMemoryAllocateInfo alloc_info = {};
   alloc_info.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
   alloc_info.allocationSize = memory_requirements.size;
-  alloc_info.memoryTypeIndex = vcore_->FindMemoryTypeIndex(
+  alloc_info.memoryTypeIndex = vcore_->find_memory_type_index(
       memory_requirements.memoryTypeBits, properties);
 
-  if (vkAllocateMemory(vcore_->GetDevice(), &alloc_info, nullptr, &memory_) !=
+  if (vkAllocateMemory(vcore_->get_device(), &alloc_info, nullptr, &memory_) !=
       VK_SUCCESS) {
     throw std::runtime_error("failed to allocate memory");
   }
-  vkBindImageMemory(vcore_->GetDevice(), image_, memory_, 0);
+  vkBindImageMemory(vcore_->get_device(), image_, memory_, 0);
 
   VkImageViewCreateInfo view_info = {};
   view_info.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
@@ -87,16 +87,16 @@ VulkanTexture::VulkanTexture(VulkanCore *vcore, uint32_t width, uint32_t height,
   view_info.subresourceRange.baseArrayLayer = 0;
   view_info.subresourceRange.layerCount = 1;
 
-  if (vkCreateImageView(vcore_->GetDevice(), &view_info, nullptr,
+  if (vkCreateImageView(vcore_->get_device(), &view_info, nullptr,
                         &image_view_) != VK_SUCCESS) {
     throw std::runtime_error("failed to create texture views!");
   }
 }
 
 VulkanTexture::~VulkanTexture() {
-  vkDestroyImageView(vcore_->GetDevice(), image_view_, nullptr);
-  vkDestroyImage(vcore_->GetDevice(), image_, nullptr);
-  vkFreeMemory(vcore_->GetDevice(), memory_, nullptr);
+  vkDestroyImageView(vcore_->get_device(), image_view_, nullptr);
+  vkDestroyImage(vcore_->get_device(), image_, nullptr);
+  vkFreeMemory(vcore_->get_device(), memory_, nullptr);
 }
 
 } // namespace slash

@@ -17,14 +17,14 @@ VulkanDescriptorPool::VulkanDescriptorPool(
   pool_info.poolSizeCount = static_cast<uint32_t>(pool_sizes_.size());
   pool_info.pPoolSizes = pool_sizes_.data();
   pool_info.maxSets = static_cast<uint32_t>(size);
-  if (vkCreateDescriptorPool(vcore_->GetDevice(), &pool_info, nullptr,
+  if (vkCreateDescriptorPool(vcore_->get_device(), &pool_info, nullptr,
                              &pool_) != VK_SUCCESS) {
     throw std::runtime_error("failed to create descriptor pool");
   }
 }
 
 VulkanDescriptorPool::~VulkanDescriptorPool() {
-  vkDestroyDescriptorPool(vcore_->GetDevice(), pool_, nullptr);
+  vkDestroyDescriptorPool(vcore_->get_device(), pool_, nullptr);
 }
 
 bool VulkanDescriptorPool::CanAllocate(

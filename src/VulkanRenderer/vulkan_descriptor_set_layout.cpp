@@ -6,7 +6,7 @@ VulkanDescriptorSetLayout::VulkanDescriptorSetLayout(VulkanCore *vcore)
     : vcore_(vcore) {}
 
 VulkanDescriptorSetLayout::~VulkanDescriptorSetLayout() {
-  vkDestroyDescriptorSetLayout(vcore_->GetDevice(), layout_, nullptr);
+  vkDestroyDescriptorSetLayout(vcore_->get_device(), layout_, nullptr);
 }
 
 void VulkanDescriptorSetLayout::AddBinding(VkDescriptorType type,
@@ -25,7 +25,7 @@ void VulkanDescriptorSetLayout::CreateLayout() {
   layout_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
   layout_info.bindingCount = static_cast<uint32_t>(bindings_.size());
   layout_info.pBindings = bindings_.data();
-  if (vkCreateDescriptorSetLayout(vcore_->GetDevice(), &layout_info, nullptr,
+  if (vkCreateDescriptorSetLayout(vcore_->get_device(), &layout_info, nullptr,
                                   &layout_) != VK_SUCCESS) {
     throw std::runtime_error("failed to create descriptor set layout");
   }

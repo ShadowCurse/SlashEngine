@@ -4,9 +4,8 @@ namespace slash {
 
 VulkanQueue::VulkanQueue(VulkanCore *vcore, uint32_t family_index)
     : vcore_(vcore), family_index_(family_index), queue_(VK_NULL_HANDLE) {
-  vkGetDeviceQueue(vcore->GetDevice(), family_index, 0, &queue_);
+  vkGetDeviceQueue(vcore->get_device(), family_index, 0, &queue_);
 }
-VulkanQueue::~VulkanQueue() {}
 
 uint32_t VulkanQueue::GetFamilyIndex() const { return family_index_; }
 

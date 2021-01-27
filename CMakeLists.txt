@@ -34,7 +34,6 @@ target_precompile_headers(project_options INTERFACE slash_pch.hpp)
 add_library(SlashEngine STATIC
         src/Core/modules.hpp
 
-        src/GameResources/resource_manager.cpp
         src/GameResources/transform.hpp
 
         src/WindowModule/window.cpp
@@ -93,13 +92,8 @@ add_library(SlashEngine STATIC
         src/VulkanResources/vulkan_frame_buffer.cpp
         src/VulkanResources/vulkan_frame_buffer.hpp
 
-        src/RendererModule/render_module.cpp
-        src/RendererModule/render_module.hpp
+        src/RendererModule/module.hpp
 
-        src/Scene/scene_manager.cpp
-        src/Scene/scene_manager.hpp
-        src/Scene/scene.cpp
-        src/Scene/scene.hpp
         src/Scene/camera.cpp
         src/Scene/camera.hpp
 
@@ -112,7 +106,12 @@ add_library(SlashEngine STATIC
         src/WindowModule/module.hpp
 
         src/LayerModule/module.hpp
-        src/Core/resource.hpp src/WindowModule/window_manager.cpp src/WindowModule/window_manager.hpp src/WindowModule/events.hpp src/Core/events.hpp src/Core/systems.hpp)
+        src/Core/resource.hpp
+        src/WindowModule/window_manager.cpp
+        src/WindowModule/window_manager.hpp
+        src/WindowModule/events.hpp
+        src/Core/events.hpp
+        src/Core/systems.hpp)
 
 target_include_directories(SlashEngine PUBLIC ${CMAKE_SOURCE_DIR}/src)
 target_include_directories(SlashEngine PUBLIC ${CMAKE_SOURCE_DIR})

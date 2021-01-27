@@ -16,7 +16,7 @@ VulkanShader::VulkanShader(VulkanCore *vcore, const std::string &path)
   create_info.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
   create_info.codeSize = code.size();
   create_info.pCode = reinterpret_cast<const uint32_t *>(code.data());
-  if (vkCreateShaderModule(vcore_->GetDevice(), &create_info, nullptr,
+  if (vkCreateShaderModule(vcore_->get_device(), &create_info, nullptr,
                            &shader_) != VK_SUCCESS) {
     throw std::runtime_error("failed to create shader module");
   }
@@ -28,14 +28,14 @@ VulkanShader::VulkanShader(VulkanCore *vcore, const std::vector<char> &code)
   create_info.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
   create_info.codeSize = code.size();
   create_info.pCode = reinterpret_cast<const uint32_t *>(code.data());
-  if (vkCreateShaderModule(vcore_->GetDevice(), &create_info, nullptr,
+  if (vkCreateShaderModule(vcore_->get_device(), &create_info, nullptr,
                            &shader_) != VK_SUCCESS) {
     throw std::runtime_error("failed to create shader module");
   }
 }
 
 VulkanShader::~VulkanShader() {
-  vkDestroyShaderModule(vcore_->GetDevice(), shader_, nullptr);
+  vkDestroyShaderModule(vcore_->get_device(), shader_, nullptr);
 }
 
 VkShaderModule VulkanShader::GetShader() const { return shader_; }

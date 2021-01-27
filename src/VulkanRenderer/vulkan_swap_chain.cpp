@@ -2,10 +2,10 @@
 namespace slash {
 
 VulkanSwapChain::VulkanSwapChain(VulkanCore *vcore,
-                                 const std::vector<VulkanQueue*> &queues)
+                                 const std::vector<VulkanQueue *> &queues)
     : vcore_(vcore) {
 
-  SwapChainSupportDetails swap_chain_support = vcore_->GetSwapChainSupport();
+  SwapChainSupportDetails swap_chain_support = vcore_->get_swap_chain_support();
 
   VkSurfaceFormatKHR surface_format =
       ChooseSwapSurfaceFormat(swap_chain_support.formats);
@@ -21,7 +21,7 @@ VulkanSwapChain::VulkanSwapChain(VulkanCore *vcore,
 
   VkSwapchainCreateInfoKHR createInfo = {};
   createInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
-  createInfo.surface = vcore_->GetSuface();
+  createInfo.surface = vcore_->get_surface();
   createInfo.minImageCount = image_count;
   createInfo.imageFormat = surface_format.format;
   createInfo.imageColorSpace = surface_format.colorSpace;
@@ -63,7 +63,7 @@ VulkanSwapChain::VulkanSwapChain(VulkanCore *vcore,
   createInfo.clipped = VK_TRUE;
   createInfo.oldSwapchain = VK_NULL_HANDLE;
 
-  if (vkCreateSwapchainKHR(vcore->GetDevice(), &createInfo, nullptr,
+  if (vkCreateSwapchainKHR(vcore->get_device(), &createInfo, nullptr,
                            &swap_chain_) != VK_SUCCESS) {
     throw std::runtime_error("failed to create swap chain");
   }
@@ -71,10 +71,10 @@ VulkanSwapChain::VulkanSwapChain(VulkanCore *vcore,
   format_ = surface_format.format;
   extent_2_d_ = extent;
 
-  vkGetSwapchainImagesKHR(vcore->GetDevice(), swap_chain_, &image_count,
+  vkGetSwapchainImagesKHR(vcore->get_device(), swap_chain_, &image_count,
                           nullptr);
   images_.resize(image_count);
-  vkGetSwapchainImagesKHR(vcore->GetDevice(), swap_chain_, &image_count,
+  vkGetSwapchainImagesKHR(vcore->get_device(), swap_chain_, &image_count,
                           images_.data());
 
   image_views_.resize(images_.size());
@@ -94,7 +94,7 @@ VulkanSwapChain::VulkanSwapChain(VulkanCore *vcore,
     view_info.subresourceRange.baseArrayLayer = 0;
     view_info.subresourceRange.layerCount = 1;
 
-    if (vkCreateImageView(vcore_->GetDevice(), &view_info, nullptr,
+    if (vkCreateImageView(vcore_->get_device(), &view_info, nullptr,
                           &image_views_[i]) != VK_SUCCESS) {
       throw std::runtime_error("failed to create texture views!");
     }
@@ -104,10 +104,10 @@ VulkanSwapChain::VulkanSwapChain(VulkanCore *vcore,
 
 VulkanSwapChain::~VulkanSwapChain() {
   for (size_t i(0); i < images_.size(); ++i) {
-//    vkDestroyImage(vcore_->GetDevice(), images_[i], nullptr);
-    vkDestroyImageView(vcore_->GetDevice(), image_views_[i], nullptr);
+//    vkDestroyImage(vcore_->get_device(), images_[i], nullptr);
+    vkDestroyImageView(vcore_->get_device(), image_views_[i], nullptr);
   }
-  vkDestroySwapchainKHR(vcore_->GetDevice(), swap_chain_, nullptr);
+  vkDestroySwapchainKHR(vcore_->get_device(), swap_chain_, nullptr);
 }
 
 VkSurfaceFormatKHR VulkanSwapChain::ChooseSwapSurfaceFormat(
@@ -136,7 +136,7 @@ VulkanSwapChain::ChooseSwapExtent(VkSurfaceCapabilitiesKHR capabilities) {
   if (capabilities.currentExtent.width != UINT32_MAX) {
     return capabilities.currentExtent;
   } else {
-    auto [width, height] = vcore_->GetWindowSize();
+    auto[width, height] = vcore_->get_window_size();
     VkExtent2D actual_extent = {width, height};
     actual_extent.width = std::max(
         capabilities.minImageExtent.width,

@@ -16,7 +16,7 @@ struct QueueFamilyIndices {
   std::optional<uint32_t> graphicsFamily;
   std::optional<uint32_t> presentFamily;
 
-  bool IsComplete() {
+  [[nodiscard]] bool complete() const {
     return graphicsFamily.has_value() && presentFamily.has_value();
   }
 };
@@ -26,26 +26,26 @@ public:
   explicit VulkanCore(GLFWwindow *window);
   ~VulkanCore();
 
-  [[nodiscard]] const VkDevice &GetDevice() const;
-  [[nodiscard]] const VkSurfaceKHR& GetSuface() const;
-  [[nodiscard]] const VkPhysicalDevice &GetPhysicalDevice() const;
-  [[nodiscard]] SwapChainSupportDetails GetSwapChainSupport() const;
-  [[nodiscard]] QueueFamilyIndices GetQueueFamilies() const;
-  [[nodiscard]] std::pair<uint32_t, uint32_t> GetWindowSize() const;
-  [[nodiscard]] VkFormat FindSupportedFormat(const std::vector<VkFormat>& candidates, VkImageTiling tiling, VkFormatFeatureFlags features);
-  [[nodiscard]] uint32_t FindMemoryTypeIndex(uint32_t memory_type_bits, VkMemoryPropertyFlags property_flags);
+  [[nodiscard]] auto get_device() const -> const VkDevice &;
+  [[nodiscard]] auto get_surface() const -> const VkSurfaceKHR& ;
+  [[nodiscard]] auto get_physical_device() const -> const VkPhysicalDevice &;
+  [[nodiscard]] auto get_swap_chain_support() const -> SwapChainSupportDetails ;
+  [[nodiscard]] auto get_queue_families() const -> QueueFamilyIndices ;
+  [[nodiscard]] auto get_window_size() const -> std::pair<uint32_t, uint32_t>;
+  [[nodiscard]] auto find_supported_format(const std::vector<VkFormat>& candidates, VkImageTiling tiling, VkFormatFeatureFlags features) -> VkFormat ;
+  [[nodiscard]] auto find_memory_type_index(uint32_t memory_type_bits, VkMemoryPropertyFlags property_flags) -> uint32_t ;
 
 private:
-  void CreateInstance();
-  void CreateSurface();
-  void PickPhysicalDevice();
-  void CreateLogicalDevice();
+  void create_instance();
+  void create_surface();
+  void pick_physical_device();
+  void create_logical_device();
 
-  bool IsDeviceSuitable(const VkPhysicalDevice &device);
-  QueueFamilyIndices FindQueueFamilies(const VkPhysicalDevice &device) const;
-  bool CheckDeviceExtensionSupport(const VkPhysicalDevice &device);
-  SwapChainSupportDetails SwapChainSupport(const VkPhysicalDevice &device) const;
-  std::vector<const char *> GetRequaredExtentions();
+  [[nodiscard]] bool is_device_suitable(const VkPhysicalDevice &device);
+  [[nodiscard]] auto find_queue_families(const VkPhysicalDevice &device) const -> QueueFamilyIndices ;
+  [[nodiscard]] bool check_device_extension_support(const VkPhysicalDevice &device);
+  [[nodiscard]] auto swap_chain_support(const VkPhysicalDevice &device) const -> SwapChainSupportDetails ;
+  [[nodiscard]] auto get_required_extensions() -> std::vector<const char *> ;
 
 #if defined(SL_RENDERER_VALIDATION)
   bool CheckValidationLayers();
@@ -63,7 +63,7 @@ private:
       VkDebugUtilsMessengerEXT *pDebugMessenger);
   void
   DestroyDebugUtilsMessengerEXT(VkInstance instance,
-                                const VkDebugUtilsMessengerEXT debugMessenger,
+                                VkDebugUtilsMessengerEXT debugMessenger,
                                 const VkAllocationCallbacks *pAllocator);
   const std::vector<const char *> validation_layers = {
       "VK_LAYER_KHRONOS_validation",
@@ -72,7 +72,8 @@ private:
   VkDebugUtilsMessengerEXT debug_utils_messenger_ext_;
 #endif
 
-  const std::vector<const char *> device_extentions = {
+ private:
+  const std::vector<const char *> device_extensions = {
       VK_KHR_SWAPCHAIN_EXTENSION_NAME,
   };
 

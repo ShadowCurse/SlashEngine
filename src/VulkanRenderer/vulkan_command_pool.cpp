@@ -9,13 +9,17 @@ slash::VulkanCommandPool::VulkanCommandPool(VulkanCore *vcore,
   create_info.queueFamilyIndex = queue_family_index_;
   create_info.flags = flags_;
   create_info.pNext = nullptr;
-  if (vkCreateCommandPool(vcore_->GetDevice(), &create_info, nullptr, &pool_) !=
+  if (vkCreateCommandPool(vcore_->get_device(), &create_info, nullptr, &pool_) !=
       VK_SUCCESS) {
     throw std::runtime_error("failed to create command pool");
   }
 }
 slash::VulkanCommandPool::~VulkanCommandPool() {
-  vkDestroyCommandPool(vcore_->GetDevice(), pool_, nullptr);
+  vkDestroyCommandPool(vcore_->get_device(), pool_, nullptr);
 }
 
 const VkCommandPool &slash::VulkanCommandPool::GetPool() const { return pool_; }
+
+void slash::VulkanCommandPool::reset() {
+  vkResetCommandPool(vcore_->get_device(), pool_, 0);
+}

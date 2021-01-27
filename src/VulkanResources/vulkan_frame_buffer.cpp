@@ -20,14 +20,14 @@ VulkanFrameBuffer::VulkanFrameBuffer(
   framebuffer_info.width = width_;
   framebuffer_info.height = height_;
   framebuffer_info.layers = 1;
-  if (vkCreateFramebuffer(vcore_->GetDevice(), &framebuffer_info, nullptr,
+  if (vkCreateFramebuffer(vcore_->get_device(), &framebuffer_info, nullptr,
                           &frame_buffer_) != VK_SUCCESS) {
     throw std::runtime_error("failed to create framebuffer");
   }
 }
 
 VulkanFrameBuffer::~VulkanFrameBuffer() {
-  vkDestroyFramebuffer(vcore_->GetDevice(), frame_buffer_, nullptr);
+  vkDestroyFramebuffer(vcore_->get_device(), frame_buffer_, nullptr);
 }
 
 } // namespace slash

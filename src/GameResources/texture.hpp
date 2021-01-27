@@ -5,6 +5,8 @@
 #include "Core/log.hpp"
 #include "stb_image.h"
 
+namespace slash {
+
 struct Slash_API Texture {
   static auto Load(
       const std::string &texture_path) -> Texture {
@@ -33,5 +35,7 @@ struct Slash_API Texture {
   uint32_t height_;
   uint32_t channel_;
 };
+
+}
 
 #endif // SLASHENGINE_SRC_GAMERESOURCES_TEXTURE_HPP_

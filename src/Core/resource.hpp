@@ -21,11 +21,17 @@ class NewResource : public Resource {
 class ResourcePack {
  public:
   ResourcePack() = default;
+  ~ResourcePack() {
+    std::for_each(std::rbegin(creation_order_),
+                  std::rend(creation_order_),
+                  [&](const auto &name) { resources_.erase(name); });
+  }
 
   template<typename R, typename ... Args>
   void add_resource(Args &&... args) {
     constexpr auto &id = typeid(R);
     resources_.insert(std::make_pair(id.name(), std::make_unique<NewResource<R>>(std::forward<Args>(args)...)));
+    creation_order_.push_back(id.name());
   }
 
   template<typename R>
@@ -34,8 +40,16 @@ class ResourcePack {
     return static_cast<NewResource<R> *>(resources_[id.name()].get())->get();
   }
 
+  template<typename R>
+  void remove_resource() {
+    constexpr auto &id = typeid(R);
+    resources_.erase(id.name());
+    std::erase_if(creation_order_, [&](const auto &name) { return name == id.name(); });
+  }
+
  private:
   std::unordered_map<const char *, std::unique_ptr<Resource>> resources_;
+  std::vector<const char *> creation_order_;
 };
 
 }

@@ -153,7 +153,7 @@ VulkanPipeline::VulkanPipeline(VulkanCore *vcore, VulkanRenderPass *render_pass,
   pipeline_layout_info.pushConstantRangeCount = 0;
   pipeline_layout_info.pPushConstantRanges = nullptr;
 
-  if (vkCreatePipelineLayout(vcore_->GetDevice(), &pipeline_layout_info,
+  if (vkCreatePipelineLayout(vcore_->get_device(), &pipeline_layout_info,
                              nullptr, &pipeline_layout_) != VK_SUCCESS) {
     throw std::runtime_error("failed to create pipeline layout");
   }
@@ -176,7 +176,7 @@ VulkanPipeline::VulkanPipeline(VulkanCore *vcore, VulkanRenderPass *render_pass,
   pipeline_info.basePipelineHandle = VK_NULL_HANDLE;
   pipeline_info.basePipelineIndex = -1;
 
-  if (vkCreateGraphicsPipelines(vcore_->GetDevice(), VK_NULL_HANDLE, 1,
+  if (vkCreateGraphicsPipelines(vcore_->get_device(), VK_NULL_HANDLE, 1,
                                 &pipeline_info, nullptr,
                                 &pipeline_) != VK_SUCCESS) {
     throw std::runtime_error("failed to create graphics pipeline");
@@ -184,8 +184,8 @@ VulkanPipeline::VulkanPipeline(VulkanCore *vcore, VulkanRenderPass *render_pass,
 }
 
 VulkanPipeline::~VulkanPipeline() {
-  vkDestroyPipelineLayout(vcore_->GetDevice(), pipeline_layout_, nullptr);
-  vkDestroyPipeline(vcore_->GetDevice(), pipeline_, nullptr);
+  vkDestroyPipelineLayout(vcore_->get_device(), pipeline_layout_, nullptr);
+  vkDestroyPipeline(vcore_->get_device(), pipeline_, nullptr);
 }
 
 } // namespace slash

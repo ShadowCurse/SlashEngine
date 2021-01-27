@@ -11,7 +11,7 @@ VulkanDescriptorSet::VulkanDescriptorSet(VulkanCore *vcore,
   alloc_info.descriptorPool = pool_->GetPool();
   alloc_info.descriptorSetCount = 1;
   alloc_info.pSetLayouts = &layout_->GetLayout();
-  if (vkAllocateDescriptorSets(vcore_->GetDevice(), &alloc_info,
+  if (vkAllocateDescriptorSets(vcore_->get_device(), &alloc_info,
                                &descriptor_set_) != VK_SUCCESS) {
     throw std::runtime_error("failed to allocate descriptor set");
   }

@@ -22,6 +22,12 @@ class Slash_API App {
     get_event<AppClose>().subscribe([&](auto) { on_close(); });
   }
 
+  ~App() {
+    std::for_each(std::rbegin(modules_), std::rend(modules_), [this](auto &module) {
+      module->remove(*this);
+    });
+  }
+
   void run() {
     SL_CORE_INFO("App start");
 
@@ -32,7 +38,9 @@ class Slash_API App {
   }
 
   void update() {
-    for (const auto &sys: systems_) sys->operator()(*this);
+    for (const auto &sys: systems_)
+      if (run_) std::invoke(*sys, *this);
+      else return;
   }
 
   template<typename M, typename ... Args>
@@ -49,6 +57,11 @@ class Slash_API App {
   template<typename R>
   auto get_resource() -> R & {
     return resource_pack_.get_resource<R>();
+  }
+
+  template<typename R>
+  void remove_resource() {
+    return resource_pack_.remove_resource<R>();
   }
 
   template<typename E>
@@ -99,17 +112,12 @@ class Slash_API App {
     return ecs_.get_query<C...>();
   }
 
-//  void set_runner(const runner_fn &runner) {
-//    runner_ = runner;
-//  }
-
  private:
   void on_close() {
     run_ = false;
   }
 
   bool run_{true};
-//  runner_fn runner_ = [this]() { update(); };
   ResourcePack resource_pack_;
   EventPool event_pool_;
   std::vector<std::unique_ptr<Module>> modules_;

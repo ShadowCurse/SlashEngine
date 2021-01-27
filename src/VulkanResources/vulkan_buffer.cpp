@@ -13,30 +13,30 @@ VulkanBuffer::VulkanBuffer(VulkanCore *vcore, VkDeviceSize buffer_size,
   buffer_info.usage = usage_flags;
   buffer_info.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
-  if (vkCreateBuffer(vcore_->GetDevice(), &buffer_info, nullptr, &buffer_) !=
+  if (vkCreateBuffer(vcore_->get_device(), &buffer_info, nullptr, &buffer_) !=
       VK_SUCCESS) {
     throw std::runtime_error("failed to create buffer");
   }
 
   VkMemoryRequirements mem_requirements;
-  vkGetBufferMemoryRequirements(vcore_->GetDevice(), buffer_,
+  vkGetBufferMemoryRequirements(vcore_->get_device(), buffer_,
                                 &mem_requirements);
 
   VkMemoryAllocateInfo alloc_info = {};
   alloc_info.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
   alloc_info.allocationSize = mem_requirements.size;
-  alloc_info.memoryTypeIndex = vcore_->FindMemoryTypeIndex(
+  alloc_info.memoryTypeIndex = vcore_->find_memory_type_index(
       mem_requirements.memoryTypeBits, memory_property_flags);
-  if (vkAllocateMemory(vcore_->GetDevice(), &alloc_info, nullptr, &memory_) !=
+  if (vkAllocateMemory(vcore_->get_device(), &alloc_info, nullptr, &memory_) !=
       VK_SUCCESS) {
     throw std::runtime_error("failed to allocate buffer memory");
   }
-  vkBindBufferMemory(vcore_->GetDevice(), buffer_, memory_, 0);
+  vkBindBufferMemory(vcore_->get_device(), buffer_, memory_, 0);
 }
 
 VulkanBuffer::~VulkanBuffer() {
-  vkDestroyBuffer(vcore_->GetDevice(), buffer_, nullptr);
-  vkFreeMemory(vcore_->GetDevice(), memory_, nullptr);
+  vkDestroyBuffer(vcore_->get_device(), buffer_, nullptr);
+  vkFreeMemory(vcore_->get_device(), memory_, nullptr);
 }
 
 VkBuffer VulkanBuffer::GetBuffer() const { return buffer_; }

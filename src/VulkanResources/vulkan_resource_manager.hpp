@@ -10,7 +10,6 @@
 #include "vulkan_renderable_object.hpp"
 #include "vulkan_texture.hpp"
 #include "vulkan_vertex_buffer.hpp"
-#include "Scene/scene_manager.hpp"
 
 namespace slash {
 
@@ -19,12 +18,12 @@ class VulkanResourceManager {
   explicit VulkanResourceManager(class VulkanRenderer *renderer);
   ~VulkanResourceManager();
 
-  void CreateRenderableObject(Entity entity);
+//  void CreateRenderableObject(Entity entity);
 //  void DestroyRenderableObject(Model *model);
 
-  auto CreateMesh(Entity entity) -> std::shared_ptr<VulkanMesh>;
-  auto CreateTexture(Entity entity) -> std::shared_ptr<VulkanTexture>;
-  auto CreateTransform(Entity entity) -> std::shared_ptr<VulkanBuffer>;
+//  auto CreateMesh(Entity entity) -> std::shared_ptr<VulkanMesh>;
+//  auto CreateTexture(Entity entity) -> std::shared_ptr<VulkanTexture>;
+//  auto CreateTransform(Entity entity) -> std::shared_ptr<VulkanBuffer>;
   void CreateCameraBuffer();
   void DeleteCameraBuffer();
   void CreateTextureSampler();
