@@ -13,7 +13,7 @@ class Slash_API RenderModule {
   static void init(App &app) {
 
     app.register_component<VulkanRenderableObject>();
-    app.register_component<Mesh_3D>();
+    app.register_component<Mesh>();
     app.register_component<Texture>();
     app.register_component<Transform>();
 

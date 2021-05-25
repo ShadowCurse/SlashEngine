@@ -33,18 +33,24 @@ target_precompile_headers(project_options INTERFACE slash_pch.hpp)
 
 add_library(SlashEngine STATIC
         src/Core/modules.hpp
+        src/Core/events.hpp
+        src/Core/systems.hpp
+        src/Core/resource.hpp
 
         src/GameResources/transform.hpp
+        src/GameResources/mesh.hpp
+        src/GameResources/texture.hpp
 
         src/WindowModule/window.cpp
 
         src/Ecs/ecs.hpp
         src/Ecs/entity.hpp
-        src/Ecs/componenet.hpp
+        src/Ecs/component.hpp
 
         #        src/Renderer/imgui_layer.cpp
 
         #        src/VulkanRenderer/vulkan_imgui.cpp
+
         src/VulkanRenderer/vulkan_core.cpp
         src/VulkanRenderer/vulkan_queue.cpp
         src/VulkanRenderer/vulkan_queue.hpp
@@ -97,21 +103,13 @@ add_library(SlashEngine STATIC
         src/Scene/camera.cpp
         src/Scene/camera.hpp
 
-        #        vendor/imgui/imgui.cpp
-        #        vendor/imgui/imgui_demo.cpp
-        #        vendor/imgui/imgui_draw.cpp
-        #        vendor/imgui/imgui_widgets.cpp
-        #        vendor/imgui/examples/imgui_impl_vulkan.cpp
-        #        vendor/imgui/examples/imgui_impl_glfw.cpp)
         src/WindowModule/module.hpp
 
         src/LayerModule/module.hpp
-        src/Core/resource.hpp
         src/WindowModule/window_manager.cpp
         src/WindowModule/window_manager.hpp
         src/WindowModule/events.hpp
-        src/Core/events.hpp
-        src/Core/systems.hpp)
+        )
 
 target_include_directories(SlashEngine PUBLIC ${CMAKE_SOURCE_DIR}/src)
 target_include_directories(SlashEngine PUBLIC ${CMAKE_SOURCE_DIR})

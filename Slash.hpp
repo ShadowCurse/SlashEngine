@@ -10,13 +10,13 @@
 #include "Core/time_step.hpp"
 #include "Core/window.hpp"
 
-#include "Ecs/componenet.hpp"
+#include "Ecs/component.hpp"
 #include "Ecs/ecs.hpp"
 #include "Ecs/entity.hpp"
 
 #include "src/Core/event.hpp"
 
-#include "GameResources/mesh_3d.hpp"
+#include "GameResources/mesh.hpp"
 #include "GameResources/texture.hpp"
 #include "GameResources/transform.hpp"
 

@@ -6,11 +6,11 @@
 
 namespace slash {
 
-struct Slash_API Transform {
-  glm::mat4 rotation;
-  glm::vec3 position;
-  glm::vec2 size;
-};
+    struct Slash_API Transform {
+        glm::vec3 translation;
+        glm::mat4 rotation;
+        glm::vec3 scale;
+    };
 
 }
 

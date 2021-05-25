@@ -5,7 +5,7 @@
 
 #include "Core/core.hpp"
 #include "entity.hpp"
-#include "componenet.hpp"
+#include "component.hpp"
 
 namespace slash {
 
