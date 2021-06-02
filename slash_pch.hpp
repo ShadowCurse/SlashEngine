@@ -21,6 +21,4 @@
 #include <cassert>
 #include <utility>
 
-#include <stb_image.h>
-
 #endif // SLASHENGINE_PCH_H_

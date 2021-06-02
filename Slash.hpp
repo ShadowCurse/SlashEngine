@@ -4,17 +4,17 @@
 #include "Core/core.hpp"
 #include "Core/input.hpp"
 #include "Core/key_codes.hpp"
-#include "src/LayerModule/layer.hpp"
-#include "src/LayerModule/layer_stack.hpp"
 #include "Core/log.hpp"
 #include "Core/time_step.hpp"
 #include "Core/window.hpp"
+#include "Core/event.hpp"
+
+#include "LayerModule/layer.hpp"
+#include "LayerModule/layer_stack.hpp"
 
 #include "Ecs/component.hpp"
 #include "Ecs/ecs.hpp"
 #include "Ecs/entity.hpp"
-
-#include "src/Core/event.hpp"
 
 #include "GameResources/mesh.hpp"
 #include "GameResources/texture.hpp"
@@ -28,7 +28,3 @@
 
 #include "WindowModule/module.hpp"
 #include "LayerModule/module.hpp"
-
-// -------------------
-
-#include "src/Core/entry_point.hpp"

@@ -9,8 +9,8 @@ layout(binding = 0) uniform Camera
 
 layout(binding = 1) uniform Transform
 {
+    vec3 translation;
     mat4 rotation;
-    vec3 position;
     vec3 size;
 } transform;
 

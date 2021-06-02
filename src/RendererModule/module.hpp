@@ -19,7 +19,11 @@ class Slash_API RenderModule {
 
     auto &wm = app.get_resource<WindowManager>();
     auto &window = wm.get_windows()[0];
+
     app.add_resource<VulkanRenderer>(window.get());
+    auto& renderer = app.get_resource<VulkanRenderer>();
+    app.add_resource<VulkanResourceManager>(&app, &renderer);
+
     app.add_system([](App &app) {
       auto &renderer = app.get_resource<VulkanRenderer>();
       renderer.new_frame();
@@ -33,6 +37,7 @@ class Slash_API RenderModule {
   }
   static void remove(App &app) {
     SL_CORE_INFO("RenderModule remove");
+    app.remove_resource<VulkanResourceManager>();
     app.remove_resource<VulkanRenderer>();
   }
 };

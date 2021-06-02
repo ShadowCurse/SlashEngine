@@ -10,7 +10,6 @@ class BasicEvent {
  virtual ~BasicEvent() = default;
 };
 
-
 template <typename E>
 class Event : public BasicEvent {
  public:

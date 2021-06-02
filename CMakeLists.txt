@@ -40,6 +40,7 @@ add_library(SlashEngine STATIC
         src/GameResources/transform.hpp
         src/GameResources/mesh.hpp
         src/GameResources/texture.hpp
+        src/GameResources/texture.cpp
 
         src/WindowModule/window.cpp
 

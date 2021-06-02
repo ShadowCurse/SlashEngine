@@ -8,6 +8,7 @@
 #include "events.hpp"
 #include "systems.hpp"
 #include "Ecs/ecs.hpp"
+#include "GameResources/mesh.hpp"
 
 namespace slash {
 
@@ -19,6 +20,7 @@ class Slash_API App {
   App() {
     slash::Log::Init();
     add_event<AppClose>();
+    add_event<AddMesh>();
     get_event<AppClose>().subscribe([&](auto) { on_close(); });
   }
 
@@ -93,8 +95,13 @@ class Slash_API App {
   }
 
   template<typename C>
-  void add_component(Entity e, C component) {
-    ecs_.add_component(e, std::move(component));
+  void add_component(Entity e, C&& component) {
+    ecs_.add_component(e, std::forward<C>(component));
+  }
+
+  void add_mesh(Entity e, Mesh&& mesh) {
+    ecs_.add_component(e, std::forward<Mesh>(mesh));
+    get_event<AddMesh>().template emit(e);
   }
 
   template<typename C>
