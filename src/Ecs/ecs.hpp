@@ -42,13 +42,13 @@ class ECSQuery : public Container<Components> ... {
     }
 
    private:
-    entity_iterator iterator_;
     ECSQuery &query_;
+    entity_iterator iterator_;
   };
 
  public:
   explicit ECSQuery(std::vector<Entity> entities, std::shared_ptr<ComponenetArray<Components>> ... components)
-      : entities_(std::move(entities)), Container<Components>(components) ... {}
+      : Container<Components>(components) ..., entities_(std::move(entities)) {}
 
   auto begin() -> Iterator {
     return Iterator{*this, std::begin(entities_)};

@@ -52,9 +52,7 @@
 #define SL_KEY_RIGHT_BRACKET 93 /* ] */
 #define SL_KEY_GRAVE_ACCENT 96  /* ` */
 #define SL_KEY_WORLD_1 161      /* non-US #1 */
-#define SL_KEY_WORLD_2                                                         \
-  162 /* non-US #2 *SL                                                         \
-/* FunctSLn keys */
+#define SL_KEY_WORLD_2 162      /* non-US #2 */
 #define SL_KEY_ESCAPE 256
 #define SL_KEY_ENTER 257
 #define SL_KEY_TAB 258

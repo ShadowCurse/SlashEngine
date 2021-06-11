@@ -9,7 +9,7 @@ class TestLayer : public slash::Layer {
 
   void on_detach() final {};
 
-  void on_update(slash::TimeStep ts) final {
+  void on_update(slash::TimeStep) final {
   }
 //  void on_event(slash::Event &event) final {
 ////     slash::EventDispatcher dispatcher(event);
@@ -22,11 +22,11 @@ class TestLayer : public slash::Layer {
 
 class TestModule {
  public:
-  static void init(slash::App &app, int a) {
+  static void init(slash::App &, int) {
     std::cout << "TestModule\n";
   }
 
-  static void remove(slash::App &app) {}
+  static void remove(slash::App &) {}
 };
 
 void mouse_move_callback(slash::MouseMovedEvent &e) {
@@ -101,9 +101,9 @@ auto main() -> int {
   auto rotation = glm::rotate(glm::mat4(1.0f), glm::radians(45.0f), glm::vec3(0.0f, 0.0f, 1.0f));
 
   // TODO pack this into one bundle
-  app.add_component(e, slash::Transform{{5.0, 5.0, 5.0}, rotation, {1.0, 1.0, 1.0}});
+  app.add_component(e, slash::Transform{{0.0, 0.0, 0.0}, rotation, {1.0, 1.0, 1.0}});
   app.add_component(e, slash::Texture::Load("src/Textures/texture.jpg"));
-  app.add_mesh(e, slash::Cube::create());
+  app.add_mesh(e, slash::Square::create());
 
   app.add_system([&](slash::App &app) {
     auto &wm = app.get_resource<slash::WindowManager>();

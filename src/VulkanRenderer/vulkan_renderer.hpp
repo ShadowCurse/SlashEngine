@@ -61,7 +61,7 @@ class VulkanRenderer {
   std::vector<VulkanSemaphore *> render_finished_semaphores_;
 
   uint32_t current_frame_ = 0;
-  uint32_t current_index_ = -1;
+  uint32_t current_index_;
   const uint32_t max_frames_ = 2;
 };
 

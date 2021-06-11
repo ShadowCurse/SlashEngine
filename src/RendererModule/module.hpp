@@ -32,7 +32,7 @@ class Slash_API RenderModule {
       for (auto[object]: query)
         render_command->AddRenderableObject(object);
       renderer.end_render_command(render_command);
-      renderer.draw_frame(0.0f);
+      renderer.draw_frame(0.0);
     });
   }
   static void remove(App &app) {

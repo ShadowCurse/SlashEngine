@@ -1,8 +1,10 @@
 #ifndef SLASHENGINE_VERTEX_H_
 #define SLASHENGINE_VERTEX_H_
 
+#include <glm/vec3.hpp>
+#include <glm/vec2.hpp>
+
 #include "Core/core.hpp"
-#include "glm/glm.hpp"
 
 namespace slash {
 
