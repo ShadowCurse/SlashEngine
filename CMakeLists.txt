@@ -11,25 +11,9 @@ include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup()
 
 include(cmake/StandardProjectSettings.cmake)
-# Link this 'library' to set the c++ standard / compile-time options requested
-add_library(project_options INTERFACE)
-target_compile_features(project_options INTERFACE cxx_std_20)
-
-# sanitizer options if supported by compiler
-#include(cmake/Sanitizers.cmake)
-#enable_sanitizers(project_options)
-
-# Link this 'library' to use the warnings specified in CompilerWarnings.cmake
-add_library(project_warnings INTERFACE)
-
-# standard compiler warnings
+include(cmake/Sanitizers.cmake)
 include(cmake/CompilerWarnings.cmake)
-set_project_warnings(project_warnings)
-
-# allow for static analysis options
 include(cmake/StaticAnalyzers.cmake)
-
-target_precompile_headers(project_options INTERFACE slash_pch.hpp)
 
 add_library(SlashEngine STATIC
         src/Core/modules.hpp
@@ -47,10 +31,6 @@ add_library(SlashEngine STATIC
         src/Ecs/ecs.hpp
         src/Ecs/entity.hpp
         src/Ecs/component.hpp
-
-        #        src/Renderer/imgui_layer.cpp
-
-        #        src/VulkanRenderer/vulkan_imgui.cpp
 
         src/VulkanRenderer/vulkan_core.cpp
         src/VulkanRenderer/vulkan_queue.cpp
@@ -119,7 +99,11 @@ add_definitions(-DGLFW_INCLUDE_VULKAN -DGLFW_INCLUDE_NONE -DSL_LINUX -DSL_BUILD_
 
 set_target_properties(SlashEngine PROPERTIES PUBLIC_HEADER Slash.hpp)
 #target_link_libraries(SlashEngine PRIVATE project_options vulkan glfw3 spdlog glm_static X11 dl)
-target_link_libraries(SlashEngine PRIVATE ${CONAN_LIBS} project_options vulkan)
+target_link_libraries(SlashEngine PRIVATE ${CONAN_LIBS} vulkan)
+
+target_precompile_headers(SlashEngine INTERFACE slash_pch.hpp)
+enable_sanitizers(SlashEngine)
+set_project_warnings(SlashEngine)
 
 #TestApp
 add_executable(TestApp Test/TestApp.cpp)
@@ -130,3 +114,7 @@ target_link_directories(TestApp PRIVATE ${CMAKE_SOURCE_DIR}/lib/build)
 
 set_target_properties(TestApp PROPERTIES CXX_STANDARD 20)
 target_link_libraries(TestApp PRIVATE SlashEngine)
+
+enable_sanitizers(TestApp)
+set_project_warnings(TestApp)
+
