@@ -75,7 +75,7 @@ auto main() -> int {
   app.add_resource<slash::Camera>();
 
   app.init_module<TestModule>(12)
-      .init_module<slash::WindowModule>(slash::WindowParams("Test", 800, 400))
+      .init_module<slash::WindowModule>(slash::WindowParams("TestApp", 800, 400))
       .init_module<slash::RenderModule>();
 
 //  auto& wm = app.get_resource<slash::WindowManager>();
@@ -102,7 +102,7 @@ auto main() -> int {
 
   // TODO pack this into one bundle
   app.add_component(e, slash::Transform{{0.0, 0.0, 0.0}, rotation, {1.0, 1.0, 1.0}});
-  app.add_component(e, slash::Texture::Load("src/Textures/texture.jpg"));
+  app.add_component(e, slash::Texture::Load("TestApp/texture.jpg"));
   app.add_mesh(e, slash::Square::create());
 
   app.add_system([&](slash::App &app) {
@@ -121,4 +121,6 @@ auto main() -> int {
   });
 
   app.run();
+
+  SL_INFO("TestApp shutdown");
 }
