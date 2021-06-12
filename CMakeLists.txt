@@ -5,15 +5,15 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_C_COMPILER clang)
 set(CMAKE_CXX_COMPILER clang++)
 
-project(SlashEngine CXX)
-
-include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup()
-
 include(cmake/StandardProjectSettings.cmake)
 include(cmake/Sanitizers.cmake)
 include(cmake/CompilerWarnings.cmake)
 include(cmake/StaticAnalyzers.cmake)
+
+project(SlashEngine CXX)
+
+include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
+conan_basic_setup()
 
 add_library(SlashEngine STATIC
         src/Core/modules.hpp
@@ -81,7 +81,6 @@ add_library(SlashEngine STATIC
 
         src/RendererModule/module.hpp
 
-        src/Scene/camera.cpp
         src/Scene/camera.hpp
 
         src/WindowModule/module.hpp
@@ -98,7 +97,6 @@ target_include_directories(SlashEngine PUBLIC ${CMAKE_SOURCE_DIR})
 add_definitions(-DGLFW_INCLUDE_VULKAN -DGLFW_INCLUDE_NONE -DSL_LINUX -DSL_BUILD_DLL -DSL_DEBUG -DSL_ENABLE_ASSERTS -DSL_RENDERER_VALIDATION)
 
 set_target_properties(SlashEngine PROPERTIES PUBLIC_HEADER Slash.hpp)
-#target_link_libraries(SlashEngine PRIVATE project_options vulkan glfw3 spdlog glm_static X11 dl)
 target_link_libraries(SlashEngine PRIVATE ${CONAN_LIBS} vulkan)
 
 target_precompile_headers(SlashEngine INTERFACE slash_pch.hpp)
@@ -106,12 +104,8 @@ enable_sanitizers(SlashEngine)
 set_project_warnings(SlashEngine)
 
 #TestApp
-add_executable(TestApp Test/TestApp.cpp)
-target_include_directories(TestApp PRIVATE ${CMAKE_SOURCE_DIR})
-target_include_directories(TestApp PRIVATE ${CMAKE_SOURCE_DIR}/src)
-
+add_executable(TestApp TestApp/TestApp.cpp)
 target_link_directories(TestApp PRIVATE ${CMAKE_SOURCE_DIR}/lib/build)
-
 set_target_properties(TestApp PROPERTIES CXX_STANDARD 20)
 target_link_libraries(TestApp PRIVATE SlashEngine)
 
