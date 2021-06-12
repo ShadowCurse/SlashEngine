@@ -6,7 +6,6 @@
 #include "Core/key_codes.hpp"
 #include "Core/log.hpp"
 #include "Core/time_step.hpp"
-#include "Core/window.hpp"
 #include "Core/event.hpp"
 
 #include "LayerModule/layer.hpp"

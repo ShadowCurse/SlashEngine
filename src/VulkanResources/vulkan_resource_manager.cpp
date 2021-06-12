@@ -75,11 +75,12 @@ void VulkanResourceManager::create_renderable_object(Entity entity) {
                          static_cast<uint32_t>(descriptor_writes.size()),
                          descriptor_writes.data(), 0, nullptr);
 
-  VulkanRenderableObject object{mesh, texture, transform, descriptor_set, renderer_->get_pipeline()};
-  app_->add_component(entity, object);
+  VulkanRenderableObject
+      object{std::move(mesh), std::move(texture), std::move(transform), descriptor_set, renderer_->get_pipeline()};
+  app_->add_component(entity, std::move(object));
 }
 
-auto VulkanResourceManager::create_mesh(Entity entity) -> std::shared_ptr<VulkanMesh> {
+auto VulkanResourceManager::create_mesh(Entity entity) -> std::unique_ptr<VulkanMesh> {
   auto &mesh = app_->get_component<Mesh>(entity);
   VkDeviceSize index_buffer_size =
       sizeof(mesh.indices_[0]) * mesh.indices_.size();
@@ -100,17 +101,17 @@ auto VulkanResourceManager::create_mesh(Entity entity) -> std::shared_ptr<Vulkan
   auto vertex_buffer = std::make_shared<VulkanVertexBuffer>(renderer_->get_core(), vertex_buffer_size, 0);
   copy_buffer(&staging_vertex_buffer, vertex_buffer.get());
 
-  return std::make_shared<VulkanMesh>(vertex_buffer, index_buffer);
+  return std::make_unique<VulkanMesh>(vertex_buffer, index_buffer);
 }
 
-auto VulkanResourceManager::create_texture(Entity entity) -> std::shared_ptr<VulkanTexture> {
+auto VulkanResourceManager::create_texture(Entity entity) -> std::unique_ptr<VulkanTexture> {
   auto &texture = app_->get_component<Texture>(entity);
   VkDeviceSize image_size = texture.width_ * texture.height_ * 4;
   SL_CORE_INFO("Texture: width: {} height: {}", texture.width_, texture.height_);
   auto staging_buffer = VulkanStagingBuffer(renderer_->get_core(), image_size);
   copy_memory(texture.pixels_, &staging_buffer);
 
-  auto texture_image = std::make_shared<VulkanTexture>(
+  auto texture_image = std::make_unique<VulkanTexture>(
       renderer_->get_core(), texture.width_, texture.height_,
       VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_TILING_OPTIMAL,
       VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
@@ -125,20 +126,20 @@ auto VulkanResourceManager::create_texture(Entity entity) -> std::shared_ptr<Vul
   return texture_image;
 }
 
-auto VulkanResourceManager::create_transform(Entity entity) -> std::shared_ptr<VulkanBuffer> {
+auto VulkanResourceManager::create_transform(Entity entity) -> std::unique_ptr<VulkanBuffer> {
   auto &transform = app_->get_component<Transform>(entity);
   VkDeviceSize buffer_size = sizeof(Transform);
-  auto rotation_buffer = std::make_shared<VulkanBuffer>(
+  auto transform_buffer = std::make_unique<VulkanBuffer>(
       renderer_->get_core(), buffer_size, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
       VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
           VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
   void *ptr;
-  vkMapMemory(renderer_->get_core()->get_device(), rotation_buffer->GetMemory(),
+  vkMapMemory(renderer_->get_core()->get_device(), transform_buffer->GetMemory(),
               0, buffer_size, 0, &ptr);
   memcpy(ptr, &transform, static_cast<size_t>(buffer_size));
   vkUnmapMemory(renderer_->get_core()->get_device(),
-                rotation_buffer->GetMemory());
-  return rotation_buffer;
+                transform_buffer->GetMemory());
+  return transform_buffer;
 }
 
 void VulkanResourceManager::copy_buffer(VulkanBuffer *src, VulkanBuffer *dst) {

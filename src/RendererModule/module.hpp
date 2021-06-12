@@ -37,6 +37,7 @@ class Slash_API RenderModule {
   }
   static void remove(App &app) {
     SL_CORE_INFO("RenderModule remove");
+    app.unregister_component<VulkanRenderableObject>();
     app.remove_resource<VulkanResourceManager>();
     app.remove_resource<VulkanRenderer>();
   }

@@ -28,6 +28,7 @@ class Slash_API App {
     std::for_each(std::rbegin(modules_), std::rend(modules_), [this](auto &module) {
       module->remove(*this);
     });
+    SL_CORE_INFO("App destroyed");
   }
 
   void run() {
@@ -90,6 +91,11 @@ class Slash_API App {
     ecs_.template register_component<C>();
   }
 
+  template<typename C>
+  void unregister_component() {
+    ecs_.template unregister_component<C>();
+  }
+
   auto create_entity() {
     return ecs_.create_entity();
   }
@@ -98,6 +104,11 @@ class Slash_API App {
   void add_component(Entity e, C&& component) {
     ecs_.add_component(e, std::forward<C>(component));
   }
+
+//  template<typename C>
+//  void add_component(Entity e, C component) {
+//    ecs_.add_component(e, std::move(component));
+//  }
 
   void add_mesh(Entity e, Mesh&& mesh) {
     ecs_.add_component(e, std::forward<Mesh>(mesh));

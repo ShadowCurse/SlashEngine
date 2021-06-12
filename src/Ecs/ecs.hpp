@@ -56,6 +56,9 @@ class ECSQuery : public Container<Components> ... {
   auto end() -> Iterator {
     return Iterator{*this, std::end(entities_)};
   }
+  [[nodiscard]] auto size() const -> size_t {
+    return entities_.size();
+  }
 
  private:
   template<typename C>
@@ -88,11 +91,16 @@ class ECS {
   }
 
   template<typename T>
-  void add_component(Entity entity, T component) {
-    component_manager_->add_component<T>(entity, component);
+  void unregister_component() {
+    component_manager_->unregister_component<T>();
+  }
+
+  template<typename T>
+  void add_component(Entity entity, T&& component) {
+    component_manager_->add_component<T>(entity, std::forward<T>(component));
 
     auto &signature = entity_manager_->get_signature(entity);
-    signature.set(component_manager_->get_compponent_type<T>(), true);
+    signature.set(component_manager_->get_component_type<T>(), true);
   }
 
   template<typename T>
@@ -100,7 +108,7 @@ class ECS {
     component_manager_->register_component<T>(entity);
 
     auto &signature = entity_manager_->get_signature(entity);
-    signature.set(component_manager_->get_compponent_type<T>(), false);
+    signature.set(component_manager_->get_component_type<T>(), false);
   }
 
   template<typename T>
@@ -115,7 +123,7 @@ class ECS {
 
   template<typename ... Components>
   auto get_query() {
-    const auto &component_types = std::vector{component_manager_->get_compponent_type<Components>() ...};
+    const auto &component_types = std::vector{component_manager_->get_component_type<Components>() ...};
     auto entities = entity_manager_->get_entities_with_components(component_types);
     return ECSQuery(entities, get_component_array<Components>() ...);
   }

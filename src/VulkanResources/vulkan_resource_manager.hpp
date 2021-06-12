@@ -16,9 +16,9 @@ class VulkanResourceManager {
 
   void create_renderable_object(Entity entity);
 
-  auto create_mesh(Entity entity) -> std::shared_ptr<VulkanMesh>;
-  auto create_texture(Entity entity) -> std::shared_ptr<VulkanTexture>;
-  auto create_transform(Entity entity) -> std::shared_ptr<VulkanBuffer>;
+  auto create_mesh(Entity entity) -> std::unique_ptr<VulkanMesh>;
+  auto create_texture(Entity entity) -> std::unique_ptr<VulkanTexture>;
+  auto create_transform(Entity entity) -> std::unique_ptr<VulkanBuffer>;
 
   void create_camera_buffer();
   void create_texture_sampler();

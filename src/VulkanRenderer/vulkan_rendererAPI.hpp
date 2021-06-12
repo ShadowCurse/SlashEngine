@@ -2,7 +2,6 @@
 #define SLASHENGINE_SRC_VULKANRENDERER_VULKANRENDERER_H_
 
 #include "Core/core.hpp"
-#include "Core/window.hpp"
 #include "GLFW/glfw3.h"
 #include "Scene/camera.hpp"
 //#include "Renderer/renderer_api.hpp"

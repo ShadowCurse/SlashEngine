@@ -40,7 +40,7 @@ class ComponenetArray final : public BasicComponenetArray {
     return Iterator(this, size_);
   }
 
-  void insert_data(Entity entity, T component) {
+  void insert_data(Entity entity, T &&component) {
     size_t new_index = size_;
     entity_to_index_[entity] = new_index;
     index_to_entity_[new_index] = entity;
@@ -52,7 +52,7 @@ class ComponenetArray final : public BasicComponenetArray {
     // copy element at the end into deleted element place
     auto index_of_remove_entity = entity_to_index_[entity];
     auto index_of_lat_element = size_ - 1;
-    components_[index_of_remove_entity] = components_[index_of_lat_element];
+    components_[index_of_remove_entity] = std::move(components_[index_of_lat_element]);
 
     // update map
     auto entity_of_last_ = index_to_entity_[index_of_lat_element];
@@ -92,14 +92,21 @@ class ComponenetManager {
   }
 
   template<typename T>
-  auto get_compponent_type() -> ComponenetType {
+  void unregister_component() {
+    const char *type_name = typeid(T).name();
+    component_types_.erase(type_name);
+    component_arrays_.erase(type_name);
+  }
+
+  template<typename T>
+  auto get_component_type() -> ComponenetType {
     const char *type_name = typeid(T).name();
     return component_types_[type_name];
   }
 
   template<typename T>
-  void add_component(Entity entity, T component) {
-    get_component_array<T>()->insert_data(entity, component);
+  void add_component(Entity entity, T &&component) {
+    get_component_array<T>()->insert_data(entity, std::forward<T>(component));
   }
 
   template<typename T>
