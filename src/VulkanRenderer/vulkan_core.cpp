@@ -34,8 +34,8 @@ auto VulkanCore::get_window_size() const -> std::pair<uint32_t, uint32_t> {
 }
 
 auto VulkanCore::find_supported_format(const std::vector<VkFormat> &candidates,
-                                                     VkImageTiling tiling,
-                                                     VkFormatFeatureFlags features) -> VkFormat {
+                                       VkImageTiling tiling,
+                                       VkFormatFeatureFlags features) -> VkFormat {
   for (auto format : candidates) {
     VkFormatProperties props;
     vkGetPhysicalDeviceFormatProperties(gpu_, format, &props);
@@ -51,7 +51,7 @@ auto VulkanCore::find_supported_format(const std::vector<VkFormat> &candidates,
 }
 
 auto VulkanCore::find_memory_type_index(uint32_t memory_type_bits,
-                                                      VkMemoryPropertyFlags property_flags) -> uint32_t {
+                                        VkMemoryPropertyFlags property_flags) -> uint32_t {
   VkPhysicalDeviceMemoryProperties memory_properties;
   vkGetPhysicalDeviceMemoryProperties(gpu_, &memory_properties);
   for (uint32_t i(0); i < memory_properties.memoryTypeCount; ++i) {
@@ -370,13 +370,12 @@ void VulkanCore::SetUpDebugInfo(VkDebugUtilsMessengerCreateInfoEXT &info) {
   info = {};
   info.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
   info.messageSeverity =
-//      VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT |
-      //                                     VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT
-      //                                     |
-      VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT |
+      VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT |
+          VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT |
+          VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT |
           VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
   info.messageType = VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT |
-//                     VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT |
+      VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT |
       VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
   info.pfnUserCallback = DebugCallBack;
   info.pUserData = nullptr;
