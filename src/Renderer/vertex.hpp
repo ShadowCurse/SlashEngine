@@ -1,6 +1,7 @@
 #ifndef SLASHENGINE_VERTEX_H_
 #define SLASHENGINE_VERTEX_H_
 
+#define GLM_FORCE_DEFAULT_ALIGNED_GENTYPES
 #include <glm/vec3.hpp>
 #include <glm/vec2.hpp>
 
