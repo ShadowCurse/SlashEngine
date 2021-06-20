@@ -19,8 +19,8 @@ VulkanCommandBuffer::VulkanCommandBuffer(VulkanCore *vcore,
 }
 
 VulkanCommandBuffer::~VulkanCommandBuffer() {
-//  vkFreeCommandBuffers(vcore_->get_device(), command_pool_->GetPool(), 1,
-//                       &buffer_);
+  vkFreeCommandBuffers(vcore_->get_device(), command_pool_->GetPool(), 1,
+                       &buffer_);
 }
 
 void VulkanCommandBuffer::AddRenderableObject(VulkanRenderableObject &object) {

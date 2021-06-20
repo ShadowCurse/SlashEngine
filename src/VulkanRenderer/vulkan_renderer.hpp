@@ -27,9 +27,9 @@ class VulkanRenderer {
   void draw_frame(double time);
   void wait_idle();
 
-  [[nodiscard]] constexpr inline auto get_core() const -> VulkanCore * { return vcore_; }
+  [[nodiscard]] constexpr inline auto get_core() const -> VulkanCore * { return vcore_.get(); }
   [[nodiscard]] constexpr inline auto get_pipeline() const -> VulkanPipeline * {
-    return pipeline_;
+    return pipeline_.get();
   }
   [[nodiscard]] auto begin_one_time_command() const -> std::shared_ptr<VulkanCommandBuffer>;
   void end_one_time_command(std::shared_ptr<VulkanCommandBuffer> command_buffer);
@@ -43,22 +43,24 @@ class VulkanRenderer {
   void recreate_swap_chain();
 
  private:
-  VulkanCore* vcore_;
-  VulkanQueue* graphics_queue_;
-  VulkanQueue* present_queue_;
-  VulkanSwapChain* swap_chain_;
-  VulkanRenderPass* render_pass_;
-  VulkanDescriptorSetLayout* descriptor_set_layout_;
-  VulkanPipeline* pipeline_;
+  std::unique_ptr<VulkanCore> vcore_;
+  std::unique_ptr<VulkanQueue> graphics_queue_;
+  std::unique_ptr<VulkanQueue> present_queue_;
+  std::unique_ptr<VulkanSwapChain> swap_chain_;
+  std::unique_ptr<VulkanRenderPass> render_pass_;
+  std::unique_ptr<VulkanDescriptorSetLayout> descriptor_set_layout_;
+  std::unique_ptr<VulkanShader> vertex_shader_;
+  std::unique_ptr<VulkanShader> fragment_shader_;
+  std::unique_ptr<VulkanPipeline> pipeline_;
 
   std::shared_ptr<VulkanDescriptorManager> descriptor_manager_;
   std::shared_ptr<VulkanCommandBufferManager>command_buffer_manager_;
 
-  VulkanTexture *depth_;
-  std::vector<VulkanFrameBuffer *> frame_buffers_;
-  std::vector<VulkanFence *> inflight_fences_;
-  std::vector<VulkanSemaphore *> image_available_semaphores_;
-  std::vector<VulkanSemaphore *> render_finished_semaphores_;
+  std::unique_ptr<VulkanTexture> depth_;
+  std::vector<std::unique_ptr<VulkanFrameBuffer>> frame_buffers_;
+  std::vector<std::unique_ptr<VulkanFence>> inflight_fences_;
+  std::vector<std::unique_ptr<VulkanSemaphore>> image_available_semaphores_;
+  std::vector<std::unique_ptr<VulkanSemaphore>> render_finished_semaphores_;
 
   uint32_t current_frame_ = 0;
   uint32_t current_index_;

@@ -12,8 +12,8 @@ namespace slash {
 class VulkanPipeline {
 public:
   VulkanPipeline(VulkanCore *vcore, VulkanRenderPass *render_pass,
-                 VulkanSwapChain *swap_chain, VulkanShader &vertex_shader,
-                 VulkanShader &fragment_shader,
+                 VulkanSwapChain *swap_chain, VulkanShader *vertex_shader,
+                 VulkanShader *fragment_shader,
                  VulkanDescriptorSetLayout *descriptor_set_layout);
   ~VulkanPipeline();
 

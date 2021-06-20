@@ -4,8 +4,8 @@
 namespace slash {
 VulkanPipeline::VulkanPipeline(VulkanCore *vcore, VulkanRenderPass *render_pass,
                                VulkanSwapChain *swap_chain,
-                               VulkanShader &vertex_shader,
-                               VulkanShader &fragment_shader,
+                               VulkanShader *vertex_shader,
+                               VulkanShader *fragment_shader,
                                VulkanDescriptorSetLayout *descriptor_set_layout)
     : vcore_(vcore), render_pass_(render_pass), swap_chain_(swap_chain),
       descriptor_set_layout_(descriptor_set_layout) {
@@ -14,7 +14,7 @@ VulkanPipeline::VulkanPipeline(VulkanCore *vcore, VulkanRenderPass *render_pass,
   vert_shader_stage_info.sType =
       VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
   vert_shader_stage_info.stage = VK_SHADER_STAGE_VERTEX_BIT;
-  vert_shader_stage_info.module = vertex_shader.GetShader();
+  vert_shader_stage_info.module = vertex_shader->GetShader();
   vert_shader_stage_info.pName = "main";
   vert_shader_stage_info.pSpecializationInfo = nullptr;
 
@@ -23,7 +23,7 @@ VulkanPipeline::VulkanPipeline(VulkanCore *vcore, VulkanRenderPass *render_pass,
   frag_shader_stage_info.sType =
       VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
   frag_shader_stage_info.stage = VK_SHADER_STAGE_FRAGMENT_BIT;
-  frag_shader_stage_info.module = fragment_shader.GetShader();
+  frag_shader_stage_info.module = fragment_shader->GetShader();
   frag_shader_stage_info.pName = "main";
   frag_shader_stage_info.pSpecializationInfo = nullptr;
 
@@ -99,7 +99,7 @@ VulkanPipeline::VulkanPipeline(VulkanCore *vcore, VulkanRenderPass *render_pass,
   VkPipelineColorBlendAttachmentState color_blend_attachment = {};
   color_blend_attachment.colorWriteMask =
       VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT |
-      VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
+          VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
   color_blend_attachment.blendEnable = VK_FALSE;
   color_blend_attachment.srcColorBlendFactor = VK_BLEND_FACTOR_ONE;
   color_blend_attachment.dstColorBlendFactor = VK_BLEND_FACTOR_ZERO;

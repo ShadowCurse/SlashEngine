@@ -3,14 +3,15 @@
 namespace slash {
 
 VulkanRenderer::VulkanRenderer(Window *window) {
-  vcore_ = new VulkanCore(window->get_native_window());
+  vcore_ = std::make_unique<VulkanCore>(window->get_native_window());
   auto queue_families = vcore_->get_queue_families();
-  graphics_queue_ = new VulkanQueue(vcore_, queue_families.graphicsFamily.value());
-  present_queue_ = new VulkanQueue(vcore_, queue_families.presentFamily.value());
-  swap_chain_ = new VulkanSwapChain(vcore_, {graphics_queue_, present_queue_});
-  render_pass_ = new VulkanRenderPass(vcore_, swap_chain_);
+  graphics_queue_ = std::make_unique<VulkanQueue>(vcore_.get(), queue_families.graphicsFamily.value());
+  present_queue_ = std::make_unique<VulkanQueue>(vcore_.get(), queue_families.presentFamily.value());
+  swap_chain_ =
+      std::make_unique<VulkanSwapChain>(vcore_.get(), std::vector{graphics_queue_.get(), present_queue_.get()});
+  render_pass_ = std::make_unique<VulkanRenderPass>(vcore_.get(), swap_chain_.get());
 
-  descriptor_set_layout_ = new VulkanDescriptorSetLayout(vcore_);
+  descriptor_set_layout_ = std::make_unique<VulkanDescriptorSetLayout>(vcore_.get());
   descriptor_set_layout_->AddBinding(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
                                      VK_SHADER_STAGE_VERTEX_BIT);
   descriptor_set_layout_->AddBinding(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
@@ -19,15 +20,16 @@ VulkanRenderer::VulkanRenderer(Window *window) {
                                      VK_SHADER_STAGE_FRAGMENT_BIT);
   descriptor_set_layout_->CreateLayout();
 
-  VulkanShader vertex_shader(
-      vcore_, "/home/antaraz/Projects/SlashEngine/src/Shaders/vert.spv");
-  VulkanShader fragment_shader(
-      vcore_, "/home/antaraz/Projects/SlashEngine/src/Shaders/frag.spv");
-  pipeline_ = new VulkanPipeline(vcore_, render_pass_, swap_chain_, vertex_shader,
-                                 fragment_shader, descriptor_set_layout_);
+  vertex_shader_ = std::make_unique<VulkanShader>(
+      vcore_.get(), "src/Shaders/vert.spv");
+  fragment_shader_ = std::make_unique<VulkanShader>(
+      vcore_.get(), "src/Shaders/frag.spv");
+  pipeline_ =
+      std::make_unique<VulkanPipeline>(vcore_.get(), render_pass_.get(), swap_chain_.get(), vertex_shader_.get(),
+                                       fragment_shader_.get(), descriptor_set_layout_.get());
 
-  depth_ = new VulkanTexture(
-      vcore_, swap_chain_->GetExtent().width, swap_chain_->GetExtent().height,
+  depth_ = std::make_unique<VulkanTexture>(
+      vcore_.get(), swap_chain_->GetExtent().width, swap_chain_->GetExtent().height,
       vcore_->find_supported_format(
           {VK_FORMAT_D32_SFLOAT, VK_FORMAT_D32_SFLOAT_S8_UINT,
            VK_FORMAT_D32_SFLOAT_S8_UINT},
@@ -37,48 +39,27 @@ VulkanRenderer::VulkanRenderer(Window *window) {
       VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
   for (auto &depth = depth_;
       auto &swap_chain_image : swap_chain_->GetImageViews()) {
-    frame_buffers_.emplace_back(new VulkanFrameBuffer(
-        vcore_, render_pass_, swap_chain_->GetExtent().width,
+    frame_buffers_.emplace_back(std::make_unique<VulkanFrameBuffer>(
+        vcore_.get(), render_pass_.get(), swap_chain_->GetExtent().width,
         swap_chain_->GetExtent().height,
-        {swap_chain_image, depth->GetImageView()}));
+        std::vector{swap_chain_image, depth->GetImageView()}));
   }
 
-  descriptor_manager_ = std::make_unique<VulkanDescriptorManager>(vcore_);
+  descriptor_manager_ = std::make_unique<VulkanDescriptorManager>(vcore_.get());
   command_buffer_manager_ = std::make_unique<VulkanCommandBufferManager>(
-      vcore_, queue_families.graphicsFamily.value());
+      vcore_.get(), queue_families.graphicsFamily.value());
   //
 
-  inflight_fences_.emplace_back(new VulkanFence(vcore_));
-  inflight_fences_.emplace_back(new VulkanFence(vcore_));
-  image_available_semaphores_.emplace_back(new VulkanSemaphore(vcore_));
-  image_available_semaphores_.emplace_back(new VulkanSemaphore(vcore_));
-  render_finished_semaphores_.emplace_back(new VulkanSemaphore(vcore_));
-  render_finished_semaphores_.emplace_back(new VulkanSemaphore(vcore_));
+  inflight_fences_.emplace_back(std::make_unique<VulkanFence>(vcore_.get()));
+  inflight_fences_.emplace_back(std::make_unique<VulkanFence>(vcore_.get()));
+  image_available_semaphores_.emplace_back(std::make_unique<VulkanSemaphore>(vcore_.get()));
+  image_available_semaphores_.emplace_back(std::make_unique<VulkanSemaphore>(vcore_.get()));
+  render_finished_semaphores_.emplace_back(std::make_unique<VulkanSemaphore>(vcore_.get()));
+  render_finished_semaphores_.emplace_back(std::make_unique<VulkanSemaphore>(vcore_.get()));
 }
 
 VulkanRenderer::~VulkanRenderer() {
   vkDeviceWaitIdle(vcore_->get_device());
-  delete inflight_fences_[0];
-  delete inflight_fences_[1];
-  delete image_available_semaphores_[0];
-  delete image_available_semaphores_[1];
-  delete render_finished_semaphores_[0];
-  delete render_finished_semaphores_[1];
-
-  command_buffer_manager_.reset();
-  descriptor_manager_.reset();
-
-  delete depth_;
-  for (auto &frame_buffer : frame_buffers_)
-    delete frame_buffer;
-
-  delete pipeline_;
-  delete descriptor_set_layout_;
-  delete render_pass_;
-  delete swap_chain_;
-  delete present_queue_;
-  delete graphics_queue_;
-  delete vcore_;
 }
 
 void VulkanRenderer::draw_frame(double time) {
@@ -145,28 +126,21 @@ void VulkanRenderer::wait_idle() {
 
 void VulkanRenderer::recreate_swap_chain() {
   vkDeviceWaitIdle(vcore_->get_device());
-  for (auto &frame_buffer : frame_buffers_) {
-    delete frame_buffer;
-  }
-  delete depth_;
+  frame_buffers_.clear();
+  depth_.reset();
+  pipeline_.reset();
+  render_pass_.reset();
+  swap_chain_.reset();
 
-  delete pipeline_;
-  delete render_pass_;
-  delete swap_chain_;
-
-  swap_chain_ = new VulkanSwapChain(vcore_, {graphics_queue_, present_queue_});
-  // TODO wait for fix
-  render_pass_ = new VulkanRenderPass(vcore_, swap_chain_);
-  VulkanShader vertex_shader(
-      vcore_, "/home/antaraz/Projects/SlashEngine/src/Shaders/vert.spv");
-  VulkanShader fragment_shader(
-      vcore_, "/home/antaraz/Projects/SlashEngine/src/Shaders/frag.spv");
+  swap_chain_ =
+      std::make_unique<VulkanSwapChain>(vcore_.get(), std::vector{graphics_queue_.get(), present_queue_.get()});
+  render_pass_ = std::make_unique<VulkanRenderPass>(vcore_.get(), swap_chain_.get());
   pipeline_ =
-      new VulkanPipeline(vcore_, render_pass_, swap_chain_, vertex_shader,
-                         fragment_shader, descriptor_set_layout_);
+      std::make_unique<VulkanPipeline>(vcore_.get(), render_pass_.get(), swap_chain_.get(), vertex_shader_.get(),
+                                       fragment_shader_.get(), descriptor_set_layout_.get());
 
-  depth_ = new VulkanTexture(
-      vcore_, swap_chain_->GetExtent().width, swap_chain_->GetExtent().height,
+  depth_ = std::make_unique<VulkanTexture>(
+      vcore_.get(), swap_chain_->GetExtent().width, swap_chain_->GetExtent().height,
       vcore_->find_supported_format(
           {VK_FORMAT_D32_SFLOAT, VK_FORMAT_D32_SFLOAT_S8_UINT,
            VK_FORMAT_D32_SFLOAT_S8_UINT},
@@ -176,10 +150,10 @@ void VulkanRenderer::recreate_swap_chain() {
       VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
   for (auto &depth = depth_;
       auto &swap_chain_image : swap_chain_->GetImageViews()) {
-    frame_buffers_.emplace_back(new VulkanFrameBuffer(
-        vcore_, render_pass_, swap_chain_->GetExtent().width,
+    frame_buffers_.emplace_back(std::make_unique<VulkanFrameBuffer>(
+        vcore_.get(), render_pass_.get(), swap_chain_->GetExtent().width,
         swap_chain_->GetExtent().height,
-        {depth->GetImageView(), swap_chain_image}));
+        std::vector{depth->GetImageView(), swap_chain_image}));
   }
 }
 
@@ -209,7 +183,7 @@ void VulkanRenderer::end_one_time_command(
 }
 
 VulkanDescriptorSet *VulkanRenderer::create_descriptor_set() const {
-  return descriptor_manager_->CreateDescriptorSet(descriptor_set_layout_);
+  return descriptor_manager_->CreateDescriptorSet(descriptor_set_layout_.get());
 }
 
 void VulkanRenderer::new_frame() { command_buffer_manager_->SwitchFrame(); }
@@ -217,7 +191,7 @@ void VulkanRenderer::new_frame() { command_buffer_manager_->SwitchFrame(); }
 std::shared_ptr<VulkanCommandBuffer>
 VulkanRenderer::start_render_command() const {
   auto command_buffer = command_buffer_manager_->CreateFrameCommandBuffer();
-  //  vkResetCommandBuffer(command_buffer->GetBuffer(), 0);
+  vkResetCommandBuffer(command_buffer->GetBuffer(), 0);
   VkCommandBufferBeginInfo begin_info = {};
   begin_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
   begin_info.flags = 0;
