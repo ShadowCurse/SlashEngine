@@ -9,9 +9,9 @@ layout(binding = 0) uniform Camera
 
 layout(binding = 1) uniform Transform
 {
-    vec3 translation;
+    mat4 translation;
     mat4 rotation;
-    vec3 size;
+    mat4 scale;
 } transform;
 
 layout(location = 0) in vec3 inPosition;
@@ -22,7 +22,8 @@ layout(location = 0) out vec3 fragColor;
 layout(location = 1) out vec2 fragTexCoord;
 
 void main() {
-    gl_Position = camera.proj * camera.view * transform.rotation * vec4(inPosition, 1.0);
+    mat4 model = transform.translation * transform.rotation * transform.scale;
+    gl_Position = camera.proj * camera.view * model * vec4(inPosition, 1.0);
     fragColor = inColor;
     fragTexCoord = inTexCoord;
 }

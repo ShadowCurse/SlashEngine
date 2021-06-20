@@ -29,10 +29,10 @@ void VulkanResourceManager::create_renderable_object(Entity entity) {
   auto transform = create_transform(entity);
   auto texture = create_texture(entity);
 
-  VkDescriptorBufferInfo rotation_info = {};
-  rotation_info.buffer = transform->GetBuffer();
-  rotation_info.offset = 0;
-  rotation_info.range = transform->GetBufferSize();
+  VkDescriptorBufferInfo transform_info = {};
+  transform_info.buffer = transform->GetBuffer();
+  transform_info.offset = 0;
+  transform_info.range = transform->GetBufferSize();
 
   VkDescriptorImageInfo texture_info = {};
   texture_info.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
@@ -56,7 +56,7 @@ void VulkanResourceManager::create_renderable_object(Entity entity) {
   descriptor_writes[1].dstArrayElement = 0;
   descriptor_writes[1].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
   descriptor_writes[1].descriptorCount = 1;
-  descriptor_writes[1].pBufferInfo = &rotation_info;
+  descriptor_writes[1].pBufferInfo = &transform_info;
   descriptor_writes[1].pImageInfo = nullptr;
   descriptor_writes[1].pTexelBufferView = nullptr;
 
@@ -76,7 +76,8 @@ void VulkanResourceManager::create_renderable_object(Entity entity) {
                          descriptor_writes.data(), 0, nullptr);
 
   VulkanRenderableObject
-      object{std::move(mesh), std::move(texture), std::move(transform), descriptor_set, renderer_->get_pipeline()};
+      object{std::move(mesh), std::move(texture), std::move(transform), descriptor_set,
+             renderer_->get_pipeline()};
   app_->add_component(entity, std::move(object));
 }
 
@@ -128,7 +129,7 @@ auto VulkanResourceManager::create_texture(Entity entity) -> std::unique_ptr<Vul
 
 auto VulkanResourceManager::create_transform(Entity entity) -> std::unique_ptr<VulkanBuffer> {
   auto &transform = app_->get_component<Transform>(entity);
-  VkDeviceSize buffer_size = sizeof(Transform);
+  constexpr VkDeviceSize buffer_size = sizeof(Transform);
   auto transform_buffer = std::make_unique<VulkanBuffer>(
       renderer_->get_core(), buffer_size, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
       VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
@@ -140,6 +141,18 @@ auto VulkanResourceManager::create_transform(Entity entity) -> std::unique_ptr<V
   vkUnmapMemory(renderer_->get_core()->get_device(),
                 transform_buffer->GetMemory());
   return transform_buffer;
+}
+
+auto VulkanResourceManager::update_transform(Entity entity) -> void {
+  auto &transform = app_->get_component<Transform>(entity);
+  auto &transform_buffer = app_->get_component<VulkanRenderableObject>(entity).transform_;
+  VkDeviceSize buffer_size = sizeof(Transform);
+  void *ptr;
+  vkMapMemory(renderer_->get_core()->get_device(), transform_buffer->GetMemory(),
+              0, buffer_size, 0, &ptr);
+  memcpy(ptr, &transform, static_cast<size_t>(buffer_size));
+  vkUnmapMemory(renderer_->get_core()->get_device(),
+                transform_buffer->GetMemory());
 }
 
 void VulkanResourceManager::copy_buffer(VulkanBuffer *src, VulkanBuffer *dst) {

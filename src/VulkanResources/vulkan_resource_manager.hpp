@@ -19,6 +19,7 @@ class VulkanResourceManager {
   auto create_mesh(Entity entity) -> std::unique_ptr<VulkanMesh>;
   auto create_texture(Entity entity) -> std::unique_ptr<VulkanTexture>;
   auto create_transform(Entity entity) -> std::unique_ptr<VulkanBuffer>;
+  void update_transform(Entity entity);
 
   void create_camera_buffer();
   void create_texture_sampler();

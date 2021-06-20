@@ -98,26 +98,43 @@ auto main() -> int {
   app.add_component(e, Position{0.0f, 1.0f});
   app.add_component(e, Velocity{1.2f});
 
-  auto rotation = glm::rotate(glm::mat4(1.0f), glm::radians(45.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+  auto translate = glm::translate(glm::mat4(1.0f), {1.0, 1.0, 1.0});
+  auto rotation = glm::rotate(glm::mat4(1.0f), glm::radians(10.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+  auto scale = glm::scale(glm::mat4(1.0f), {1.0, 1.0, 1.0});
 
   // TODO pack this into one bundle
-  app.add_component(e, slash::Transform{{0.0, 0.0, 0.0}, rotation, {1.0, 1.0, 1.0}});
+  app.add_component(e, slash::Transform{translate, rotation, scale});
   app.add_component(e, slash::Texture::Load("TestApp/texture.jpg"));
   app.add_mesh(e, slash::Square::create());
+
+  float mul = 1.0;
 
   app.add_system([&](slash::App &app) {
     auto &wm = app.get_resource<slash::WindowManager>();
     auto &windows = wm.get_windows();
+    auto q = app.get_component_query<slash::Transform>();
     if (!windows.empty() && windows[0]->is_key_pressed(SL_KEY_A)) {
-      SL_INFO("key pressed");
-      auto &pos = app.get_component<Position>(e);
-      SL_INFO("curr pos: x:{} y:{}", pos.x, pos.y);
-      auto query = app.get_component_query<Velocity, Position>();
-      for (auto[vel, pos]: query) {
-        pos.x += vel.velocity;
-        SL_INFO("new pos: x:{} y:{}", pos.x, pos.y);
+      SL_INFO("A key pressed");
+      SL_INFO(time);
+      for (auto[t] : q) {
+        mul += 0.1f;
+        t.rotation = glm::rotate(glm::mat4(1.0f), mul * glm::radians(45.0f), glm::vec3(0.0f, 0.0f, 1.0f));
       }
     }
+    if (!windows.empty() && windows[0]->is_key_pressed(SL_KEY_D)) {
+      SL_INFO("D key pressed");
+      SL_INFO(time);
+      for (auto[t] : q) {
+        mul -= 0.1f;
+        t.rotation = glm::rotate(glm::mat4(1.0f), mul * glm::radians(45.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+      }
+    }
+  });
+
+  app.add_system([&](slash::App &app) {
+//    SL_INFO("updating transform");
+    auto &vrm = app.get_resource<slash::VulkanResourceManager>();
+    vrm.update_transform(e);
   });
 
   app.run();
