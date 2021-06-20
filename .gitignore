@@ -1,5 +1,7 @@
 /build
 /build-release
+/cmake-build-debug
+/cmake-build-release
 Makefile
 SlashPCH.hpp.gch
 .vscode
