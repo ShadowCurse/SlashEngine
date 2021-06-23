@@ -21,9 +21,9 @@ VulkanRenderer::VulkanRenderer(Window *window) {
   descriptor_set_layout_->CreateLayout();
 
   vertex_shader_ = std::make_unique<VulkanShader>(
-      vcore_.get(), "src/Shaders/vert.spv");
+      vcore_.get(), "src/Shaders/vert.spv", VK_SHADER_STAGE_VERTEX_BIT);
   fragment_shader_ = std::make_unique<VulkanShader>(
-      vcore_.get(), "src/Shaders/frag.spv");
+      vcore_.get(), "src/Shaders/frag.spv", VK_SHADER_STAGE_FRAGMENT_BIT);
   pipeline_ =
       std::make_unique<VulkanPipeline>(vcore_.get(), render_pass_.get(), swap_chain_.get(), vertex_shader_.get(),
                                        fragment_shader_.get(), descriptor_set_layout_.get());

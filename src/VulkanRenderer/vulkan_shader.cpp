@@ -2,8 +2,9 @@
 
 namespace slash {
 
-VulkanShader::VulkanShader(VulkanCore *vcore, const std::string &path)
-    : vcore_(vcore) {
+VulkanShader::VulkanShader(VulkanCore *vcore, const std::string &path, VkShaderStageFlagBits stage)
+    : vcore_{vcore},
+      stage_{stage} {
   std::ifstream file(path, std::ios::ate | std::ios::binary);
   if (!file.is_open()) {
     throw std::runtime_error("failed to open file");
@@ -38,6 +39,15 @@ VulkanShader::~VulkanShader() {
   vkDestroyShaderModule(vcore_->get_device(), shader_, nullptr);
 }
 
-VkShaderModule VulkanShader::GetShader() const { return shader_; }
+auto VulkanShader::pipeline_shader_stage_create_info() const -> VkPipelineShaderStageCreateInfo {
+  VkPipelineShaderStageCreateInfo shader_stage_info = {};
+  shader_stage_info.sType =
+      VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+  shader_stage_info.stage = stage_;
+  shader_stage_info.module = shader_;
+  shader_stage_info.pName = "main";
+  shader_stage_info.pSpecializationInfo = nullptr;
+  return shader_stage_info;
+}
 
 } // namespace slash

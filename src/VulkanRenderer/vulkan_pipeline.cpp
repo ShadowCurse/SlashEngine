@@ -9,29 +9,9 @@ VulkanPipeline::VulkanPipeline(VulkanCore *vcore, VulkanRenderPass *render_pass,
                                VulkanDescriptorSetLayout *descriptor_set_layout)
     : vcore_(vcore), render_pass_(render_pass), swap_chain_(swap_chain),
       descriptor_set_layout_(descriptor_set_layout) {
-  // vertex stage info
-  VkPipelineShaderStageCreateInfo vert_shader_stage_info = {};
-  vert_shader_stage_info.sType =
-      VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-  vert_shader_stage_info.stage = VK_SHADER_STAGE_VERTEX_BIT;
-  vert_shader_stage_info.module = vertex_shader->GetShader();
-  vert_shader_stage_info.pName = "main";
-  vert_shader_stage_info.pSpecializationInfo = nullptr;
+  VkPipelineShaderStageCreateInfo shader_stages[] = {vertex_shader->pipeline_shader_stage_create_info(),
+                                                     fragment_shader->pipeline_shader_stage_create_info()};
 
-  // fragment stage info
-  VkPipelineShaderStageCreateInfo frag_shader_stage_info = {};
-  frag_shader_stage_info.sType =
-      VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-  frag_shader_stage_info.stage = VK_SHADER_STAGE_FRAGMENT_BIT;
-  frag_shader_stage_info.module = fragment_shader->GetShader();
-  frag_shader_stage_info.pName = "main";
-  frag_shader_stage_info.pSpecializationInfo = nullptr;
-
-  // array of pipeline stage infos
-  VkPipelineShaderStageCreateInfo shader_stages[] = {vert_shader_stage_info,
-                                                     frag_shader_stage_info};
-
-  // TMP
   auto binding_descriptions = VulkanVertex::getBindingDescription();
   auto attribute_descriptions = VulkanVertex::getAttributeDescriptions();
 
