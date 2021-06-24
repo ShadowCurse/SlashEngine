@@ -9,7 +9,7 @@ namespace slash {
 struct AppClose {};
 
 // TODO move this to render module
-struct AddMesh {
+struct CreateRenderable {
   Entity entity;
 };
 

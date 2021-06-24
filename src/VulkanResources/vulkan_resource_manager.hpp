@@ -4,6 +4,9 @@
 #include "Core/app.hpp"
 #include "Core/events.hpp"
 #include "Ecs/entity.hpp"
+#include "GameResources/mesh.hpp"
+#include "GameResources/texture.hpp"
+#include "GameResources/transform.hpp"
 #include "vulkan_mesh.hpp"
 #include "vulkan_buffer.hpp"
 #include "vulkan_texture.hpp"
@@ -16,9 +19,9 @@ class VulkanResourceManager {
 
   void create_renderable_object(Entity entity);
 
-  auto create_mesh(Entity entity) -> std::unique_ptr<VulkanMesh>;
-  auto create_texture(Entity entity) -> std::unique_ptr<VulkanTexture>;
-  auto create_transform(Entity entity) -> std::unique_ptr<VulkanBuffer>;
+  auto create_mesh(const Mesh& mesh) -> std::unique_ptr<VulkanMesh>;
+  auto create_texture(const Texture& texture) -> std::unique_ptr<VulkanTexture>;
+  auto create_transform(const Transform& transform) -> std::unique_ptr<VulkanBuffer>;
   void update_transform(Entity entity);
 
   void create_camera_buffer();

@@ -1,34 +1,6 @@
 #include "Slash.hpp"
 #include <iostream>
 
-class TestLayer : public slash::Layer {
- public:
-  TestLayer() {}
-
-  void on_attach() final {};
-
-  void on_detach() final {};
-
-  void on_update(slash::TimeStep) final {
-  }
-//  void on_event(slash::Event &event) final {
-////     slash::EventDispatcher dispatcher(event);
-////     if (dispatcher.Dispatch<slash::KeyPressedEvent>(std::bind(&TestLayer::Controls, this, std::placeholders::_1))) {
-////         return;
-////     }
-//    SL_TRACE("{0}", event.ToString());
-//  }
-};
-
-class TestModule {
- public:
-  static void init(slash::App &, int) {
-    std::cout << "TestModule\n";
-  }
-
-  static void remove(slash::App &) {}
-};
-
 void mouse_move_callback(slash::MouseMovedEvent &e) {
   SL_INFO("Mouse move event: x:{}, y:{}", e.x, e.y);
 }
@@ -53,30 +25,13 @@ void key_release_callback(slash::KeyReleasedEvent &e) {
   SL_INFO("Key release event: key:{}", e.key_code);
 }
 
-struct Velocity {
-  float velocity{};
-};
-
-void velocity_system(Velocity &velocity) {
-  if (velocity.velocity > 2.0f)
-    velocity.velocity -= 0.1f;
-  else
-    velocity.velocity += 0.1f;
-}
-
-struct Position {
-  float x{};
-  float y{};
-};
-
 auto main() -> int {
   slash::App app;
 
   app.add_resource<slash::Camera>();
 
-  app.init_module<TestModule>(12)
-      .init_module<slash::WindowModule>(slash::WindowParams("TestApp", 800, 400))
-      .init_module<slash::RenderModule>();
+  app.init_module<slash::WindowModule>(slash::WindowParams("TestApp", 800, 400))
+     .init_module<slash::RenderModule>();
 
 //  auto& wm = app.get_resource<slash::WindowManager>();
 //  wm.add_window(slash::WindowParams{"Test2", 300, 200 });
@@ -92,52 +47,50 @@ auto main() -> int {
   app.get_event<slash::KeyPressedEvent>().subscribe(key_pressed_callback);
   app.get_event<slash::KeyReleasedEvent>().subscribe(key_release_callback);
 
-  app.register_component<Velocity>();
-  app.register_component<Position>();
-  auto e = app.create_entity();
-  app.add_component(e, Position{0.0f, 1.0f});
-  app.add_component(e, Velocity{1.2f});
+//  auto e = app.create_entity();
 
-  auto translate = glm::translate(glm::mat4(1.0f), {1.0, 1.0, 1.0});
+  auto translate = glm::translate(glm::mat4(1.0f), {0.0, 0.0, 0.0});
   auto rotation = glm::rotate(glm::mat4(1.0f), glm::radians(10.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-  auto scale = glm::scale(glm::mat4(1.0f), {1.0, 1.0, 1.0});
+  auto scale = glm::scale(glm::mat4(1.0f), {0.5, 0.5, 0.5});
 
-  // TODO pack this into one bundle
-  app.add_component(e, slash::Transform{translate, rotation, scale});
-  app.add_component(e, slash::Texture::Load("TestApp/texture.jpg"));
-  app.add_mesh(e, slash::Square::create());
+  auto mesh = slash::Square::create();
+  auto transform = slash::Transform{glm::mat4{1.0f}, rotation, scale};
+  auto texture = slash::Texture::Load("TestApp/texture.jpg");
+
+  auto e = app.add_pack(slash::PackObject3d{mesh, transform, texture});
 
   float mul = 1.0;
 
   app.add_system([&](slash::App &app) {
     auto &wm = app.get_resource<slash::WindowManager>();
     auto &windows = wm.get_windows();
-    auto q = app.get_component_query<slash::Transform>();
+    auto q = app.get_component_query<slash::PackObject3d>();
     if (!windows.empty() && windows[0]->is_key_pressed(SL_KEY_A)) {
       SL_INFO("A key pressed");
-      SL_INFO(time);
+      SL_INFO(mul);
       for (auto[t] : q) {
         mul += 0.1f;
-        t.rotation = glm::rotate(glm::mat4(1.0f), mul * glm::radians(45.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+        t.transform.rotation = glm::rotate(glm::mat4(1.0f), mul * glm::radians(45.0f), glm::vec3(0.0f, 0.0f, 1.0f));
       }
     }
     if (!windows.empty() && windows[0]->is_key_pressed(SL_KEY_D)) {
       SL_INFO("D key pressed");
-      SL_INFO(time);
+      SL_INFO(mul);
       for (auto[t] : q) {
         mul -= 0.1f;
-        t.rotation = glm::rotate(glm::mat4(1.0f), mul * glm::radians(45.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+        t.transform.rotation = glm::rotate(glm::mat4(1.0f), mul * glm::radians(45.0f), glm::vec3(0.0f, 0.0f, 1.0f));
       }
     }
   });
 
   app.add_system([&](slash::App &app) {
-//    SL_INFO("updating transform");
     auto &vrm = app.get_resource<slash::VulkanResourceManager>();
     vrm.update_transform(e);
   });
 
   app.run();
+
+
 
   SL_INFO("TestApp shutdown");
 }

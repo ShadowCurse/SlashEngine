@@ -11,7 +11,7 @@
 namespace slash {
 VulkanResourceManager::VulkanResourceManager(App *app, VulkanRenderer *renderer)
     : app_{app}, renderer_{renderer} {
-  app->get_event<AddMesh>().subscribe([&](auto event) { create_renderable_object(event.entity); });
+  app->get_event<CreateRenderable>().subscribe([&](auto event) { create_renderable_object(event.entity); });
 
   create_camera_buffer();
   create_texture_sampler();
@@ -25,9 +25,10 @@ void VulkanResourceManager::create_renderable_object(Entity entity) {
   buffer_info.offset = 0;
   buffer_info.range = camera_buffer_->GetBufferSize();
 
-  auto mesh = create_mesh(entity);
-  auto transform = create_transform(entity);
-  auto texture = create_texture(entity);
+  auto &object = app_->get_component<PackObject3d>(entity);
+  auto mesh = create_mesh(object.mesh);
+  auto transform = create_transform(object.transform);
+  auto texture = create_texture(object.texture);
 
   VkDescriptorBufferInfo transform_info = {};
   transform_info.buffer = transform->GetBuffer();
@@ -76,13 +77,12 @@ void VulkanResourceManager::create_renderable_object(Entity entity) {
                          descriptor_writes.data(), 0, nullptr);
 
   VulkanRenderableObject
-      object{std::move(mesh), std::move(texture), std::move(transform), descriptor_set,
-             renderer_->get_pipeline()};
-  app_->add_component(entity, std::move(object));
+      renderable_object{std::move(mesh), std::move(texture), std::move(transform), descriptor_set,
+                        renderer_->get_pipeline()};
+  app_->add_component(entity, std::move(renderable_object));
 }
 
-auto VulkanResourceManager::create_mesh(Entity entity) -> std::unique_ptr<VulkanMesh> {
-  auto &mesh = app_->get_component<Mesh>(entity);
+auto VulkanResourceManager::create_mesh(const Mesh &mesh) -> std::unique_ptr<VulkanMesh> {
   VkDeviceSize index_buffer_size =
       sizeof(mesh.indices_[0]) * mesh.indices_.size();
   SL_CORE_INFO("Mesh indices scale: {}", mesh.indices_.size());
@@ -105,8 +105,7 @@ auto VulkanResourceManager::create_mesh(Entity entity) -> std::unique_ptr<Vulkan
   return std::make_unique<VulkanMesh>(vertex_buffer, index_buffer);
 }
 
-auto VulkanResourceManager::create_texture(Entity entity) -> std::unique_ptr<VulkanTexture> {
-  auto &texture = app_->get_component<Texture>(entity);
+auto VulkanResourceManager::create_texture(const Texture &texture) -> std::unique_ptr<VulkanTexture> {
   VkDeviceSize image_size = texture.width_ * texture.height_ * 4;
   SL_CORE_INFO("Texture: width: {} height: {}", texture.width_, texture.height_);
   auto staging_buffer = VulkanStagingBuffer(renderer_->get_core(), image_size);
@@ -127,8 +126,7 @@ auto VulkanResourceManager::create_texture(Entity entity) -> std::unique_ptr<Vul
   return texture_image;
 }
 
-auto VulkanResourceManager::create_transform(Entity entity) -> std::unique_ptr<VulkanBuffer> {
-  auto &transform = app_->get_component<Transform>(entity);
+auto VulkanResourceManager::create_transform(const Transform &transform) -> std::unique_ptr<VulkanBuffer> {
   constexpr VkDeviceSize buffer_size = sizeof(Transform);
   auto transform_buffer = std::make_unique<VulkanBuffer>(
       renderer_->get_core(), buffer_size, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
@@ -144,7 +142,7 @@ auto VulkanResourceManager::create_transform(Entity entity) -> std::unique_ptr<V
 }
 
 auto VulkanResourceManager::update_transform(Entity entity) -> void {
-  auto &transform = app_->get_component<Transform>(entity);
+  auto &transform = app_->get_component<PackObject3d>(entity).transform;
   auto &transform_buffer = app_->get_component<VulkanRenderableObject>(entity).transform_;
   VkDeviceSize buffer_size = sizeof(Transform);
   void *ptr;
