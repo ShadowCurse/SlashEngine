@@ -1,13 +1,12 @@
 #ifndef SLASHENGINE_CORE_LOG_H_
 #define SLASHENGINE_CORE_LOG_H_
 
-#include "core.hpp"
 #include "spdlog/spdlog.h"
 #include "spdlog/sinks/stdout_color_sinks.h"
 
 namespace slash {
 
-class Slash_API Log {
+class Log {
  private:
   Log() = default;
 

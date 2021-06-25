@@ -1,49 +1,52 @@
 #ifndef SLASHENGINE_SRC_RENDERERMODULE_MODULE_HPP_
 #define SLASHENGINE_SRC_RENDERERMODULE_MODULE_HPP_
 
-#include "Core/core.hpp"
+#include "events.hpp"
 #include "WindowModule/module.hpp"
 #include "VulkanRenderer/vulkan_renderer.hpp"
 #include "VulkanResources/vulkan_resource_manager.hpp"
 
 namespace slash {
 
-class Slash_API RenderModule {
- public:
-  static void init(App &app) {
+struct RenderModule : public Dependencies<ResourcePackModule, EventPoolModule, SystemModule, ECSModule> {
+  [[nodiscard]] auto init(ResourcePackModule &rp, EventPoolModule &ep, SystemModule &sm, ECSModule &ecs) -> bool {
+    ep.add_event<CreateRenderable>();
 
-    app.register_component<VulkanRenderableObject>();
-    app.register_component<Mesh>();
-    app.register_component<Texture>();
-    app.register_component<Transform>();
+    ecs.register_component<VulkanRenderableObject>();
+    ecs.register_component<Mesh>();
+    ecs.register_component<Texture>();
+    ecs.register_component<Transform>();
+    ecs.register_component<PackObject3d>();
 
-    auto &wm = app.get_resource<WindowManager>();
-    auto &window = wm.get_windows()[0];
+    auto &wmgr = rp.get_resource<WindowManager>();
+    auto &window = wmgr.get_windows()[0];
 
-    app.add_resource<VulkanRenderer>(window.get());
-    auto &renderer = app.get_resource<VulkanRenderer>();
-    app.add_resource<VulkanResourceManager>(&app, &renderer);
+    rp.add_resource<VulkanRenderer>(window.get());
+    auto &renderer = rp.get_resource<VulkanRenderer>();
+    rp.add_resource<VulkanResourceManager>(ep, ecs, &renderer);
 
-    app.add_system([](App &app) {
-      auto &renderer = app.get_resource<VulkanRenderer>();
+    sm.add_system([&] {
+      auto &renderer = rp.get_resource<VulkanRenderer>();
       renderer.new_frame();
       auto render_command = renderer.start_render_command();
-      auto query = app.get_component_query<VulkanRenderableObject>();
+      auto query = ecs.get_query<VulkanRenderableObject>();
       for (auto[object]: query)
         render_command->AddRenderableObject(object);
       renderer.end_render_command(render_command);
       renderer.draw_frame(0.0);
     });
+    return true;
   }
-  static void remove(App &app) {
-    SL_CORE_INFO("RenderModule remove");
-    app.get_resource<VulkanRenderer>().wait_idle();
-    app.unregister_component<VulkanRenderableObject>();
-    app.unregister_component<Mesh>();
-    app.unregister_component<Texture>();
-    app.unregister_component<Transform>();
-    app.remove_resource<VulkanResourceManager>();
-    app.remove_resource<VulkanRenderer>();
+
+  [[nodiscard]] auto destroy(ResourcePackModule &rp, EventPoolModule &, SystemModule &, ECSModule &ecs) -> bool {
+    rp.get_resource<VulkanRenderer>().wait_idle();
+    ecs.unregister_component<VulkanRenderableObject>();
+    ecs.unregister_component<Mesh>();
+    ecs.unregister_component<Texture>();
+    ecs.unregister_component<Transform>();
+    rp.remove_resource<VulkanResourceManager>();
+    rp.remove_resource<VulkanRenderer>();
+    return true;
   }
 };
 

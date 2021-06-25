@@ -1,7 +1,6 @@
 #ifndef SLASHENGINE_SRC_ECS_COMPONENET_HPP_
 #define SLASHENGINE_SRC_ECS_COMPONENET_HPP_
 
-#include "Core/core.hpp"
 #include "entity.hpp"
 
 namespace slash {

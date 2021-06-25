@@ -1,7 +1,6 @@
 #ifndef SLASHENGINE_SRC_GAMERESOURCES_MESH_3D_HPP_
 #define SLASHENGINE_SRC_GAMERESOURCES_MESH_3D_HPP_
 
-#include "Core/core.hpp"
 #include "Renderer/vertex.hpp"
 
 namespace slash {

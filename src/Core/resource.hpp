@@ -1,8 +1,7 @@
 #ifndef SLASHENGINE_SRC_CORE_RESOURCE_HPP_
 #define SLASHENGINE_SRC_CORE_RESOURCE_HPP_
 
-#include "Core/core.hpp"
-#include "Core/log.hpp"
+#include "modules.hpp"
 
 namespace slash {
 
@@ -18,13 +17,20 @@ class NewResource : public Resource {
   R resource_;
 };
 
-class ResourcePack {
+class ResourcePackModule : public Dependencies<> {
  public:
-  ResourcePack() = default;
-  ~ResourcePack() {
+  ResourcePackModule() = default;
+  ~ResourcePackModule() = default;
+
+  [[nodiscard]] auto init() -> bool {
+    return true;
+  }
+
+  auto destroy() -> bool {
     std::for_each(std::rbegin(creation_order_),
                   std::rend(creation_order_),
                   [&](const auto &name) { resources_.erase(name); });
+    return true;
   }
 
   template<typename R, typename ... Args>

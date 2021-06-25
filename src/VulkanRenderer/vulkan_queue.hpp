@@ -1,7 +1,6 @@
 #ifndef SLASHENGINE_SRC_VULKANRENDERER_VULKAN_QUEUE_HPP_
 #define SLASHENGINE_SRC_VULKANRENDERER_VULKAN_QUEUE_HPP_
 
-#include "Core/core.hpp"
 #include "GLFW/glfw3.h"
 #include "vulkan_core.hpp"
 

@@ -4,7 +4,6 @@ namespace slash {
 
 ImGuiOverlay::ImGuiOverlay(ImGuiDrawFn &fn) {}
 
-
-ImGuiOverlay::~ImGuiOverlay() {  }
+ImGuiOverlay::~ImGuiOverlay() {}
 void ImGuiOverlay::SetVisibility(bool visible) {}
 }

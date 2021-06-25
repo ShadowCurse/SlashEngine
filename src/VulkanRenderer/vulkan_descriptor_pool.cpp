@@ -31,9 +31,9 @@ bool VulkanDescriptorPool::CanAllocate(
     const std::vector<VkDescriptorSetLayoutBinding> &bindings) const {
   for (auto &binding : bindings) {
     if (std::find_if(pool_sizes_.begin(), pool_sizes_.end(), [&](auto &size) {
-          return size.type == binding.descriptorType &&
-                 size.descriptorCount >= binding.descriptorCount;
-        }) == pool_sizes_.end()) {
+      return size.type == binding.descriptorType &&
+          size.descriptorCount >= binding.descriptorCount;
+    }) == pool_sizes_.end()) {
       return false;
     }
   }

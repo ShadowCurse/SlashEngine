@@ -4,7 +4,7 @@
 namespace slash {
 
 class TimeStep {
-public:
+ public:
   explicit TimeStep(double time = 0.0) : time_(time) {}
 
   explicit operator double() const { return time_; }
@@ -12,7 +12,7 @@ public:
   [[nodiscard]] double GetSecond() const { return time_; }
   [[nodiscard]] double GetMilliseconds() const { return time_ * 1000.0; }
 
-private:
+ private:
   double time_;
 };
 

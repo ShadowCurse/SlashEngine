@@ -25,12 +25,24 @@ add_library(SlashEngine STATIC
         src/GameResources/mesh.hpp
         src/GameResources/texture.hpp
         src/GameResources/texture.cpp
+        src/GameResources/pack.hpp
 
         src/WindowModule/window.cpp
+        src/WindowModule/window_manager.cpp
+        src/WindowModule/window_manager.hpp
+        src/WindowModule/events.hpp
+        src/WindowModule/module.hpp
 
         src/Ecs/ecs.hpp
         src/Ecs/entity.hpp
         src/Ecs/component.hpp
+
+        src/Scene/camera.hpp
+
+        src/RendererModule/events.hpp
+        src/RendererModule/module.hpp
+
+        src/LayerModule/module.hpp
 
         src/VulkanRenderer/vulkan_core.cpp
         src/VulkanRenderer/vulkan_queue.cpp
@@ -78,17 +90,6 @@ add_library(SlashEngine STATIC
         src/VulkanResources/vulkan_mesh.hpp
         src/VulkanResources/vulkan_frame_buffer.cpp
         src/VulkanResources/vulkan_frame_buffer.hpp
-
-        src/RendererModule/module.hpp
-
-        src/Scene/camera.hpp
-
-        src/WindowModule/module.hpp
-
-        src/LayerModule/module.hpp
-        src/WindowModule/window_manager.cpp
-        src/WindowModule/window_manager.hpp
-        src/WindowModule/events.hpp
         )
 
 target_include_directories(SlashEngine PUBLIC ${CMAKE_SOURCE_DIR}/src)

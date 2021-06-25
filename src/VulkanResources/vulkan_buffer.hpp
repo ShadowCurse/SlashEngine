@@ -1,13 +1,12 @@
 #ifndef SLASHENGINE_SRC_VULKANRENDERER_VULKAN_BUFFER_HPP_
 #define SLASHENGINE_SRC_VULKANRENDERER_VULKAN_BUFFER_HPP_
 
-#include "Core/core.hpp"
 #include "VulkanRenderer/vulkan_core.hpp"
 
 namespace slash {
 
 class VulkanBuffer {
-public:
+ public:
   VulkanBuffer() = default;
   VulkanBuffer(VulkanCore *vcore, VkDeviceSize buffer_size,
                VkBufferUsageFlags usage_flags,
@@ -18,7 +17,7 @@ public:
   [[nodiscard]] VkDeviceMemory GetMemory() const;
   [[nodiscard]] VkDeviceSize GetBufferSize() const;
 
-protected:
+ protected:
   VulkanCore *vcore_;
   VkBuffer buffer_;
   VkDeviceMemory memory_;
@@ -26,8 +25,8 @@ protected:
 };
 
 class VulkanStagingBuffer final : public VulkanBuffer {
-public:
-  VulkanStagingBuffer(VulkanCore* vcore, VkDeviceSize buffer_size);
+ public:
+  VulkanStagingBuffer(VulkanCore *vcore, VkDeviceSize buffer_size);
   ~VulkanStagingBuffer() final = default;
 };
 

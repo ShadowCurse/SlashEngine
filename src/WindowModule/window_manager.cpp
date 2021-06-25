@@ -4,10 +4,11 @@
 
 namespace slash {
 
-WindowManager::WindowManager(App& app) : app_ptr_{&app}{
-  SL_CORE_ASSERT(glfwInit(), "Could not initialized GLFW")
+WindowManager::WindowManager(EventPoolModule &ep, SystemModule &sm) : ep_{ep} {
+  if (!glfwInit())
+    SL_CORE_ERROR("Could not initialized GLFW");
   glfwSetErrorCallback(error_callback);
-  app.add_system([](App&){ update(); });
+  sm.add_system([&] { update(); });
 }
 
 WindowManager::~WindowManager() {
@@ -21,7 +22,7 @@ void WindowManager::add_window(WindowParams params) {
       .title = std::move(params.title),
       .width = params.width,
       .height = params.height,
-      .app_ptr = app_ptr_,
+      .event_pool_module = &ep_,
       .close_callback = [&](size_t window_id) { window_close_callback(window_id); }
   };
 
@@ -43,7 +44,7 @@ void WindowManager::error_callback(int error, const char *description) {
 void WindowManager::window_close_callback(size_t window_id) {
   std::erase_if(windows_, [&](const auto &window) { return window->id() == window_id; });
   if (windows_.empty())
-    app_ptr_->get_event<AppClose>().emit();
+    ep_.get_event<AppClose>().emit();
 }
 
 }

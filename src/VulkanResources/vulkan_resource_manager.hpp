@@ -15,13 +15,13 @@ namespace slash {
 
 class VulkanResourceManager {
  public:
-  explicit VulkanResourceManager(App *app, class VulkanRenderer *renderer);
+  explicit VulkanResourceManager(EventPoolModule &ep, ECSModule &ecs, class VulkanRenderer *renderer);
 
   void create_renderable_object(Entity entity);
 
-  auto create_mesh(const Mesh& mesh) -> std::unique_ptr<VulkanMesh>;
-  auto create_texture(const Texture& texture) -> std::unique_ptr<VulkanTexture>;
-  auto create_transform(const Transform& transform) -> std::unique_ptr<VulkanBuffer>;
+  auto create_mesh(const Mesh &mesh) -> std::unique_ptr<VulkanMesh>;
+  auto create_texture(const Texture &texture) -> std::unique_ptr<VulkanTexture>;
+  auto create_transform(const Transform &transform) -> std::unique_ptr<VulkanBuffer>;
   void update_transform(Entity entity);
 
   void create_camera_buffer();
@@ -36,7 +36,7 @@ class VulkanResourceManager {
                                VkImageLayout oldLayout, VkImageLayout newLayout);
 
  private:
-  App *app_;
+  ECSModule &ecs_;
   VulkanRenderer *renderer_;
 
   std::shared_ptr<VulkanBuffer> camera_buffer_;

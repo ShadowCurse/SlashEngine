@@ -1,14 +1,13 @@
 #ifndef SLASHENGINE_SRC_VULKANRENDERER_VULKAN_VERTEX_BUFFER_HPP_
 #define SLASHENGINE_SRC_VULKANRENDERER_VULKAN_VERTEX_BUFFER_HPP_
 
-#include "Core/core.hpp"
 #include "VulkanRenderer/vulkan_core.hpp"
 #include "VulkanResources/vulkan_buffer.hpp"
 
 namespace slash {
 
 class VulkanVertexBuffer final : public VulkanBuffer {
-public:
+ public:
   VulkanVertexBuffer(VulkanCore *vcore, VkDeviceSize size,
                      uint32_t offset);
 
@@ -18,7 +17,7 @@ public:
     return offset_;
   }
 
-private:
+ private:
   VkDeviceSize offset_;
 };
 

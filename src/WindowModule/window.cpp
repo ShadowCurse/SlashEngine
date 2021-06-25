@@ -50,15 +50,15 @@ Window::Window(WindowData data) {
     auto data = static_cast<WindowData *>(glfwGetWindowUserPointer(window));
     switch (action) {
       case GLFW_PRESS: {
-        data->app_ptr->get_event<KeyPressedEvent>().emit(key, 0);
+        data->event_pool_module->get_event<KeyPressedEvent>().emit(key, 0);
         break;
       }
       case GLFW_RELEASE: {
-        data->app_ptr->get_event<KeyReleasedEvent>().emit(key);
+        data->event_pool_module->get_event<KeyReleasedEvent>().emit(key);
         break;
       }
       case GLFW_REPEAT: {
-        data->app_ptr->get_event<KeyPressedEvent>().emit(key, 1);
+        data->event_pool_module->get_event<KeyPressedEvent>().emit(key, 1);
         break;
       }
       default:break;
@@ -67,7 +67,7 @@ Window::Window(WindowData data) {
 
   glfwSetCharCallback(window_, [](GLFWwindow *window, uint keycode) {
     auto data = static_cast<WindowData *>(glfwGetWindowUserPointer(window));
-    data->app_ptr->get_event<KeyTypedEvent>().emit(static_cast<int>(keycode));
+    data->event_pool_module->get_event<KeyTypedEvent>().emit(static_cast<int>(keycode));
   });
 
   glfwSetMouseButtonCallback(window_, [](GLFWwindow *window, int button,
@@ -76,11 +76,11 @@ Window::Window(WindowData data) {
     auto data = static_cast<WindowData *>(glfwGetWindowUserPointer(window));
     switch (action) {
       case GLFW_PRESS: {
-        data->app_ptr->get_event<MouseButtonPressedEvent>().emit(button);
+        data->event_pool_module->get_event<MouseButtonPressedEvent>().emit(button);
         break;
       }
       case GLFW_RELEASE: {
-        data->app_ptr->get_event<MouseButtonReleasedEvent>().emit(button);
+        data->event_pool_module->get_event<MouseButtonReleasedEvent>().emit(button);
         break;
       }
       default:break;
@@ -90,13 +90,13 @@ Window::Window(WindowData data) {
   glfwSetScrollCallback(
       window_, [](GLFWwindow *window, double x_offset, double y_offset) {
         auto data = static_cast<WindowData *>(glfwGetWindowUserPointer(window));
-        data->app_ptr->get_event<MouseScrolledEvent>().emit(x_offset, y_offset);
+        data->event_pool_module->get_event<MouseScrolledEvent>().emit(x_offset, y_offset);
       });
 
   glfwSetCursorPosCallback(
       window_, [](GLFWwindow *window, double xPos, double yPos) {
         auto data = static_cast<WindowData *>(glfwGetWindowUserPointer(window));
-        data->app_ptr->get_event<MouseMovedEvent>().emit(xPos, yPos);
+        data->event_pool_module->get_event<MouseMovedEvent>().emit(xPos, yPos);
       });
 }
 

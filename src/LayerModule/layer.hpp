@@ -1,13 +1,12 @@
 #ifndef SLASHENGINE_CORE_LAYER_H_
 #define SLASHENGINE_CORE_LAYER_H_
 
-#include "src/Core/event.hpp"
-#include "Core/core.hpp"
+#include "Core/event.hpp"
 #include "Core/time_step.hpp"
 
 namespace slash {
 
-class Slash_API Layer {
+class Layer {
  protected:
   Layer() = default;
 

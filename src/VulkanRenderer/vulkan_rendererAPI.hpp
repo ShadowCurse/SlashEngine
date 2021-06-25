@@ -1,7 +1,6 @@
 #ifndef SLASHENGINE_SRC_VULKANRENDERER_VULKANRENDERER_H_
 #define SLASHENGINE_SRC_VULKANRENDERER_VULKANRENDERER_H_
 
-#include "Core/core.hpp"
 #include "GLFW/glfw3.h"
 #include "Scene/camera.hpp"
 //#include "Renderer/renderer_api.hpp"
@@ -11,8 +10,8 @@
 
 namespace slash {
 
-class Slash_API VulkanRendererAPI final : public RendererAPI {
-public:
+class VulkanRendererAPI final : public RendererAPI {
+ public:
   VulkanRendererAPI(Window *window) {}
   void AddWindow(std::shared_ptr<Window> window) final;
   void Init() final;
@@ -27,7 +26,7 @@ public:
   void BindTexture(std::shared_ptr<Texture> texture) final;
   void UnBindTexture(std::shared_ptr<Texture> texture) final;
 
-private:
+ private:
   struct Config {
     struct InstanceConfig {
       std::string application_name = "Vulkan app";

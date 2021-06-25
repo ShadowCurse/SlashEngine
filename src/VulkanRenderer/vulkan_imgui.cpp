@@ -89,8 +89,8 @@ void VulkanImGui::Destroy() {
 //  ImGui::DestroyContext();
 }
 
-void VulkanImGui::SetDrawFn(ImGuiDrawFn& fn) {
- draw_fn_ = fn;
+void VulkanImGui::SetDrawFn(ImGuiDrawFn &fn) {
+  draw_fn_ = fn;
 }
 
 void VulkanImGui::UpdateCommandBuffers(VkFramebuffer framebuffer,
@@ -221,7 +221,7 @@ void VulkanImGui::CreateRenderPass() {
   color_attachment.initialLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
   color_attachment.finalLayout =
       VK_IMAGE_LAYOUT_PRESENT_SRC_KHR; // VK_IMAGE_LAYOUT_PRESENT_SRC_KHR; //
-                                       // VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+  // VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 
   VkAttachmentReference color_attachment_ref = {};
   color_attachment_ref.attachment = 0;
@@ -256,7 +256,7 @@ void VulkanImGui::CreateRenderPass() {
   dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
   dependency.srcAccessMask = 0;
   dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT |
-                             VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+      VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
 
   std::array<VkAttachmentDescription, 2> attachemnts = {color_attachment,
                                                         depth_attachment};

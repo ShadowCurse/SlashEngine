@@ -1,7 +1,6 @@
 #ifndef SLASHENGINE_SRC_VULKANRESOURCES_VULKAN_RENDERABLE_OBJECT_HPP_
 #define SLASHENGINE_SRC_VULKANRESOURCES_VULKAN_RENDERABLE_OBJECT_HPP_
 
-#include "Core/core.hpp"
 #include "Core/log.hpp"
 #include "VulkanRenderer/vulkan_discriptor_set.hpp"
 #include "VulkanRenderer/vulkan_pipeline.hpp"

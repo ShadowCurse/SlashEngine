@@ -4,11 +4,9 @@
 #define GLM_FORCE_DEFAULT_ALIGNED_GENTYPES
 #include <glm/mat4x4.hpp>
 
-#include "Core/core.hpp"
-
 namespace slash {
 
-struct Slash_API Transform {
+struct Transform {
   glm::mat4 translation;
   glm::mat4 rotation;
   glm::mat4 scale;

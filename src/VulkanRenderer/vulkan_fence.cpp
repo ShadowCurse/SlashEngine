@@ -15,6 +15,6 @@ VulkanFence::VulkanFence(VulkanCore *vcore) : vcore_(vcore) {
 VulkanFence::~VulkanFence() {
   vkDestroyFence(vcore_->get_device(), fence_, nullptr);
 }
-const VkFence & VulkanFence::GetFence() const { return fence_; }
+const VkFence &VulkanFence::GetFence() const { return fence_; }
 
 } // namespace slash

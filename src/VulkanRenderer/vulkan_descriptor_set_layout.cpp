@@ -30,7 +30,7 @@ void VulkanDescriptorSetLayout::CreateLayout() {
     throw std::runtime_error("failed to create descriptor set layout");
   }
 }
-const VkDescriptorSetLayout& VulkanDescriptorSetLayout::GetLayout() const {
+const VkDescriptorSetLayout &VulkanDescriptorSetLayout::GetLayout() const {
   return layout_;
 }
 

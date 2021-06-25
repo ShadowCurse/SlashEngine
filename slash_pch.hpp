@@ -20,5 +20,8 @@
 #include <typeinfo>
 #include <cassert>
 #include <utility>
+#include <type_traits>
+#include <numeric>
+#include <optional>
 
 #endif // SLASHENGINE_PCH_H_

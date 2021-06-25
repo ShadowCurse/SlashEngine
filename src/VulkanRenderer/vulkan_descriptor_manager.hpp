@@ -1,7 +1,6 @@
 #ifndef SLASHENGINE_SRC_VULKANRENDERER_VULKAN_DESCRIPTOR_MANAGER_HPP_
 #define SLASHENGINE_SRC_VULKANRENDERER_VULKAN_DESCRIPTOR_MANAGER_HPP_
 
-#include "Core/core.hpp"
 #include "vulkan_core.hpp"
 #include "vulkan_descriptor_pool.hpp"
 #include "vulkan_descriptor_set_layout.hpp"
@@ -10,7 +9,7 @@
 namespace slash {
 
 class VulkanDescriptorManager {
-public:
+ public:
   VulkanDescriptorManager(VulkanCore *vcore, uint32_t default_pool_size = 64);
   ~VulkanDescriptorManager();
 
@@ -18,7 +17,7 @@ public:
   [[nodiscard]] VulkanDescriptorSet *
   CreateDescriptorSet(VulkanDescriptorSetLayout *layout);
 
-private:
+ private:
   VulkanCore *vcore_;
   std::vector<VulkanDescriptorSetLayout> layouts_;
   std::vector<std::shared_ptr<VulkanDescriptorSet>> sets_;

@@ -7,11 +7,12 @@
 #include "vulkan_index_buffer.hpp"
 #include "vulkan_renderable_object.hpp"
 #include "vulkan_vertex_buffer.hpp"
+#include "RendererModule/events.hpp"
 
 namespace slash {
-VulkanResourceManager::VulkanResourceManager(App *app, VulkanRenderer *renderer)
-    : app_{app}, renderer_{renderer} {
-  app->get_event<CreateRenderable>().subscribe([&](auto event) { create_renderable_object(event.entity); });
+VulkanResourceManager::VulkanResourceManager(EventPoolModule &ep, ECSModule &ecs, VulkanRenderer *renderer)
+    : ecs_{ecs}, renderer_{renderer} {
+  ep.get_event<CreateRenderable>().subscribe([&](auto event) { create_renderable_object(event.entity); });
 
   create_camera_buffer();
   create_texture_sampler();
@@ -25,7 +26,7 @@ void VulkanResourceManager::create_renderable_object(Entity entity) {
   buffer_info.offset = 0;
   buffer_info.range = camera_buffer_->GetBufferSize();
 
-  auto &object = app_->get_component<PackObject3d>(entity);
+  auto &object = ecs_.get_component<PackObject3d>(entity);
   auto mesh = create_mesh(object.mesh);
   auto transform = create_transform(object.transform);
   auto texture = create_texture(object.texture);
@@ -79,7 +80,7 @@ void VulkanResourceManager::create_renderable_object(Entity entity) {
   VulkanRenderableObject
       renderable_object{std::move(mesh), std::move(texture), std::move(transform), descriptor_set,
                         renderer_->get_pipeline()};
-  app_->add_component(entity, std::move(renderable_object));
+  ecs_.add_component(entity, std::move(renderable_object));
 }
 
 auto VulkanResourceManager::create_mesh(const Mesh &mesh) -> std::unique_ptr<VulkanMesh> {
@@ -142,8 +143,8 @@ auto VulkanResourceManager::create_transform(const Transform &transform) -> std:
 }
 
 auto VulkanResourceManager::update_transform(Entity entity) -> void {
-  auto &transform = app_->get_component<PackObject3d>(entity).transform;
-  auto &transform_buffer = app_->get_component<VulkanRenderableObject>(entity).transform_;
+  auto &transform = ecs_.get_component<PackObject3d>(entity).transform;
+  auto &transform_buffer = ecs_.get_component<VulkanRenderableObject>(entity).transform_;
   VkDeviceSize buffer_size = sizeof(Transform);
   void *ptr;
   vkMapMemory(renderer_->get_core()->get_device(), transform_buffer->GetMemory(),
@@ -251,7 +252,9 @@ void VulkanResourceManager::transition_image_layout(VulkanTexture *texture,
 }
 
 void VulkanResourceManager::create_camera_buffer() {
-  auto &camera = app_->get_resource<Camera>();
+  //TODO camera as resource
+  Camera camera;
+//  auto &camera = ecs_.get_resource<Camera>();
   camera.SetRatio(static_cast<float>(16) / 9);
   VkDeviceSize buffer_size = sizeof(Camera);
   camera_buffer_ = std::make_shared<VulkanBuffer>(

@@ -1,14 +1,13 @@
 #ifndef SLASHENGINE_SRC_VULKANRENDERER_VULKAN_COMMAND_BUFFER_MANAGER_HPP_
 #define SLASHENGINE_SRC_VULKANRENDERER_VULKAN_COMMAND_BUFFER_MANAGER_HPP_
 
-#include "Core/core.hpp"
 #include "vulkan_command_buffer.hpp"
 #include "vulkan_command_pool.hpp"
 
 namespace slash {
 
 class VulkanCommandBufferManager {
-public:
+ public:
   VulkanCommandBufferManager(VulkanCore *vcore, uint32_t queue_family_index);
   ~VulkanCommandBufferManager();
 
@@ -19,7 +18,7 @@ public:
   [[nodiscard]] std::shared_ptr<VulkanCommandBuffer> CreateFrameCommandBuffer();
   void FreeFrameCommandBuffer(std::shared_ptr<VulkanCommandBuffer> buffer);
 
-private:
+ private:
   VulkanCore *vcore_;
   uint32_t queue_family_index_;
   std::vector<std::shared_ptr<VulkanCommandBuffer>> command_buffers_;

@@ -1,32 +1,34 @@
 #ifndef SLASHENGINE_SRC_WINDOWMODULE_MODULE_HPP_
 #define SLASHENGINE_SRC_WINDOWMODULE_MODULE_HPP_
 
-#include "Core/app.hpp"
+#include "Core/modules.hpp"
 #include "window_manager.hpp"
 #include "events.hpp"
 
 namespace slash {
 
-class Slash_API WindowModule {
- public:
-  static void init(App &app, WindowParams params) {
-    app.add_resource<WindowManager>(app);
+struct WindowModule : public Dependencies<ResourcePackModule, EventPoolModule, SystemModule> {
+  [[nodiscard]] auto init(ResourcePackModule &rp, EventPoolModule &ep, SystemModule &sm) -> bool {
+    rp.add_resource<WindowManager>(ep, sm);
 
-    app.add_event<MouseMovedEvent>();
-    app.add_event<MouseScrolledEvent>();
-    app.add_event<MouseButtonPressedEvent>();
-    app.add_event<MouseButtonReleasedEvent>();
-    app.add_event<KeyPressedEvent>();
-    app.add_event<KeyReleasedEvent>();
-    app.add_event<KeyTypedEvent>();
+    ep.add_event<MouseMovedEvent>();
+    ep.add_event<MouseScrolledEvent>();
+    ep.add_event<MouseButtonPressedEvent>();
+    ep.add_event<MouseButtonReleasedEvent>();
+    ep.add_event<KeyPressedEvent>();
+    ep.add_event<KeyReleasedEvent>();
+    ep.add_event<KeyTypedEvent>();
 
-    auto &window_manager = app.get_resource<WindowManager>();
-    window_manager.add_window(std::move(params));
-
+    auto &window_manager = rp.get_resource<WindowManager>();
+    auto wp = WindowParams("TestApp", 800, 400);
+    window_manager.add_window(std::move(wp));
+    return true;
   }
-  static void remove(App &app) {
+
+  [[nodiscard]] auto destroy(ResourcePackModule &rp, EventPoolModule &, SystemModule &) -> bool {
     SL_CORE_INFO("WindowModule remove");
-    app.remove_resource<WindowManager>();
+    rp.remove_resource<WindowManager>();
+    return true;
   }
 };
 

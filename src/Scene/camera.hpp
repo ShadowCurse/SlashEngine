@@ -1,8 +1,6 @@
 #ifndef SLASHENGINE_CAMERA_HPP
 #define SLASHENGINE_CAMERA_HPP
 
-#include "Core/core.hpp"
-
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
 #define GLM_FORCE_DEFAULT_ALIGNED_GENTYPES
@@ -11,7 +9,7 @@
 
 namespace slash {
 
-class Slash_API Camera {
+class Camera {
  public:
   Camera() {
     view_ =

@@ -1,7 +1,6 @@
 #ifndef SLASHENGINE_SRC_VULKANRENDERER_VULKAN_DISCRIPTOR_SET_HPP_
 #define SLASHENGINE_SRC_VULKANRENDERER_VULKAN_DISCRIPTOR_SET_HPP_
 
-#include "Core/core.hpp"
 #include "VulkanResources/vulkan_buffer.hpp"
 #include "vulkan_core.hpp"
 #include "vulkan_descriptor_pool.hpp"
@@ -19,17 +18,17 @@ struct DescriptorInfo {
 };
 
 class VulkanDescriptorSet {
-public:
+ public:
   VulkanDescriptorSet(VulkanCore *vcore, VulkanDescriptorPool *pooli,
                       VulkanDescriptorSetLayout *layout);
   ~VulkanDescriptorSet();
 
-  void Update(const std::vector<DescriptorInfo>& descriptors);
+  void Update(const std::vector<DescriptorInfo> &descriptors);
   void AddBuffer();
   void AddImage();
   [[nodiscard]] const VkDescriptorSet &GetDescriptor() const;
 
-private:
+ private:
   VulkanCore *vcore_;
   VulkanDescriptorPool *pool_;
   VulkanDescriptorSetLayout *layout_;

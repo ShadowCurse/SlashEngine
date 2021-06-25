@@ -1,9 +1,7 @@
 #ifndef SLASHENGINE_SRC_ECS_ECS_HPP_
 #define SLASHENGINE_SRC_ECS_ECS_HPP_
 
-#include <utility>
-
-#include "Core/core.hpp"
+#include "Core/modules.hpp"
 #include "entity.hpp"
 #include "component.hpp"
 
@@ -69,11 +67,16 @@ class ECSQuery : public Container<Components> ... {
   std::vector<Entity> entities_;
 };
 
-class ECS {
+class ECSModule : public Dependencies<> {
  public:
-  ECS() {
+  ECSModule() = default;
+  auto init() -> bool {
     entity_manager_ = std::make_unique<EntityManager>();
     component_manager_ = std::make_unique<ComponenetManager>();
+    return true;
+  }
+  auto destroy() -> bool {
+    return true;
   }
 
   auto create_entity() -> Entity {
@@ -96,7 +99,7 @@ class ECS {
   }
 
   template<typename T>
-  void add_component(Entity entity, T&& component) {
+  void add_component(Entity entity, T &&component) {
     component_manager_->add_component<T>(entity, std::forward<T>(component));
 
     auto &signature = entity_manager_->get_signature(entity);

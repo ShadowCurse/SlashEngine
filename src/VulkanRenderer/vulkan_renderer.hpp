@@ -1,7 +1,6 @@
 #ifndef SLASHENGINE_SRC_VULKANRENDERER_VULKAN_RENDERER_HPP_
 #define SLASHENGINE_SRC_VULKANRENDERER_VULKAN_RENDERER_HPP_
 
-#include "Core/core.hpp"
 #include "WindowModule/window.hpp"
 #include "VulkanResources/vulkan_frame_buffer.hpp"
 #include "vulkan_command_buffer.hpp"
@@ -36,7 +35,7 @@ class VulkanRenderer {
 
   [[nodiscard]] auto create_descriptor_set() const -> VulkanDescriptorSet *;
 
-  [[nodiscard]] auto start_render_command() const -> std::shared_ptr<VulkanCommandBuffer> ;
+  [[nodiscard]] auto start_render_command() const -> std::shared_ptr<VulkanCommandBuffer>;
   void end_render_command(std::shared_ptr<VulkanCommandBuffer> buffer);
 
  private:
@@ -54,7 +53,7 @@ class VulkanRenderer {
   std::unique_ptr<VulkanPipeline> pipeline_;
 
   std::shared_ptr<VulkanDescriptorManager> descriptor_manager_;
-  std::shared_ptr<VulkanCommandBufferManager>command_buffer_manager_;
+  std::shared_ptr<VulkanCommandBufferManager> command_buffer_manager_;
 
   std::unique_ptr<VulkanTexture> depth_;
   std::vector<std::unique_ptr<VulkanFrameBuffer>> frame_buffers_;

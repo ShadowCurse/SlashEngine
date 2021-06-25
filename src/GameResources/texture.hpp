@@ -1,13 +1,12 @@
 #ifndef SLASHENGINE_SRC_GAMERESOURCES_TEXTURE_HPP_
 #define SLASHENGINE_SRC_GAMERESOURCES_TEXTURE_HPP_
 
-#include "Core/core.hpp"
 #include "Core/log.hpp"
 #include "stb_image.h"
 
 namespace slash {
 
-struct Slash_API Texture {
+struct Texture {
   static auto Load(const std::string &texture_path) -> Texture;
 
  public:

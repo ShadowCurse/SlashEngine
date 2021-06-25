@@ -1,7 +1,6 @@
 #ifndef SLASHENGINE_SRC_VULKANRENDERER_VULKAN_COMMAND_BUFFER_HPP_
 #define SLASHENGINE_SRC_VULKANRENDERER_VULKAN_COMMAND_BUFFER_HPP_
 
-#include "Core/core.hpp"
 #include "VulkanResources/vulkan_renderable_object.hpp"
 #include "vulkan_command_pool.hpp"
 #include "vulkan_core.hpp"
@@ -9,7 +8,7 @@
 namespace slash {
 
 class VulkanCommandBuffer {
-public:
+ public:
   VulkanCommandBuffer(VulkanCore *vcore, VulkanCommandPool *command_pool,
                       VkCommandBufferLevel level);
   ~VulkanCommandBuffer();
@@ -26,7 +25,7 @@ public:
 
   enum class State { NotStarted, Started, InRenderPass, Ended };
 
-private:
+ private:
   VulkanCore *vcore_;
   VulkanCommandPool *command_pool_;
   VkCommandBufferLevel level_;

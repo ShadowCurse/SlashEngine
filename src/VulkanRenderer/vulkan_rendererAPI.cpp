@@ -35,10 +35,10 @@ void VulkanRendererAPI::Init() {
   CreateFences();
 
   imgui_.Init(static_cast<GLFWwindow *>(window_->GetNativeWindow()), instance_,
-             physical_device_, device_,
-             queue_family_indices_.graphicsFamily.value(), graphics_queue_,
-             VK_NULL_HANDLE, swap_chain_format_, FindDepthFormat(),
-             swap_chain_image_views_.size());
+              physical_device_, device_,
+              queue_family_indices_.graphicsFamily.value(), graphics_queue_,
+              VK_NULL_HANDLE, swap_chain_format_, FindDepthFormat(),
+              swap_chain_image_views_.size());
   //  SetUpImGui();
 }
 
@@ -347,10 +347,10 @@ void VulkanRendererAPI::GetWindowData() {
 
 void VulkanRendererAPI::CreateSurface() {
   if (glfwCreateWindowSurface(
-          instance_,
-          static_cast<GLFWwindow *>(
-              slash::Application::Get().GetWindow().GetNativeWindow()),
-          nullptr, &surface_) != VK_SUCCESS) {
+      instance_,
+      static_cast<GLFWwindow *>(
+          slash::Application::Get().GetWindow().GetNativeWindow()),
+      nullptr, &surface_) != VK_SUCCESS) {
     throw std::runtime_error("failed to create widow surface");
   }
 }
@@ -531,7 +531,7 @@ void VulkanRendererAPI::RecreateSwapChain() {
 
 //  ImGui_ImplVulkan_SetMinImageCount(
 //      static_cast<uint32_t>(swap_chain_images_.size()));
-  imgui_.SetMinimalImageCount( static_cast<uint32_t>(swap_chain_images_.size()));
+  imgui_.SetMinimalImageCount(static_cast<uint32_t>(swap_chain_images_.size()));
 }
 
 void VulkanRendererAPI::CreateImageViews() {
@@ -554,8 +554,8 @@ void VulkanRendererAPI::CreateRenderPass() {
   color_attachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
   color_attachment.finalLayout =
       VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL; // VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
-                                                // //
-                                                // VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+  // //
+  // VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 
   VkAttachmentReference color_attachment_ref = {};
   color_attachment_ref.attachment = 0;
@@ -590,7 +590,7 @@ void VulkanRendererAPI::CreateRenderPass() {
   dependency[0].dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
   dependency[0].srcAccessMask = 0;
   dependency[0].dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT |
-                                VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+      VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
 
   std::array<VkAttachmentDescription, 2> attachemnts = {color_attachment,
                                                         depth_attachment};
@@ -747,7 +747,7 @@ void VulkanRendererAPI::CreateGraphicsPipeline() {
   VkPipelineColorBlendAttachmentState color_blend_attachment = {};
   color_blend_attachment.colorWriteMask =
       VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT |
-      VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
+          VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
   color_blend_attachment.blendEnable = VK_FALSE;
   color_blend_attachment.srcColorBlendFactor = VK_BLEND_FACTOR_ONE;
   color_blend_attachment.dstColorBlendFactor = VK_BLEND_FACTOR_ZERO;
@@ -1180,20 +1180,15 @@ VKAPI_ATTR VkBool32 VKAPI_CALL VulkanRendererAPI::DebugCallBack(
     const VkDebugUtilsMessengerCallbackDataEXT *pCallBackData,
     [[maybe_unused]] void *pUserData) {
   switch (messageSeverity) {
-  case VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT:
-    SL_CORE_TRACE(pCallBackData->pMessage);
-    break;
-  case VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT:
-    SL_CORE_INFO(pCallBackData->pMessage);
-    break;
-  case VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT:
-    SL_CORE_WARN(pCallBackData->pMessage);
-    break;
-  case VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT:
-    SL_CORE_ERROR(pCallBackData->pMessage);
-    break;
-  default:
-    SL_CORE_ERROR(pCallBackData->pMessage);
+    case VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT:SL_CORE_TRACE(pCallBackData->pMessage);
+      break;
+    case VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT:SL_CORE_INFO(pCallBackData->pMessage);
+      break;
+    case VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT:SL_CORE_WARN(pCallBackData->pMessage);
+      break;
+    case VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT:SL_CORE_ERROR(pCallBackData->pMessage);
+      break;
+    default:SL_CORE_ERROR(pCallBackData->pMessage);
   }
   return VK_FALSE;
 }
@@ -1204,13 +1199,13 @@ void VulkanRendererAPI::SetUpDebugMessengerCreateInfo(
   createInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
   createInfo.messageSeverity =
       VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT |
-      //                                     VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT
-      //                                     |
-      VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT |
-      VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
+          //                                     VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT
+          //                                     |
+          VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT |
+          VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
   createInfo.messageType = VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT |
-                           VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT |
-                           VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
+      VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT |
+      VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
   createInfo.pfnUserCallback = DebugCallBack;
   createInfo.pUserData = nullptr;
 }
@@ -1257,12 +1252,12 @@ bool VulkanRendererAPI::IsDeviceSuitable(const VkPhysicalDevice &device) {
   if (extentions_supported) {
     auto swapChainSupport = SwapChainSupport(device);
     swapChainAdequate = !swapChainSupport.formats.empty() &&
-                        !swapChainSupport.presentModes.empty();
+        !swapChainSupport.presentModes.empty();
   }
 
   // TODO make this configurable
   return indices.IsComplete() && extentions_supported && swapChainAdequate &&
-         supported_features.samplerAnisotropy;
+      supported_features.samplerAnisotropy;
 }
 
 // Gets queue family that has particular properties
@@ -1472,7 +1467,7 @@ void VulkanRendererAPI::UpdateUniformBuffer(double time,
   static double time_passed = 0;
   time_passed += time;
   camera_.SetRatio(static_cast<float>(swap_chain_extent_.width) /
-                   static_cast<float>(swap_chain_extent_.height));
+      static_cast<float>(swap_chain_extent_.height));
   void *data;
   vkMapMemory(device_, camera_buffer_memory_, 0, sizeof(Camera), 0, &data);
   memcpy(data, &camera_, sizeof(Camera));
@@ -1599,16 +1594,16 @@ void VulkanRendererAPI::TransitionImageLayout(VkImage image,
     source_stage = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
     destination_stage = VK_PIPELINE_STAGE_TRANSFER_BIT;
   } else if (oldLayout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL &&
-             newLayout == VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL) {
+      newLayout == VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL) {
     barrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
     barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
     source_stage = VK_PIPELINE_STAGE_TRANSFER_BIT;
     destination_stage = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
   } else if (oldLayout == VK_IMAGE_LAYOUT_UNDEFINED &&
-             newLayout == VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL) {
+      newLayout == VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL) {
     barrier.srcAccessMask = 0;
     barrier.dstAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT |
-                            VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+        VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
     source_stage = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
     destination_stage = VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
   } else {
@@ -1675,7 +1670,7 @@ VulkanRendererAPI::FindSupportedFormat(const std::vector<VkFormat> &candidates,
         (props.linearTilingFeatures & features) == features) {
       return format;
     } else if (tiling == VK_IMAGE_TILING_OPTIMAL &&
-               (props.optimalTilingFeatures & features) == features) {
+        (props.optimalTilingFeatures & features) == features) {
       return format;
     }
   }

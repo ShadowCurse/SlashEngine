@@ -1,13 +1,12 @@
 #ifndef SLASHENGINE_VULKANRENDERER_VULKANVERTEX_H_
 #define SLASHENGINE_VULKANRENDERER_VULKANVERTEX_H_
 
-#include "Core/core.hpp"
 #include "GLFW/glfw3.h"
 #include "Renderer/vertex.hpp"
 
 namespace slash {
 
-struct Slash_API VulkanVertex {
+struct VulkanVertex {
   static VkVertexInputBindingDescription getBindingDescription() {
     VkVertexInputBindingDescription bindingDescription = {};
     bindingDescription.binding = 0;

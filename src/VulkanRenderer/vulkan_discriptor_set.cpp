@@ -21,7 +21,7 @@ VulkanDescriptorSet::~VulkanDescriptorSet() {}
 
 void VulkanDescriptorSet::Update(
     const std::vector<DescriptorInfo> &descriptors) {
-  for (auto& descr: descriptors) {
+  for (auto &descr: descriptors) {
 
   }
 }

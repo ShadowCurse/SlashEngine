@@ -1,7 +1,8 @@
 #ifndef SLASHENGINE_CORE_EVENT_H_
 #define SLASHENGINE_CORE_EVENT_H_
 
-#include "Core/core.hpp"
+#include "modules.hpp"
+#include "events.hpp"
 
 namespace slash {
 
@@ -30,9 +31,17 @@ class Event : public BasicEvent {
   std::vector<subscribe_fn> subscribers_;
 };
 
-class EventPool {
+class EventPoolModule : public Dependencies<> {
  public:
-  EventPool() = default;
+  EventPoolModule() = default;
+  auto init() -> bool {
+    add_event<AppClose>();
+    return true;
+  }
+
+  auto destroy() -> bool {
+    return true;
+  }
 
   template<typename E>
   void add_event() {

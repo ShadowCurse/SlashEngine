@@ -1,7 +1,6 @@
 #ifndef SLASHENGINE_SRC_VULKANRENDERER_VULKAN_RENDERPASS_HPP_
 #define SLASHENGINE_SRC_VULKANRENDERER_VULKAN_RENDERPASS_HPP_
 
-#include "Core/core.hpp"
 #include "vulkan_core.hpp"
 #include "vulkan_swap_chain.hpp"
 

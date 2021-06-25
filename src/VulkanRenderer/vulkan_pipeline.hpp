@@ -1,7 +1,6 @@
 #ifndef SLASHENGINE_SRC_VULKANRENDERER_VULKAN_PIPELINE_HPP_
 #define SLASHENGINE_SRC_VULKANRENDERER_VULKAN_PIPELINE_HPP_
 
-#include "Core/core.hpp"
 #include "vulkan_core.hpp"
 #include "vulkan_descriptor_set_layout.hpp"
 #include "vulkan_renderpass.hpp"
@@ -10,7 +9,7 @@
 namespace slash {
 
 class VulkanPipeline {
-public:
+ public:
   VulkanPipeline(VulkanCore *vcore, VulkanRenderPass *render_pass,
                  VulkanSwapChain *swap_chain, VulkanShader *vertex_shader,
                  VulkanShader *fragment_shader,
@@ -24,7 +23,7 @@ public:
     return pipeline_layout_;
   }
 
-private:
+ private:
   VulkanCore *vcore_;
   VulkanRenderPass *render_pass_;
   VulkanSwapChain *swap_chain_;

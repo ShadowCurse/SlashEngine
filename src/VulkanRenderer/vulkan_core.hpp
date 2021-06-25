@@ -1,9 +1,7 @@
 #ifndef SLASHENGINE_SRC_VULKANRENDERER_VULKAN_CORE_HPP_
 #define SLASHENGINE_SRC_VULKANRENDERER_VULKAN_CORE_HPP_
 
-#include <optional>
-
-#include "Core/core.hpp"
+#include "slash_pch.hpp"
 #include "GLFW/glfw3.h"
 
 namespace slash {

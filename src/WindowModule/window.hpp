@@ -1,7 +1,6 @@
 #ifndef SLASHENGINE_WINDOWMODULE_WINDOW_H_
 #define SLASHENGINE_WINDOWMODULE_WINDOW_H_
 
-#include "Core/core.hpp"
 #include "Core/log.hpp"
 #include "Core/app.hpp"
 #include "Core/event.hpp"
@@ -9,7 +8,7 @@
 
 namespace slash {
 
-class Slash_API Window {
+class Window {
  public:
   using window_close_callback_fn = std::function<void(size_t)>;//void(*)(GLFWwindow*);
 
@@ -21,7 +20,7 @@ class Slash_API Window {
     bool VSync = false;
     bool resized = false;
 
-    App *app_ptr;
+    EventPoolModule *event_pool_module;
     window_close_callback_fn close_callback;
   };
  public:

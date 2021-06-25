@@ -1,15 +1,12 @@
 #ifndef SLASHENGINE_CORE_LAYER_STACK_H_
 #define SLASHENGINE_CORE_LAYER_STACK_H_
 
-#include "slash_pch.hpp"
-
-#include "Core/core.hpp"
-#include "src/Core/event.hpp"
+#include "Core/event.hpp"
 #include "layer.hpp"
 
 namespace slash {
 
-class Slash_API LayerStack {
+class LayerStack {
  public:
   using layers = std::vector<std::unique_ptr<Layer>>;
   using iterator = layers::iterator;

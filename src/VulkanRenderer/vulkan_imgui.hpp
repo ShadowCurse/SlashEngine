@@ -1,7 +1,6 @@
 #ifndef SLASHENGINE_SRC_VULKANRENDERER_VULKAN_IMGUI_HPP_
 #define SLASHENGINE_SRC_VULKANRENDERER_VULKAN_IMGUI_HPP_
 
-#include "Core/core.hpp"
 #include "imgui.h"
 //#include "imgui_impl_glfw.h"
 //#include "imgui_impl_vulkan.h"
@@ -11,7 +10,7 @@ namespace slash {
 using ImGuiDrawFn = std::function<void()>;
 
 class VulkanImGui {
-public:
+ public:
   VulkanImGui() = default;
   ~VulkanImGui() = default;
 
@@ -23,13 +22,13 @@ public:
 
   void Destroy();
 
-  void SetDrawFn(ImGuiDrawFn& fn);
+  void SetDrawFn(ImGuiDrawFn &fn);
 
   void UpdateCommandBuffers(VkFramebuffer framebuffer, VkExtent2D extend);
   VkCommandBuffer CommandBuffer();
   void SetMinimalImageCount(uint32_t image_count);
 
-private:
+ private:
   void CreateDescriptorPool();
   void CreateCommandPool();
   void CreateCommandBuffers();

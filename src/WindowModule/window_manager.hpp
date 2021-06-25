@@ -1,13 +1,11 @@
 #ifndef SLASHENGINE_SRC_WINDOWMODULE_WINDOW_MANAGER_HPP_
 #define SLASHENGINE_SRC_WINDOWMODULE_WINDOW_MANAGER_HPP_
 
-#include "Core/core.hpp"
-#include "Core/app.hpp"
 #include "window.hpp"
 
 namespace slash {
 
-struct Slash_API WindowParams {
+struct WindowParams {
   explicit WindowParams(std::string title = "SlashEngine", uint width = 1920,
                         uint height = 1080)
       : title(std::move(title)), width(width), height(height) {}
@@ -19,7 +17,7 @@ struct Slash_API WindowParams {
 
 class WindowManager {
  public:
-  explicit WindowManager(App& app);
+  explicit WindowManager(EventPoolModule &ep, SystemModule &sm);
   ~WindowManager();
 
   void add_window(WindowParams params);
@@ -30,7 +28,7 @@ class WindowManager {
   static void error_callback(int error, const char *description);
   void window_close_callback(size_t window_id);
 
-  App* app_ptr_;
+  EventPoolModule &ep_;
   std::vector<std::unique_ptr<Window>> windows_;
 };
 
