@@ -1,47 +1,31 @@
 #ifndef SLASHENGINE_SRC_CORE_MODULES_HPP_
 #define SLASHENGINE_SRC_CORE_MODULES_HPP_
 
-#include "Core/core.hpp"
-
 namespace slash {
 
-template<typename ... Types>
-struct Modules {
-  template<class Type>
-  constexpr bool has() {
-    return (std::is_same_v<Type, Types> || ...);
+template<typename ... T>
+struct AppBuilder;
+
+template<typename ... T>
+struct NewApp;
+
+template<typename ... T>
+struct Dependencies {
+  using dependencies = Dependencies<T...>;
+  template<typename ... TT>
+  [[nodiscard]] static constexpr auto check_deps() -> bool {
+    return AppBuilder<TT...>::template check_deps<T...>();
   }
 };
 
-class Module {
- public:
-  virtual ~Module() = default;
-//  virtual void init() = 0;
-  virtual void remove(class App &) = 0;
-};
-
-template<typename M>
-class NewModule final : public Module {
- public:
-  using init_fn = std::function<decltype(M::init)>;
-  using remove_fn = std::function<decltype(M::remove)>;
-
- public:
-  template<typename ... Args>
-  explicit NewModule(class App &app, Args &&... args)
-      : init_{M::init},
-        remove_{M::remove} {
-    init_(app, std::forward<Args>(args)...);
-  }
-  ~NewModule() final = default;
-  void remove(App &app) final {
-    remove_(app);
-  }
- private:
-  init_fn init_;
-  remove_fn remove_;
-
-};
+//TODO solve this
+template<typename T>
+//concept IsModule = std::is_class_v<typename T::deps> && std::is_base_of_v<Module2, T>;
+concept IsModule = requires(T t) {
+  typename T::dependencies;
+//  {t.init(TT{}...)} -> std::same_as<bool>;
+//  {t.destroy()} -> std::same_as<bool>;
+};// std::is_class_v<typename T::dependencies> && std::is_function_v<typeof(typename T::init)> && std::is_same_v<typeof(typename T::init()), bool>;
 
 }
 
