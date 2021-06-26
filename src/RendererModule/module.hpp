@@ -10,6 +10,9 @@ namespace slash {
 
 struct RenderModule : public Dependencies<ResourcePackModule, EventPoolModule, SystemModule, ECSModule> {
   [[nodiscard]] auto init(ResourcePackModule &rp, EventPoolModule &ep, SystemModule &sm, ECSModule &ecs) -> bool {
+    ecs_ = &ecs;
+    ep_ = &ep;
+
     ep.add_event<CreateRenderable>();
 
     ecs.register_component<VulkanRenderableObject>();
@@ -48,6 +51,17 @@ struct RenderModule : public Dependencies<ResourcePackModule, EventPoolModule, S
     rp.remove_resource<VulkanRenderer>();
     return true;
   }
+
+  [[nodiscard]] auto add_pack(PackObject3d &&pack) -> Entity {
+    auto e = ecs_->create_entity();
+    ecs_->add_component(e, std::forward<PackObject3d>(pack));
+    ep_->get_event<CreateRenderable>().template emit(e);
+    return e;
+  }
+
+ private:
+  ECSModule* ecs_;
+  EventPoolModule* ep_;
 };
 
 }
