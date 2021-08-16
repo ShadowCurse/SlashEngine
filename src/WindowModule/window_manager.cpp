@@ -29,6 +29,10 @@ void WindowManager::add_window(WindowParams params) {
   windows_.emplace_back(std::make_unique<Window>(std::move(data)));
 }
 
+auto WindowManager::get_main_window() const -> const Window & {
+  return *windows_[0].get();
+}
+
 auto WindowManager::get_windows() const -> const std::vector<std::unique_ptr<Window>> & {
   return windows_;
 }

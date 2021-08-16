@@ -21,6 +21,7 @@ class WindowManager {
   ~WindowManager();
 
   void add_window(WindowParams params);
+  [[nodiscard]] auto get_main_window() const -> const Window &;
   [[nodiscard]] auto get_windows() const -> const std::vector<std::unique_ptr<Window>> &;
   static void update();
 
