@@ -1,29 +1,44 @@
 #include "Slash.hpp"
-#include <iostream>
 
-void mouse_move_callback(slash::MouseMovedEvent &e) {
-  SL_INFO("Mouse move event: x:{}, y:{}", e.x, e.y);
-}
+struct MouseAndKeyboardLogModule : slash::Dependencies<slash::EventPoolModule> {
+  [[nodiscard]] auto init(slash::EventPoolModule &ep) -> bool {
+    ep.get_event<slash::MouseMovedEvent>().subscribe(mouse_move_callback);
+    ep.get_event<slash::MouseButtonPressedEvent>().subscribe(mouse_button_pressed_callback);
+    ep.get_event<slash::MouseButtonReleasedEvent>().subscribe(mouse_button_release_callback);
+    ep.get_event<slash::MouseScrolledEvent>().subscribe(mouse_scroll_callback);
+    ep.get_event<slash::KeyPressedEvent>().subscribe(key_pressed_callback);
+    ep.get_event<slash::KeyReleasedEvent>().subscribe(key_release_callback);
+    return true;
+  }
 
-void mouse_scroll_callback(slash::MouseScrolledEvent &e) {
-  SL_INFO("Mouse scroll event: x_offset:{}, y_offset:{}", e.x_offset, e.y_offset);
-}
+  [[nodiscard]] auto destroy(slash::EventPoolModule &) -> bool {
+    return true;
+  }
 
-void mouse_button_pressed_callback(slash::MouseButtonPressedEvent &e) {
-  SL_INFO("Mouse button press event: button:{}", e.button);
-}
+  static void mouse_move_callback(slash::MouseMovedEvent &e) {
+    SL_INFO("Mouse move event: x:{}, y:{}", e.x, e.y);
+  }
 
-void mouse_button_release_callback(slash::MouseButtonReleasedEvent &e) {
-  SL_INFO("Mouse button release event: button:{}", e.button);
-}
+  static void mouse_scroll_callback(slash::MouseScrolledEvent &e) {
+    SL_INFO("Mouse scroll event: x_offset:{}, y_offset:{}", e.x_offset, e.y_offset);
+  }
 
-void key_pressed_callback(slash::KeyPressedEvent &e) {
-  SL_INFO("Key pressed event: key:{}, repeat:{}", e.key_code, e.repeat_count);
-}
+  static void mouse_button_pressed_callback(slash::MouseButtonPressedEvent &e) {
+    SL_INFO("Mouse button press event: button:{}", e.button);
+  }
 
-void key_release_callback(slash::KeyReleasedEvent &e) {
-  SL_INFO("Key release event: key:{}", e.key_code);
-}
+  static void mouse_button_release_callback(slash::MouseButtonReleasedEvent &e) {
+    SL_INFO("Mouse button release event: button:{}", e.button);
+  }
+
+  static void key_pressed_callback(slash::KeyPressedEvent &e) {
+    SL_INFO("Key pressed event: key:{}, repeat:{}", e.key_code, e.repeat_count);
+  }
+
+  static void key_release_callback(slash::KeyReleasedEvent &e) {
+    SL_INFO("Key release event: key:{}", e.key_code);
+  }
+};
 
 auto main() -> int {
   slash::Log::Init();
@@ -35,15 +50,9 @@ auto main() -> int {
           .add_module<slash::ECSModule>()
           .add_module<slash::WindowModule>()
           .add_module<slash::RenderModule>()
+          .add_module<MouseAndKeyboardLogModule>()
           .build();
   app.init();
-
-  app.get_event<slash::MouseMovedEvent>().subscribe(mouse_move_callback);
-  app.get_event<slash::MouseButtonPressedEvent>().subscribe(mouse_button_pressed_callback);
-  app.get_event<slash::MouseButtonReleasedEvent>().subscribe(mouse_button_release_callback);
-  app.get_event<slash::MouseScrolledEvent>().subscribe(mouse_scroll_callback);
-  app.get_event<slash::KeyPressedEvent>().subscribe(key_pressed_callback);
-  app.get_event<slash::KeyReleasedEvent>().subscribe(key_release_callback);
 
   auto translate = glm::translate(glm::mat4(1.0f), {0.0, 0.0, 0.0});
   auto rotation = glm::rotate(glm::mat4(1.0f), glm::radians(10.0f), glm::vec3(0.0f, 0.0f, 1.0f));
@@ -58,9 +67,9 @@ auto main() -> int {
   float mul = 1.0;
   app.add_system([&]() {
     auto &wm = app.get_resource<slash::WindowManager>();
-    auto &windows = wm.get_windows();
+    auto &window = wm.get_main_window();
     auto q = app.get_query<slash::PackObject3d>();
-    if (!windows.empty() && windows[0]->is_key_pressed(SL_KEY_A)) {
+    if (window.is_key_pressed(SL_KEY_A)) {
       SL_INFO("A key pressed");
       SL_INFO(mul);
       for (auto[t] : q) {
@@ -68,7 +77,7 @@ auto main() -> int {
         t.transform.rotation = glm::rotate(glm::mat4(1.0f), mul * glm::radians(45.0f), glm::vec3(0.0f, 0.0f, 1.0f));
       }
     }
-    if (!windows.empty() && windows[0]->is_key_pressed(SL_KEY_D)) {
+    if (window.is_key_pressed(SL_KEY_D)) {
       SL_INFO("D key pressed");
       SL_INFO(mul);
       for (auto[t] : q) {
