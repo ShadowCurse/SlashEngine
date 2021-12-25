@@ -26,8 +26,8 @@ class VulkanRenderer {
   void draw_frame(double time);
   void wait_idle();
 
-  [[nodiscard]] constexpr inline auto get_core() const -> VulkanCore * { return vcore_.get(); }
-  [[nodiscard]] constexpr inline auto get_pipeline() const -> VulkanPipeline * {
+  [[nodiscard]] inline auto get_core() const -> VulkanCore * { return vcore_.get(); }
+  [[nodiscard]] inline auto get_pipeline() const -> VulkanPipeline * {
     return pipeline_.get();
   }
   [[nodiscard]] auto begin_one_time_command() const -> std::shared_ptr<VulkanCommandBuffer>;
