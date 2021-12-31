@@ -52,7 +52,8 @@ struct RenderModule : public Dependencies<ResourcePackModule, EventPoolModule, S
     return true;
   }
 
-  [[nodiscard]] auto add_pack(PackObject3d &&pack) -> Entity {
+  // TODO remove
+  [[nodiscard]] auto add_object_pack(PackObject3d &&pack) -> Entity {
     auto e = ecs_->create_entity();
     ecs_->add_component(e, std::forward<PackObject3d>(pack));
     ep_->get_event<CreateRenderable>().template emit(e);
