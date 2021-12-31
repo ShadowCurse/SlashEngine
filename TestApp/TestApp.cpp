@@ -40,6 +40,16 @@ struct MouseAndKeyboardLogModule : slash::Dependencies<slash::EventPoolModule> {
   }
 };
 
+struct SomePack {
+  int a;
+  double b;
+
+  auto build(slash::PackInserter inserter) {
+    inserter.insert(std::move(a));
+    inserter.insert(std::move(b));
+  }
+};
+
 auto main() -> int {
   slash::Log::Init();
   auto app =
@@ -62,7 +72,12 @@ auto main() -> int {
   auto transform = slash::Transform{glm::mat4{1.0f}, rotation, scale};
   auto texture = slash::Texture::Load("TestApp/texture.jpg");
 
-  auto e = app.add_pack(slash::PackObject3d{mesh, transform, texture});
+  auto e = app.add_object_pack(slash::PackObject3d{mesh, transform, texture});
+
+  auto sp = SomePack { 10, 11.1 };
+  app.register_component<int>();
+  app.register_component<double>();
+  app.add_pack(sp);
 
   float mul = 1.0;
   app.add_system([&]() {
