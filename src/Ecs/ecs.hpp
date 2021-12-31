@@ -7,6 +7,25 @@
 
 namespace slash {
 
+struct PackInserter {
+  PackInserter(Entity e, EntityManager& em, ComponenetManager& cm) : e_{e}, em_{em}, cm_{cm} {}
+  template<typename T>
+    auto insert(T &&t) {
+      auto &signature = em_.get_signature(e_);
+      cm_.add_component<T>(e_, std::forward<T>(t));
+      signature.set(cm_.get_component_type<T>(), true);
+    }
+  private:
+    Entity e_;
+    EntityManager& em_;
+    ComponenetManager& cm_;
+};
+
+template<typename T>
+concept IsPack = requires(T t, PackInserter p) {
+  {t.build(p)};
+};
+  
 template<typename T>
 struct Container {
   explicit Container(auto array) : component_array{array} {}
@@ -104,6 +123,13 @@ class ECSModule : public Dependencies<> {
 
     auto &signature = entity_manager_->get_signature(entity);
     signature.set(component_manager_->get_component_type<T>(), true);
+  }
+
+  template<IsPack P>
+  void add_pack(P &&pack) {
+    auto e = create_entity();
+    auto inserter = PackInserter { e, *entity_manager_.get(), *component_manager_.get() };
+    pack.build(inserter);
   }
 
   template<typename T>
