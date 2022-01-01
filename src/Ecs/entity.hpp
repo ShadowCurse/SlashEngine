@@ -32,9 +32,6 @@ class EntityManager {
     availabe_entities_.push(entity);
     --living_entity_count_;
   }
-//  void SetSignature(Entity entity, Signature signature) {
-//    signatures_[entity] = signature;
-//  }
   auto get_signature(Entity entity) -> Signature & {
     return signatures_[entity];
   }

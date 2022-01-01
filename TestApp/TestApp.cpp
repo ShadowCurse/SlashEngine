@@ -75,8 +75,6 @@ auto main() -> int {
   auto e = app.add_object_pack(slash::PackObject3d{mesh, transform, texture});
 
   auto sp = SomePack { 10, 11.1 };
-  app.register_component<int>();
-  app.register_component<double>();
   app.add_pack(sp);
 
   float mul = 1.0;

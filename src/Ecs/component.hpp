@@ -85,6 +85,9 @@ class ComponenetManager {
   template<typename T>
   void register_component() {
     const char *type_name = typeid(T).name();
+    if (component_types_.find(type_name) != std::end(component_types_)) {
+      return;
+    } 
     component_types_.insert({type_name, next_component_type_});
     component_arrays_.insert({type_name, std::make_shared<ComponenetArray<T>>()});
     ++next_component_type_;

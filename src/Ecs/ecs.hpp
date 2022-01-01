@@ -12,6 +12,7 @@ struct PackInserter {
   template<typename T>
     auto insert(T &&t) {
       auto &signature = em_.get_signature(e_);
+      cm_.register_component<T>();
       cm_.add_component<T>(e_, std::forward<T>(t));
       signature.set(cm_.get_component_type<T>(), true);
     }
