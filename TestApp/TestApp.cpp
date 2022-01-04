@@ -64,6 +64,7 @@ auto main() -> int {
           .build();
   app.init();
 
+  // current object creation
   auto translate = glm::translate(glm::mat4(1.0f), {0.0, 0.0, 0.0});
   auto rotation = glm::rotate(glm::mat4(1.0f), glm::radians(10.0f), glm::vec3(0.0f, 0.0f, 1.0f));
   auto scale = glm::scale(glm::mat4(1.0f), {0.5, 0.5, 0.5});
@@ -73,6 +74,12 @@ auto main() -> int {
   auto texture = slash::Texture::Load("TestApp/texture.jpg");
 
   auto e = app.add_object_pack(slash::PackObject3d{mesh, transform, texture});
+
+  // with resorces
+  // app.add_pack(Object_3d {
+  //    app.get_resource<slash::Asset<slash::Mesh>>().add(slash::Square::create())
+  // })
+  app.get_resource<slash::Asset<slash::Mesh>>().add(slash::Square::create());
 
   auto sp = SomePack { 10, 11.1 };
   app.add_pack(sp);

@@ -11,6 +11,8 @@
 #include "Core/systems.hpp"
 #include "Core/time_step.hpp"
 
+#include "Assets/module.hpp"
+
 #include "LayerModule/layer.hpp"
 #include "LayerModule/layer_stack.hpp"
 
