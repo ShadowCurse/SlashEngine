@@ -3,37 +3,32 @@
 
 #include "Core/event.hpp"
 #include "Core/resource.hpp"
-#include "assets.hpp"
+#include "Core/systems.hpp"
 #include "GameResources/mesh.hpp"
 #include "GameResources/texture.hpp"
 #include "GameResources/transform.hpp"
+#include "assets.hpp"
 
 namespace slash {
 
-struct AssetsModule : public Dependencies<ResourcePackModule, EventPoolModule> {
-  [[nodiscard]] auto init(ResourcePackModule& rp, EventPoolModule& ep) -> bool {
-    rp.add_resource<Asset<Mesh>>(*this);
-    /* ecs_ = &ecs; */
-    /* ep_ = &ep; */
+struct AssetsModule : public Dependencies<ResourcePackModule, SystemModule> {
+  [[nodiscard]] auto init(ResourcePackModule &rp, SystemModule &sm) -> bool {
+    rp.add_resource<AssetsModule>(sm);
+    auto am = rp.get_resource<AssetsModule>();
 
+    rp.add_resource<Asset<Mesh, VulkanMesh>>(am,
+        [&](auto mesh) {
+          return vrm.create_mesh(mesh);
+        };
     return true;
   }
 
-  [[nodiscard]] auto destroy(ResourcePackModule& rp, EventPoolModule&) -> bool {
+  [[nodiscard]] auto destroy(ResourcePackModule &rp, EventPoolModule &)
+      -> bool {
     return true;
   }
-
-  /* template<typename T> [[nodiscard]] auto add(T&& asset) -> AssetHandle<T> {} */
-  /* template<typename T> [[nodiscard]] auto get(AssetHandle<T> handle) -> const T& {} */
-  /* template<typename T> [[nodiscard]] auto get_mut(AssetHandle<T> handle) -> T& {} */
-  /* template<typename T> void remove(AssetHandle<T> handle) {} */
-  /* template<typename T, typename M> void register_asset_manager(M& manager) {} */
-
- private:
-  /* ECSModule* ecs_; */
-  /* EventPoolModule* ep_; */
 };
 
-}  // namespace slash
+} // namespace slash
 
-#endif  // SLASHENGINE_SRC_ASSETS_MODULE_HPP_
+#endif // SLASHENGINE_SRC_ASSETS_MODULE_HPP_
