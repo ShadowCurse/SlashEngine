@@ -75,12 +75,6 @@ auto main() -> int {
 
   auto e = app.add_object_pack(slash::PackObject3d{mesh, transform, texture});
 
-  // with resorces
-  // app.add_pack(Object_3d {
-  //    app.get_resource<slash::Asset<slash::Mesh>>().add(slash::Square::create())
-  // })
-  auto h = app.get_resource<slash::Asset<slash::Mesh>>().add(slash::Square::create());
-
   auto sp = SomePack { 10, 11.1 };
   app.add_pack(sp);
 
