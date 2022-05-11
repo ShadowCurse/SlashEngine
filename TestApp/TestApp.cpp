@@ -65,15 +65,23 @@ auto main() -> int {
   app.init();
 
   // current object creation
-  auto translate = glm::translate(glm::mat4(1.0f), {0.0, 0.0, 0.0});
+  auto translation = glm::translate(glm::mat4(1.0f), {1.0, 0.0, 0.0});
   auto rotation = glm::rotate(glm::mat4(1.0f), glm::radians(10.0f), glm::vec3(0.0f, 0.0f, 1.0f));
   auto scale = glm::scale(glm::mat4(1.0f), {0.5, 0.5, 0.5});
+  auto transform = slash::Transform{translation, rotation, scale};
 
   auto mesh = slash::Square::create();
-  auto transform = slash::Transform{glm::mat4{1.0f}, rotation, scale};
   auto texture = slash::Texture::Load("TestApp/texture.jpg");
-
   auto e = app.add_object_pack(slash::PackObject3d{mesh, transform, texture});
+
+  auto translation2 = glm::translate(glm::mat4(1.0f), {-1.0, 0.0, 0.0});
+  auto rotation2 = glm::rotate(glm::mat4(1.0f), glm::radians(10.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+  auto scale2 = glm::scale(glm::mat4(1.0f), {0.5, 0.5, 0.5});
+  auto transform2 = slash::Transform{translation2, rotation2, scale2};
+
+  auto mesh2 = slash::Cube::create();
+  auto texture2 = slash::Texture::Load("TestApp/cube_diffuse.jpg");
+  auto e2 = app.add_object_pack(slash::PackObject3d{mesh2, transform2, texture2});
 
   auto sp = SomePack { 10, 11.1 };
   app.add_pack(sp);
@@ -104,6 +112,7 @@ auto main() -> int {
   app.add_system([&]() {
     auto &vrm = app.get_resource<slash::VulkanResourceManager>();
     vrm.update_transform(e);
+    vrm.update_transform(e2);
   });
 
   app.run();
