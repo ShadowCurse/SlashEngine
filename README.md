@@ -6,7 +6,7 @@ Usage example can be found in TestApp folder
 
 ## Build instructions
 
-Dependencies mostly handled by `conan` but to run TestApp you will need [VulkanSDK](https://www.lunarg.com/vulkan-sdk/)
+Dependencies mostly handled by `conan` but you would also need [VulkanSDK](https://www.lunarg.com/vulkan-sdk/)
 
 Steps:
 ```
@@ -17,4 +17,12 @@ $ conan install .. --build=missing
 $ cmake ..
 $ make -j
 ```
-TestApp binary will be in build/bin
+TestApp binary will be in `build/bin`
+
+To launch run:
+```
+./build/bin/TestApp
+```
+
+## Example
+<img src="./examples/slash_engine_v0.0.1.png" width="400">
